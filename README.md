@@ -5,14 +5,14 @@ david.broska\@zu.de
 
 ### Course Information
 
-Classes on Tuesdays 16:30-19:00 (Big Blue Button link on ILIAS)
+Classes on Tuesdays 16:30-19:00 (Big Blue Button link on [ILIAS](https://learning.zu.de/goto.php?target=crs_19944&client_id=ilias))
 
 | Session |  Date  | Topic                                                  |
-|:-------:|:------:|--------------------------------------------------------|
+|:-------:|:------:|:-------------------------------------------------------|
 |    1    | Feb 02 | [Overview and key concepts](#session-1)                |
 |    2    | Feb 09 | [Descriptive statistics for text analysis](#session-2) |
 |    3    | Feb 16 | [Dictionary methods](#session-3)                       |
-|    4    | Feb 23 | [Machine learning (for texts](#session-4))             |
+|    4    | Feb 23 | [Machine learning (for texts)](#session-4)             |
 |    5    | Mar 02 | [Supervised scaling models for texts](#session-5)      |
 |    6    | Mar 09 | [Unsupervised scaling models for texts](#session-6)    |
 |    7    | Mar 16 | [Similarity and clustering](#session-7)                |
@@ -39,13 +39,11 @@ There are no strict prerequisites for this course but basic R programming skills
 The overall goal of this course is to let participants enrich their methodological repertoire and strengthen their skills in conducting computational social science research. Participants will therefore be responsible for carrying out their own small-scale research project on a topic of their interest using some of the methods presented in this course. Three coding assignments are intended to lay the foundation for the final project: participants practice the creation and analysis of textual data using content analytic and statistical software.
 
 -   Project (70%)
-
 -   Assignments (30%)
 
 ### Resources
 
 -   [quanteda cheatsheet](https://muellerstefan.net/files/quanteda-cheatsheet.pdf)
-
 -   [regex cheatsheet](https://github.com/ashchan/cheatsheets/blob/master/misc/regular-expressions-cheat-sheet-v2.pdf)
 
 ### Credits
@@ -73,7 +71,7 @@ We will familiarize ourselves with the key themes and concerns of the seminar, d
 
 **Descriptive statistics for text analysis**
 
-This session introduces methods for describing text by statistical measures used to describe and compare documents. We will also cover common techniques for preparing textual data for quantitative analysis. This will be followed by a coding session in which participants have the opportunity to apply the methods presented before.
+This session introduces methods for characterizing and comparing texts by statistical measures. We will also cover common techniques for preparing textual data for quantitative analyses. This will be followed by a coding session in which participants have the opportunity to apply the methods presented before.
 
 Please download and install base [R](https://cran.microsoft.com/) and [RStudio](https://rstudio.com/products/rstudio/download/) Desktop before this session. This [tutorial](https://www.datacamp.com/community/tutorials/installing-R-windows-mac-ubuntu) provides instructions on installing the software.
 

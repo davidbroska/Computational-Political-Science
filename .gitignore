@@ -2,3 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+
+libs/
+figures/
+
+session_[0-9]_slides.Rmd
+session_[0-9][0-9]_slides.Rmd
+
+session_[0-9]_slides_files/
+session_[0-9][0-9]_slides_files/

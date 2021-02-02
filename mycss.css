@@ -1,0 +1,102 @@
+
+.smaller{
+  font-size: 70%;
+}
+.smallest{
+  font-size: 50%;
+}
+.semi-small{
+  font-size: 90%;
+}
+
+/* custom.css */
+.title-slide {
+    background-image: url(pictures/zu_logo.png);
+    background-position: center bottom 50px;
+    background-size: 30%;
+    border-bottom: 0px solid #522D80;
+    box-shadow:  0 55px 0 #fff;
+  }
+.remark-inline-code{
+  /* background: #F5F5F5; /* lighter */
+    background: #e7e8e2; /* darker */
+    border-radius: 3px;
+    padding: 4px;
+}
+.remark-code, .remark-inline-code {
+  font-family: 'Fira Mono', 'Lucida Console', Monaco, monospace;
+  font-size: 80%;
+}
+
+.left-code {
+  color: #777;
+  width: 38%;
+  height: 92%;
+  float: left;
+}
+.right-plot {
+  width: 60%;
+  float: right;
+  padding-left: 1%;
+}
+.plot-callout {
+  height: 225px;
+  width: 450px;
+  bottom: 5%;
+  right: 5%;
+  position: absolute;
+  padding: 0px;
+  z-index: 100;
+}
+.plot-callout img {
+  width: 100%;
+  border: 4px solid #23373B;
+}
+.left-col {
+  width: 45%;
+  float: left;
+}
+.right-col {
+  width: 45%;
+  float: right;
+}
+.left-col-full {
+  width: 50%;
+  float: left;
+}
+.right-col-full {
+  width: 50%;
+  float: right;
+}
+ .column {
+    float: left;
+    width: 33.33%;
+}
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.centerimg {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.left-three {
+  width: 33%;
+  float: left;
+  display: inline-block;
+  font-size: initial;
+  *display: inline;
+  vertical-align: middle;
+}
+.right-three {
+  width: 33%;
+  float: right;
+  display: inline-block;
+  font-size: initial;
+  *display: inline;
+  vertical-align: middle;
+}
