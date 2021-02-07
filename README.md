@@ -7,20 +7,20 @@ david.broska\@zu.de
 
 Classes on Tuesdays 16:30-19:00 (Big Blue Button link on [ILIAS](https://learning.zu.de/goto.php?target=crs_19944&client_id=ilias))
 
-| Session |  Date  | Topic                                                  |
-|:-------:|:------:|:-------------------------------------------------------|
-|    1    | Feb 02 | [Overview and key concepts](#session-1)                |
-|    2    | Feb 09 | [Descriptive statistics for text analysis](#session-2) |
-|    3    | Feb 16 | [Dictionary methods](#session-3)                       |
-|    4    | Feb 23 | [Machine learning (for texts)](#session-4)             |
-|    5    | Mar 02 | [Supervised scaling models for texts](#session-5)      |
-|    6    | Mar 09 | [Unsupervised scaling models for texts](#session-6)    |
-|    7    | Mar 16 | [Similarity and clustering](#session-7)                |
-|    8    | Mar 23 | [Topic models](#session-8)                             |
-|   \-    |   \-   | *Break*                                                |
-|    9    | Apr 13 | [Retrieving data from the web](#session-9)             |
-|   10    | Apr 20 | [Published applications](#session-10)                  |
-|   11    | Apr 27 | [Project Presentations](#session-11)                   |
+| Session |  Date  | Topic                                                  |               Assignment               |
+|:-------:|:------:|:-------------------------------------------------------|:--------------------------------------:|
+|    1    | Feb 02 | [Overview and key concepts](#session-1)                |                   \-                   |
+|    2    | Feb 09 | [Descriptive statistics for text analysis](#session-2) |   [Formative](#formative-assignment)   |
+|    3    | Feb 16 | [Dictionary methods](#session-3)                       |                   \-                   |
+|    4    | Feb 23 | [Machine learning (for texts)](#session-4)             | [Summative 1](#summative-assignment-1) |
+|    5    | Mar 02 | [Supervised scaling models for texts](#session-5)      |                   \-                   |
+|    6    | Mar 09 | [Unsupervised scaling models for texts](#session-6)    | [Summative 2](#summative-assignment-2) |
+|    7    | Mar 16 | [Similarity and clustering](#session-7)                |                   \-                   |
+|    8    | Mar 23 | [Topic models](#session-8)                             | [Summative 3](#summative-assignment-3) |
+|   \-    |   \-   | *Break*                                                |                   \-                   |
+|    9    | Apr 13 | [Retrieving data from the web](#session-9)             |                   \-                   |
+|   10    | Apr 20 | [Published applications](#session-10)                  |                   \-                   |
+|   11    | Apr 27 | [Project Presentations](#session-11)                   |                   \-                   |
 
 ### Course Description
 
@@ -44,14 +44,12 @@ The overall goal of this course is to let participants enrich their methodologic
 ### Resources
 
 -   [base R cheat sheet](https://rstudio.com/wp-content/uploads/2016/05/base-r.pdf)
-
 -   [quanteda cheat sheet](https://muellerstefan.net/files/quanteda-cheatsheet.pdf)
-
 -   [regular expression cheat sheet](https://github.com/ashchan/cheatsheets/blob/master/misc/regular-expressions-cheat-sheet-v2.pdf)
 
 ### Credits
 
-I am indebted to Prof. Kenneth Benoit, Dr. Pablo Barbará, and Dr. Blake Miller who developed an introductory course for quantitative text analysis at the London School of Economics. I have adapted a large proportion of the material for the Computational Political Science course.
+I am indebted to Prof. Kenneth Benoit, Dr. Pablo Barbará, and Dr. Blake Miller who developed an introductory course for quantitative text analysis at the London School of Economics. I also thank David Zimmerman for preparing an excellent introduction to programming in R. I have adapted a large proportion of these materials for the Computational Political Science course.
 
 ------------------------------------------------------------------------
 
@@ -80,6 +78,12 @@ Please download and install base [R](https://cran.microsoft.com/) and [RStudio](
 
 If you haven't done so already, please make sure to install the following R packages through `install.packages(c("quanteda","stringr", "ggplot2"))`. Please contact me in advance if you run into technical problems. I'm happy to help.
 
+#### Formative Assignment
+
+This assignment does *not* count towards the final degree. Instead, it is meant to give you an opportunity to familiarize yourself with the questions and the structure of the assignments in the following weeks. You can work on this assignment on your own or in teams of two. If you submit the assignment you will be provided with feedback. Please send the .Rmd file and the compiled .html document to david.broska\@zu.de.
+
+**Deadline**: Feb 22, 23:59:59
+
 ------------------------------------------------------------------------
 
 ### Session 3
@@ -103,6 +107,12 @@ Hands-on work gives participants the opportunity to apply classification methods
 *Reading:*
 
 -   Evans, Michael, Wayne McIntosh, Jimmy Lin, and Cynthia Cates. 2007. "Recounting the Courts? Applying Automated Content Analysis to Enhance Empirical Legal Research." *Journal of Empirical Legal Studies* 4 (4): 1007–39. <https://doi.org/10.1111/j.1740-1461.2007.00113.x>.
+
+#### Summative assignment 1
+
+The first summative assignment will be released after Session 4 and amounts to 10% of the overall grade for the course. You are expected to work on this assignment on your own. Please send the .Rmd file and the compiled .html document to david.broska\@zu.de.
+
+**Deadline**: Mar 08, 23:59:59
 
 ------------------------------------------------------------------------
 
@@ -130,6 +140,12 @@ Building on the previous session on text scaling, we will discuss unsupervised m
 
 -   Lowe, Will, and Kenneth Benoit. 2013. "Validating Estimates of Latent Traits from Textual Data Using Human Judgment as a Benchmark." *Political Analysis* 21 (3): 298–313. <https://doi.org/10.1093/pan/mpt002>.
 
+#### Summative assignment 2
+
+The second summative assignment will be released after Session 6 and amounts to 10% of the overall grade for the course. You are expected to work on this assignment on your own. Please send the .Rmd file and the compiled .html document to david.broska\@zu.de.
+
+**Deadline**: Mar 15, 23:59:59
+
 ------------------------------------------------------------------------
 
 ### Session 7
@@ -155,6 +171,12 @@ During the practical part of the session, we will learn how to use the Latent Di
 -   Blei, David M. 2012. "Probabilistic Topic Models." *Communications of the ACM* 55 (4): 77–84. <https://doi.org/10.1145/2133806.2133826>.
 
 -   Roberts, Margaret, Brandon Stewart, Dustin Tingley, Christopher Lucas, Jetson Leder-Luis, Shana Kushner Gadarian, Bethany Albertson, and David G. Rand. 2014. "Structural Topic Models for Open-Ended Survey Responses." *American Journal of Political Science* 58 (4): 1064–82.
+
+#### Summative assignment 3
+
+The third summative assignment will be released after Session 8 and amounts to 10% of the overall grade for the course. You are expected to work on this assignment on your own. Please send the .Rmd and the compiled .html document to david.broska\@zu.de.
+
+**Deadline**: Apr 12, 23:59:59
 
 ------------------------------------------------------------------------
 
