@@ -10,7 +10,7 @@ Classes on Tuesdays 16:30-19:00 (Big Blue Button link on [ILIAS](https://learnin
 | Session |  Date  | Topic                                                  |               Assignment               |
 |:-------:|:------:|:-------------------------------------------------------|:--------------------------------------:|
 |    1    | Feb 02 | [Overview and key concepts](#session-1)                |                   \-                   |
-|    2    | Feb 09 | [Descriptive statistics for text analysis](#session-2) |   [Formative](#formative-assignment)   |
+|    2    | Feb 09 | [Preprocessing and descriptive statistics](#session-2) |   [Formative](#formative-assignment)   |
 |    3    | Feb 16 | [Dictionary methods](#session-3)                       |                   \-                   |
 |    4    | Feb 23 | [Machine learning (for texts)](#session-4)             | [Summative 1](#summative-assignment-1) |
 |    5    | Mar 02 | [Supervised scaling models for texts](#session-5)      |                   \-                   |
@@ -49,7 +49,7 @@ The overall goal of this course is to let participants enrich their methodologic
 
 ### Credits
 
-I am indebted to Prof. Kenneth Benoit, Dr. Pablo Barbará, and Dr. Blake Miller who developed an introductory course for quantitative text analysis at the London School of Economics. I also thank David Zimmerman for preparing an excellent introduction to programming in R. I have adapted a large proportion of these materials for the Computational Political Science course.
+I am indebted to Prof. Kenneth Benoit, Dr. Pablo Barbará, and Dr. Blake Miller who developed an introductory course for quantitative text analysis at the London School of Economics. I also thank Dr. David Zimmerman for preparing an excellent introduction to programming in R. I have adapted a large proportion of these materials for the Computational Political Science course.
 
 ------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ We will familiarize ourselves with the key themes and concerns of the seminar, d
 
 ### Session 2
 
-**Descriptive statistics for text analysis**
+**Preprocessing and descriptive statistics**
 
 This session introduces methods for characterizing and comparing texts by statistical measures. We will also cover common techniques for preparing textual data for quantitative analyses. This will be followed by a coding session in which participants have the opportunity to apply the methods presented before.
 
