@@ -1,0 +1,140 @@
+---
+title: 'CPS Formative Assignment Part A \n Solutions'
+subtitle: 'Data exploration'
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+```
+
+### Intro
+
+The purpose of this assignment is to familiarize yourself with R, RMarkdown, and `quanteda`. Specifically, we will look at functions that allow you to explore text data.
+
+As with the rest of assignments throughout the term, the goal is to write R code in the chunks within this RMarkdown file that will accomplish the tasks detailed below. Where questions are asked, give your answer where indicated or in the grey box after the question.
+
+Start by loading the `quanteda` package.
+
+```{r, include = F}
+library("quanteda")
+```
+
+You will use the corpus of inaugural addresses by U.S. presidents `data_corpus_inaugural` for this part of the exercise. These data are available as soon as you load `quanteda` and are lazily-loaded once you access them.
+
+
+
+### Question 1 (3 points)
+
+Here is code to inspect which inaugural address was the longest.
+
+```{r}
+which.max(nchar(texts(data_corpus_inaugural)))
+```
+
+Explain briefly how this answer works.
+
+**Your answer here**
+
+>
+
+
+
+
+How could you do this using a **quanteda** function? You might want to a have look at `ntoken()` from the quanteda package and `sort()` from base R. Use `?` to interrogate what a function does, e.g. `?ntoken`.
+
+```{r}
+
+```
+
+
+
+### Question 2 (3 points)
+
+Generate a document-feature matrix from this corpus and call it `sotu_dfm`. Make sure that the text is put into __lowercase__ and words are __stemmed__ as preprocessing steps.
+
+```{r}
+
+```
+
+Now, look at the 20 most common features in the document-feature matrix. Hint: `?topfeatures`
+
+```{r}
+
+```
+
+What do most of those tokens have in common? What step(s) might you take to focus on a more interesting set of word frequencies?
+
+**Your answer here**
+
+>
+
+
+
+
+### Question 3 (2 points)
+
+Now generate a second document-feature matrix but remove punctuation and remove stopwords. Call this object `sotu_dfm_sp`.
+
+```{r}
+
+```
+
+Now look at the 20 most common features again. The most common words are now no longer uninteresting words.
+
+```{r}
+
+```
+
+To go further, we could also have used the `remove_numbers = TRUE` argument. Note that in **quanteda**, it is possible to tokenize the corpus first, using `tokens()`, and then create the dfm from those tokens. This provides an additional amount of control, through the many functions available in the [`tokens_*()` functions](https://quanteda.io/reference/tokens.html?q=token#quanteda-tokenizers).
+
+
+
+
+
+
+### Question 4 (1 point)
+
+Write code to figure out how many different types of punctuation and how many different types of stopwords were removed.
+
+```{r}
+
+```
+
+
+
+### Question 5 (3 points)
+
+Plot a wordcloud of the dfm that has the stopwords and punctuation characters, and numbers removed, but without stemming. Plot this only for words with a minimum count of 10. Hint: Use `textplot_wordcloud()` to generate the plot.
+
+```{r, warning=FALSE}
+
+```
+
+
+
+### Question 6 (2 points)
+
+Write code to search for the word "division" from the `data_corpus_inaugural` object using `kwic()`.
+
+```{r}
+
+```
+
+Search for the word "division" and save the results of this keywords-in-context object to a new object called `division_kwic`. Plot an "x-ray" plot for this kwic using `textplot_xray()` in the code bloc below:
+
+```{r fig.width = 10}
+
+```
+
+### Question 7 (2 points)
+
+Examine the context of words *related to* "disaster". Hint: you can use the stem of the word along with setting the `regex` argument to `TRUE`. Execute a query using a pattern match that returns different variations of words based on "disaster" (such as disasters, disastrous, disastrously, etc.). There is an excellent tutorial on regular expressions at <http://www.regular-expressions.info>.
+
+```{r}
+
+```
+
