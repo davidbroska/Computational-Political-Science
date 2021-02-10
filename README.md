@@ -45,7 +45,7 @@ The overall goal of this course is to let participants enrich their methodologic
 
 -   [base R cheat sheet](https://rstudio.com/wp-content/uploads/2016/05/base-r.pdf)
 -   [quanteda cheat sheet](https://muellerstefan.net/files/quanteda-cheatsheet.pdf)
--   [regular expression cheat sheet](https://github.com/ashchan/cheatsheets/blob/master/misc/regular-expressions-cheat-sheet-v2.pdf)
+-   [regular expressions in R cheat sheet](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf)
 
 ### Credits
 
