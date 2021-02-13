@@ -94,6 +94,10 @@ Dictionary methods allow researchers to link words in a document with a concept 
 
 During the practical part of this session, we will apply commonly used dictionaries to conduct sentiment analyses.
 
+*Reading:*
+
+-   Hancock, Jeffrey T., David I. Beaver, Cindy K. Chung, Joey Frazee, James W. Pennebaker, Art Graesser, and Zhiqiang Cai. 2010. "Social Language Processing: A Framework for Analyzing the Communication of Terrorists and Authoritarian Regimes." Behavioral Sciences of Terrorism and Political Aggression 2 (2): 108–32. <https://doi.org/10.1080/19434471003597415>.
+
 ------------------------------------------------------------------------
 
 ### Session 4
