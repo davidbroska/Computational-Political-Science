@@ -1,11 +1,10 @@
 ---
-title: "MY459: Lab Session 1"
+title: "Introduction to RMarkdown"
 output:
   html_document: default
   pdf_document: default
 ---
 
-# Introduction to RMarkdown
 
 Before we dive into our first coding session, let's become a bit more familiar with the programming tools used in this course.
 
