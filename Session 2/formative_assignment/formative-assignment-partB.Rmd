@@ -95,7 +95,7 @@ Now, find the 10 most frequent hashtags for each candidate. You can use a loop t
 
 ### Question 6 (3 points)
 
-Goig back to the dataset with tweets by Bernie Sanders, try to create a corpus and a document feature matrix. Think carefully through the different options (e.g. should you exclude stopwords?). Then, look at the 25 most frequent words. What do you learn?
+Going back to the dataset with tweets by Bernie Sanders, try to create a corpus and a document feature matrix. Think carefully through the different options (e.g. should you exclude stopwords?). Then, look at the 25 most frequent words. What do you learn?
 
 **Your answer here**
 
