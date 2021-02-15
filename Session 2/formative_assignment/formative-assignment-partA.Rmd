@@ -132,7 +132,7 @@ Search for the word "division" and save the results of this keywords-in-context 
 
 ### Question 7 (2 points)
 
-Examine the context of words *related to* "disaster". Hint: you can use the stem of the word along with setting the `regex` argument to `TRUE`. Execute a query using a pattern match that returns different variations of words based on "disaster" (such as disasters, disastrous, disastrously, etc.). There is an excellent tutorial on regular expressions at <http://www.regular-expressions.info>.
+Examine the context of words *related to* "disaster". Hint: you can use the stem of the word along with setting the `valuetype` argument to `"regex"`. Execute a query using a pattern match that returns different variations of words based on "disaster" (such as disasters, disastrous, disastrously, etc.). There is an excellent tutorial on regular expressions at <http://www.regular-expressions.info>.
 
 ```{r}
 
