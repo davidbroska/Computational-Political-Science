@@ -40,7 +40,11 @@ Explain briefly how this answer works.
 
 **Your answer here**
 
->
+>Given the corpus object `data_corpus_inaugural` the `texts()` function returns a named character vector where one element represents one of the 58 inaugural speeches. For each of those speeches `nchar()` then counts the number of characters. For the resulting numeric vector, the function `which.max()` gives the index of the maximum count of characters across speeches. It turns out that the longest speech is at position 14 of the vector. Since the element names are preserved throughout this process we can see that William Henry Harrison held the longest speech back in 1841.
+
+>The functions provided by quanteda allow to count the number of tokens (`ntoken()`), features (`nfeat()`), or syllables (`nsyllable()`), for example. It may be a detail, but `nchar()` counts every single character whereas these quanteda functions count groups of characters. Nevertheless, we obtain the same result as with the code based on `nchar()`.
+
+>Note: this answer is way more extensive than it is required for obtaining the full three points!
 
 
 
@@ -48,7 +52,16 @@ Explain briefly how this answer works.
 How could you do this using a **quanteda** function? You might want to a have look at `ntoken()` from the quanteda package and `sort()` from base R. Use `?` to interrogate what a function does, e.g. `?ntoken`.
 
 ```{r}
+# possible answers include
 
+ntoken(data_corpus_inaugural) %>%
+  sort(decreasing = TRUE) %>%
+  head(n = 1)
+
+# What is %>%? It is called the pipe used to perform sequential tasks. For example:
+# I woke up %>% showered %>% dressed %>% glammed up %>% took breakfast %>% showed up to work 
+
+# https://twitter.com/WeAreRLadies/status/1172576445794803713?s=20
 ```
 
 
@@ -58,20 +71,21 @@ How could you do this using a **quanteda** function? You might want to a have lo
 Generate a document-feature matrix from this corpus and call it `sotu_dfm`. Make sure that the text is put into __lowercase__ and words are __stemmed__ as preprocessing steps.
 
 ```{r}
-
+sotu_dfm <- dfm(data_corpus_inaugural, tolower = TRUE, stem = TRUE)
 ```
 
 Now, look at the 20 most common features in the document-feature matrix. Hint: `?topfeatures`
 
 ```{r}
-
+# examine top 20 common features
+topfeatures(sotu_dfm, n = 20)
 ```
 
 What do most of those tokens have in common? What step(s) might you take to focus on a more interesting set of word frequencies?
 
 **Your answer here**
 
->
+>All of them are function words or punctuation. Words like that can be considered stopwords and are often excluded from bag-of-words analyses.
 
 
 
@@ -81,16 +95,16 @@ What do most of those tokens have in common? What step(s) might you take to focu
 Now generate a second document-feature matrix but remove punctuation and remove stopwords. Call this object `sotu_dfm_sp`.
 
 ```{r}
-
+sotu_dfm_sp <- dfm(data_corpus_inaugural, tolower = TRUE, stem = TRUE, remove = stopwords("english"), remove_punct = TRUE)
 ```
 
 Now look at the 20 most common features again. The most common words are now no longer uninteresting words.
 
 ```{r}
-
+topfeatures(sotu_dfm_sp, n = 20)
 ```
 
-To go further, we could also have used the `remove_numbers = TRUE` argument. Note that in **quanteda**, it is possible to tokenize the corpus first, using `tokens()`, and then create the dfm from those tokens. This provides an additional amount of control, through the many functions available in the [`tokens_*()` functions](https://quanteda.io/reference/tokens.html?q=token#quanteda-tokenizers).
+To go further, we could also have used the `remove_numbers = TRUE` argument. Note that in **quanteda**, it is possible to tokenize the corpus first, using `tokens()`, and then create the dfm from those tokens. This provides an additional amount of control, through the many functions available in the [`tokens_*()` functions](http://docs.quanteda.io/reference/#section-tokens-functions).
 
 
 
@@ -102,7 +116,7 @@ To go further, we could also have used the `remove_numbers = TRUE` argument. Not
 Write code to figure out how many different types of punctuation and how many different types of stopwords were removed.
 
 ```{r}
-
+ncol(sotu_dfm) - ncol(sotu_dfm_sp)
 ```
 
 
@@ -112,23 +126,27 @@ Write code to figure out how many different types of punctuation and how many di
 Plot a wordcloud of the dfm that has the stopwords and punctuation characters, and numbers removed, but without stemming. Plot this only for words with a minimum count of 10. Hint: Use `textplot_wordcloud()` to generate the plot.
 
 ```{r, warning=FALSE}
-
+# Generate dfm
+sotu_dfm_spn <- dfm(data_corpus_inaugural, tolower = TRUE, stem = FALSE, remove = stopwords("english"), remove_punct = TRUE, remove_numbers = TRUE)
+# Remove words (types) with less than 10 occurrences
+sotu_dfm_spn <- dfm_trim(sotu_dfm_spn, min_termfreq = 10, verbose = TRUE)
+set.seed(123)
+textplot_wordcloud(sotu_dfm_spn, min_size=.2, max_size=2, max_words=60)
 ```
-
-
 
 ### Question 6 (2 points)
 
 Write code to search for the word "division" from the `data_corpus_inaugural` object using `kwic()`.
 
 ```{r}
-
+kwic(data_corpus_inaugural, "division")
 ```
 
 Search for the word "division" and save the results of this keywords-in-context object to a new object called `division_kwic`. Plot an "x-ray" plot for this kwic using `textplot_xray()` in the code bloc below:
 
 ```{r fig.width = 10}
-
+division_kwic <- kwic(data_corpus_inaugural, pattern = "division")
+textplot_xray(division_kwic)
 ```
 
 ### Question 7 (2 points)
@@ -136,6 +154,7 @@ Search for the word "division" and save the results of this keywords-in-context 
 Examine the context of words *related to* "disaster". Hint: you can use the stem of the word along with setting the `valuetype` argument to `"regex"`. Execute a query using a pattern match that returns different variations of words based on "disaster" (such as disasters, disastrous, disastrously, etc.). There is an excellent tutorial on regular expressions at <http://www.regular-expressions.info>.
 
 ```{r}
-
+# Other regular expression are possible here
+kwic(data_corpus_inaugural, pattern = "disast[A-Za-z]*", valuetype = "regex")
 ```
 

@@ -14,7 +14,6 @@ knitr::opts_chunk$set(
 
 ```{r, include = F}
 library("quanteda")
-library("stringr")
 ```
 
 ### Intro
@@ -31,7 +30,9 @@ Read the dataset into R using `read.csv()`. It is recommended to set the argumen
 Use the functions `head()` and `str()` to inspect the structure of the data. 
 
 ```{r}
-
+data <- read.csv("candidate-tweets.csv", stringsAsFactors=FALSE)
+head(data)
+str(data)
 ```
 
 
@@ -41,10 +42,11 @@ About how many tweets are retweets? What is the percentage of retweets among all
 
 **Your answer here**
 
->
+>7271 tweets (approximately 27% of all tweets) are retweets
 
 ```{r}
-
+length(grep('^RT @', data$text))
+length(grep('^RT @', data$text))/nrow(data)
 ```
 
 ### Question 3 (1 point)
@@ -52,7 +54,7 @@ About how many tweets are retweets? What is the percentage of retweets among all
 How many tweets were sent by each of the candidates? Hint: `?table`
 
 ```{r}
-
+table(data$screen_name)
 ```
 
 
@@ -63,17 +65,21 @@ How many tweets were sent by each of the candidates? Hint: `?table`
 Create a (smaller) data frame that contains only tweets by Bernie Sanders. Hint: You might want to create vector that indicates the rows that hold tweets from Bernie Sanders and use this vector to create a smaller data frame.
 
 ```{r}
-
+sanders <- data[data$screen_name=="BernieSanders",]
 ```
 
 How many times did Bernie Sanders mention words related to 'health care'? and 'immigration'? and 'billionaires'? 'gun control'? 'poverty'? Use regular expressions to make sure your searches return all relevant results.
 
 **Your answer here**
 
->
+>"Health care" and "billionaires" were some of the most frequently mentioned terms.
 
 ```{r}
-
+length(grep('health care|obamacare|medicare', sanders$text, ignore.case=TRUE))
+length(grep('immigr*', sanders$text, ignore.case=TRUE))
+length(grep('billionaires?', sanders$text, ignore.case=TRUE))
+length(grep('gun control|gun law', sanders$text, ignore.case=TRUE))
+length(grep('poor|poverty', sanders$text, ignore.case=TRUE))
 ```
 
 
@@ -83,16 +89,27 @@ What are the 10 most frequent hashtags in the tweets by Bernie Sanders? Try to a
 
 
 ```{r}
+library(stringr)
+top_hashtags <- function(text){
+  hashtags <- str_extract_all(text, '#[A-Za-z0-9_]+')
+  return(
+    head(sort(table(unlist(hashtags)), decreasing = TRUE), n=10)
+    )
+}
 
+top_hashtags(sanders$text)
 ```
 
 Now, find the 10 most frequent hashtags for each candidate. You can use a loop to answer this question or just run the above function for each candidate separately.
 
 ```{r}
+cands <- unique(data$screen_name)
 
+for (cand in cands){
+  message(cand)
+  print(top_hashtags(data$text[data$screen_name==cand]))
+}
 ```
-
-
 
 ### Question 6 (3 points)
 
@@ -100,20 +117,24 @@ Going back to the dataset with tweets by Bernie Sanders, try to create a corpus 
 
 **Your answer here**
 
->
+> Most of the words are related to the campaign. You can also see some of the key themes (health care, wall street, the people).
 
 ```{r}
-
+sanders_dfm <- dfm(corpus(sanders$text), 
+                   remove=c(stopwords("english"), "rt", "@berniesanders",
+                            "can", "must", "https", "http"),
+                   remove_punct=TRUE, remove_url=TRUE)
+topfeatures(sanders_dfm, n=25)
 ```
 
 Plot the DFM you just created using a wordcloud. Do you learn more/same/less about the data? 
 
 **Your answer here**
 
->
+> The same as above because `textplot_wordcloud()` visualizes the most frequent features that we extract with `topfeatures()`. Generally speaking, we learn about some of the key themes in Bernie's campaign.
 
 ```{r}
-
+textplot_wordcloud(sanders_dfm, rotation=0, min_size=.75, max_size=3, max_words=50)
 ```
 
 ### Question 7 (2 points)
@@ -133,10 +154,10 @@ Why is the result different than the output you get when you run `kwic(data_corp
 
 **Your answer here**
 
->
+>The default option for pattern matching in `kwic` is glob; which means quanteda will search for that specific word unless there's any additional wildcard character. In contrast, regex search for words that contain that substring.
 
 What if we on wanted to construct a regular expression to query only "valued" and "values" but not other variations of the lemma "value"?
 
 ```{r}
-
+kwic(data_corpus_inaugural, "value[ds]", valuetype = "regex")
 ```
