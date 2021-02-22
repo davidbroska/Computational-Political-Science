@@ -1,0 +1,130 @@
+---
+title: 'Classification with Naive Bayes Solutions'
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+
+library("quanteda")
+library("quanteda.textmodels")
+```
+
+#### Classifying movie reviews
+
+In this assignment, we will use R to understand and apply document classification and R and quanteda. We will start with a classic computer science dataset of movie reviews, [(Pang and Lee 2004)](http://www.cs.cornell.edu/home/llee/papers/cutsent.pdf).
+
+The movies corpus has an attribute `Sentiment` that labels each text as either `pos` or `neg` according to the original imdb.com archived newspaper review star rating.  We will begin by examining the conditional probabilities at the word level.
+
+Let's start by loading the movies dataset and looking at the attributes:
+
+```{r}
+data(data_corpus_moviereviews, package = "quanteda.textmodels")
+summary(data_corpus_moviereviews, n = 10)
+```    
+
+What is the overall probability of the class `pos` in the corpus? Are the classes balanced? (Hint: Use `table()` on the document variable of `Sentiment`.) 
+
+**Your answer here**
+
+>
+
+```{r}
+
+```
+
+Make a dfm from the corpus, grouping the documents by the `Sentiment` document variable. Also, remove words that occur less than twenty times using `dfm_trim`. Words with very low overall frequencies in a corpus of this size are unlikely to be good general predictors.
+
+```{r}
+
+```
+
+Calculate the word-level likelihoods for each class, from the reduced dfm, i.e. the probability of a word given the class `pos` and `neg`.  What are the word likelihoods for `"good"` and "`great`"? What do you learn? Use `kwic()` to find out the context of `"good"`.
+
+Hint: you don't have to compute the probabilities by hand. You should be able to obtain them using `dfm_weight`.
+
+**Your answer here**
+
+>
+
+```{r}
+
+
+```
+        
+
+Now we will use `quanteda`’s naive bayes `textmodel_nb()` to run a prediction on the movie reviews.
+
+The movie corpus contains 1000 positive examples followed by 1000 negative examples. When extracting training and testing labels, we want to get a mix of positive and negative in each set, so first we need to shuffle the corpus. Hint: You can do this with the `corpus_sample()` function.
+
+```{r}
+set.seed(1234)  # use this just before running corpus_sample()
+
+```
+
+Next, make a dfm from the shuffled corpus, and make training labels. In this case, we are using 1500 training labels, and leaving the remaining 500 unlabelled to use as a test set. We will also trim the dataset to remove rare features.
+
+```{r}
+
+```
+
+Now, run the training and testing commands of the Naive Bayes classifier, and compare the predictions for the documents with the actual document labels for the test set using a confusion matrix.
+
+```{r}
+
+```
+### Compute model statistics
+
+
+Extract the posterior class probabilities of the words `good` and `great`. Do the results confirm your previous finding? Clue: look at the documentation for `textmodel_nb()` for how to extract the posterior class probabilities.
+
+```{r}
+
+```
+
+
+Compute the following statistics for the last classification: 
+    
+Use this code for starters, and note that it returns something that you can use to compute \(F1\).
+
+```{r}
+precrecall <- function(mytable, verbose = T) {
+    truePositives <- mytable[1,1]
+    falsePositives <- sum(mytable[1,]) - truePositives
+    falseNegatives <- sum(mytable[,1]) - truePositives
+    precision <- truePositives / (truePositives + falsePositives)
+    recall <- truePositives / (truePositives + falseNegatives)
+    if (verbose) {
+        print(mytable)
+        cat("\n precision =", round(precision, 2), 
+            "\n    recall =", round(recall, 2), "\n")
+    }
+    invisible(c(precision, recall))
+}
+```
+    
+Hint: Computing precision and recall is not the same if we are considering the "true positive" to be predicting positive for a true positive, versus predicting negative for a true negative.  Since the factors of `Sentiment` are ordered alphabetically, and since the table command puts lower integer codes for factors first, `movtable` by default puts the (1,1) cell as the case of predicting negative reviews as the "true positive", not predicting positive reviews.  To get the positive-postive prediction you will need to reverse index it, e.g. `movTable[2:1, 2:1]`.
+
+1. precision and recall, *for the positive category prediction*;
+        
+```{r}
+
+```
+
+2.  \(F1\) from the above; and
+        
+```{r}
+
+```
+
+3. accuracy.
+        
+```{r}
+
+```
+
+
+

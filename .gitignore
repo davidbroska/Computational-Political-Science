@@ -5,6 +5,7 @@
 
 libs/
 figures/
+formative_assignment_students/
 
 session_[0-9]_slides.Rmd
 session_[0-9][0-9]_slides.Rmd
@@ -15,5 +16,12 @@ session_[0-9][0-9]_slides.html
 session_[0-9]_slides_files/
 session_[0-9][0-9]_slides_files/
 
-formative-assignment-partA-solutions.Rmd
-formative-assignment-partB-solutions.Rmd
+summative-assignment-1-partA.Rmd
+FB-UK-parties.csv
+
+summative-assignment-1-partA-solutions.Rmd
+summative-assignment-1-partB-solutions.Rmd
+
+01-naive-bayes-exercise-solutions.Rmd
+
+
