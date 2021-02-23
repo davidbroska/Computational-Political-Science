@@ -78,12 +78,20 @@ Now, run the training and testing commands of the Naive Bayes classifier, and co
 ```
 ### Compute model statistics
 
+Extract the probability of a word given the class and the class prior probability from the estimated Naive Bayes model. 
+
+Also, predict the probabilities of documents belonging to a class using `predict()`. Finally, sort the documents into classes using `predict()`. Display the first six predictions using `head()`.
+
+```{r}
+
+```
 
 Extract the posterior class probabilities of the words `good` and `great`. Do the results confirm your previous finding? Clue: look at the documentation for `textmodel_nb()` for how to extract the posterior class probabilities.
 
 ```{r}
 
 ```
+
 
 
 Compute the following statistics for the last classification: 
