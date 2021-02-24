@@ -449,7 +449,7 @@ nb <- textmodel_nb(x,y,prior="docfreq")
 ```
 
 
-```{r, warning=F, R.options=list(digits=2)}
+```{r, warning=F, R.options=list(digits=3)}
 ( Pc <- nb$priors )                                 # extract prior for class
 ( PwGc <- nb$param )                                # get p of word given category
 ```
