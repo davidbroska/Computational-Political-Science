@@ -139,7 +139,7 @@ After all, we could just learn the broad idea of the Naive Bayes classifier and 
 
 <br>
 
-- We introduce classification by the example of the Naive Bayes which requires a better understanding the model's internal mechanisms
+- We introduce classification by the example of the Naive Bayes which requires a better understanding of the model's internal mechanisms
 
 --
 
@@ -147,7 +147,7 @@ After all, we could just learn the broad idea of the Naive Bayes classifier and 
 
 --
 
-- We lay the foundation for interesting data science applications of Bayesian thinking which is nowadays widely applied
+- We lay the foundation for interesting and widely used data science applications of Bayesian thinking
  
 
 ---
@@ -381,7 +381,7 @@ txt <- c(k1 = "$ Win $",
          u1 = "$",
          u2 = "$ $",
          u3 = "Paypal 100 $ $")
-x <- dfm(txt, tolower = F) 
+x <- dfm(txt) 
 y <- factor(c("Spam","Spam","Spam","No Spam", NA, NA, NA), ordered = T)
 ```
 
@@ -437,7 +437,7 @@ as.matrix(dfm(txt, groups = y) + 1)  # but we need to apply Laplacian smoothing
 
 ```{r, echo=F}
 # get probability of word given category 
-# divide feature frequency by category frequency (10 and 16 respectively)
+# divide word frequency by category frequency (10 and 16 respectively)
 as.matrix( (dfm(txt, groups = y) + 1) / rowSums(dfm(txt, groups = y) + 1) )
 ```
 
@@ -454,9 +454,13 @@ nb <- textmodel_nb(x,y,prior="docfreq")
 ( PwGc <- nb$param )                                # get p of word given category
 ```
 .pull-left[
-```{r, R.options=list(digits=2)}
+```{r, eval=F}
 # get p of class given word(s)
 ( PcGw <- predict(nb, type="prob") )            
+```
+```{r, echo=F}
+# get p of class given word(s)
+( PcGw <- round( predict(nb, type="prob") ,2) )            
 ```
 ]
 .pull-right[
@@ -465,11 +469,15 @@ nb <- textmodel_nb(x,y,prior="docfreq")
 # categorize based on highest p
 ( cats <- predict(nb, type="class") )               
 ```
+```{r, include=F}
+# categorize based on highest p
+( cats <- predict(nb, type="class") )               
+```
 ```{r, echo=F}
 cat( paste( cats, collapse='\n' ) )
 ```
-
 ]
+
 
 ---
 # Manually computing P( spam | words )
@@ -479,10 +487,12 @@ Recall that we have the prior P(spam)=0.75 and estimated these conditional proba
 
 ```{r echo=F}
 freq_given_cat_df <- convert( (dfm(txt, groups = y) + 1) / rowSums(dfm(txt, groups = y) + 1), "data.frame")
-knitr::kable(freq_given_cat_df, align="c")
+col_labels <- c(" ", colnames(freq_given_cat_df)[2:ncol(freq_given_cat_df)])
+
+knitr::kable(freq_given_cat_df, align="c", col.names = col_labels)
 ```
 
-#### We can calculate the probability of a document blonging to a category manually  
+####Notice how our belief of the message being spam changes as we consider various features  
 
 .pull-left[
 #### P(spam | &#36;)
@@ -496,7 +506,7 @@ knitr::kable(freq_given_cat_df, align="c")
 ```
 ]
 
---
+
 
 .pull-right[
 #### P(spam | &#36; &#8745; &#36;)
@@ -520,7 +530,8 @@ knitr::kable(freq_given_cat_df, align="c")
 
 .pull-left[
 What is the probability of spam given a dollar sign in the message?
-<img src="../figures/P_spam_given_d.png" class="centerimg" width="82%">
+
+<img src="../figures/P_spam_given_d.png" class="centerimg" width="78%">
 
 ]
 
@@ -535,13 +546,13 @@ $$
 \begin{align}
 P(\text{s}|\$)=&\frac{P(\text{s})P(\$|\text{s})}{P(\text{s})P(\$|\text{s})+P(\neg \text{ s})P(\$|\neg \text{ s})}
 \\=&\frac{0.75 \times0.375}{0.75\times 0.375 + 0.25\times 0.2} \\
-=& `r round(P_spam_given_d,2)`
+=& `r round( (.75*.375) / (.75*.375 + .25*.2) ,2)`
 \end{align}
 $$
 
 #### Numerator
 
-Look at the branches where the evidence (&#36;) occurs *and* the hypothesis (spam) is true; compute their joint probability P(s, &#36;)
+Look at the branches where the evidence (&#36;) occurs *and* the hypothesis (spam) is true; compute the joint probability P(s &#8745; &#36;)
 
 #### Denominator
 
@@ -552,7 +563,7 @@ numerator *added* to the joint probability of the evidence occurring given the h
 
 
 ---
-# P( spam | $, $ )
+# P( spam | $ &#8745; $ )
 
 
 .pull-left[
@@ -570,16 +581,16 @@ What is the probability of spam given **two** dollar signs in the message?
 
 Assuming independence of features allows us to easily calculate the probability of spam given **multiple** features.
 
-Independence simplifies the calculation, for example $$P(\$|s,\$)=P(\$|s)$$
+Independence simplifies the calculation, for example $$P(\$|s \cap\$)=P(\$|s)$$
 
 Substantively, we assume that observing a &#36; does not affect the probability of observing further &#36; (or any other feature) 
 
 
 $$
 \begin{align}
-&P(\text{s}| \$, \$)\\
+&P(\text{s}| \$ \cap \$)\\
 =&\frac{P(\text{s})P(\$|\text{s})^2}{P(\text{s})P(\$|\text{s})^2 +P(\neg \text{ s})P(\$|\neg \text{ s})^2 }
-\\=&\frac{0.75 \times0.375^2}{0.75\times 0.375^2 + 0.25\times 0.2^2} \\=& `r round(P_spam_given_d_d,2)`
+\\=&\frac{0.75 \times0.375^2}{0.75\times 0.375^2 + 0.25\times 0.2^2} \\=& `r round((.75 * .375^2) / (.75 * .375^2 + .25 * .2^2),2)`
 \end{align}
 $$
 
@@ -587,15 +598,15 @@ $$
 
 
 ---
-# P( spam | $, $, Paypal, 100 )
+# P( spam | $ &#8745; $ &#8745; Paypal &#8745; 100 )
 
 What is the probability of spam given the message includes &#36;, &#36;, Paypal, and 100? 
 
-Recall that we have the prior of P(s)=0.75 and estimated the following conditional probabilities:
+Recall that we have the prior of P(spam)=0.75 and estimated the following conditional probabilities:
 
 
 ```{r echo=F}
-knitr::kable(freq_given_cat_df, align="c")
+knitr::kable(freq_given_cat_df, align="c", col.names = col_labels)
 ```
 <br>
 
@@ -603,9 +614,9 @@ knitr::kable(freq_given_cat_df, align="c")
 
 $$
 \begin{align}
-&P(\text{s}|\$, \$, \text{Paypal}, 100)\\
+&P(\text{s}|\$ \cap \$ \cap \text{Paypal} \cap 100)\\
 =&\frac{P(\text{s})P(\$|\text{s})^2 P(\text{Paypal}|s)P(100|s)}{P(\text{s})P(\$|\text{s})^2 P(\text{Paypal}|s)P(100|s) +P(\neg \text{ s})P(\$|\neg \text{ s})^2 P(\text{Paypal}| \neg s)P(100| \neg s)}
-\\=&\frac{0.75 \times0.375^2 \times 0.0625^2}{0.75\times 0.375^2 \times 0.0625^2+ 0.25\times 0.2^4} \\ =& `r round(P_spam_given_d_d_100_Paypal,2)`
+\\=&\frac{0.75 \times0.375^2 \times 0.0625^2}{0.75\times 0.375^2 \times 0.0625^2+ 0.25\times 0.2^4} \\ =& `r round((.75 * .375^2 * .0625^2) /  (.75 * .375^2 *.0625^2 + .25 * .2^4),2)`
 \end{align}
 $$
 
