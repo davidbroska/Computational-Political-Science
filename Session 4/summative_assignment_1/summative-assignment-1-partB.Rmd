@@ -1,0 +1,97 @@
+---
+title: 'CPS Summative Assignment Part B Solutions'
+subtitle: 'Classification with Naive Bayes'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+
+library("quanteda")
+library("quanteda.textmodels")
+```
+
+
+
+
+In the lecture, we used a small example to better understand the Naive Bayes classifier. In this assignment, we will strengthen our intuition of the model's internal mechanics.
+
+```{r}
+# 4 texts with known and 3 texts with unknown category
+txt <- c(k1 = "$ Win $", 
+         k2 = "$ Prize $", 
+         k3 = "Earn $ Easily", 
+         k4 = "Paypal 100 $",
+         u1 = "$",
+         u2 = "$ $",
+         u3 = "Paypal 100 $ $")
+x <- dfm(txt) 
+y <- factor(c("Spam","Spam","Spam","No Spam", NA, NA, NA), ordered = T)
+```
+
+### Question 1 (2 points)
+
+Calculate the probability of a word given the category using the relative frequency of spam as the prior probability. There are a couple of ways to this. For example, you can calculate the probabilities employing `dfm()` and a bit of arithmetic. You could also estimate the Naive Bayes using `textmodel_nb()` and extract the relevant object. 
+
+```{r}
+
+```
+
+
+### Question 2 (6 points)
+
+Compute the following probabilities based on the prior probability P(spam)=0.75 and the conditional probabilities in the table above.
+
+1. P( spam| earn )
+2. P( spam| earn ∩ easily )
+
+I would recommend you to draw a tree diagram and make manual calculations. If you prefer, however, you could also write a function to compute the probabilities.
+
+Please provide the numbers that led to your result. If you want, you can also attach a photo of your drawing/calculations.
+
+
+What is P( spam | earn )?
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
+What is P( spam| earn ∩ easily )? 
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
+
+### Question 3 (3 points)
+
+Verify your calculations by adding "earn" and "earn easily" as documents with unknown categories to the above corpus `txt`, estimate the Naive Bayes model, and predict the probabilities of those documents being spam. Please copy the code from above and rename every object, for example `txt2`, `x2`, `y2`, etc. 
+
+```{r}
+
+
+```
+
+
+### Question 4 (2 points)
+
+Consider the probabilities calculated above in the following order: P(spam), P( spam| earn ), and P( spam| earn ∩ easily ). How do they change? How would you interpret this change?
+
+**Your answer here**
+
+> 
+
+
+

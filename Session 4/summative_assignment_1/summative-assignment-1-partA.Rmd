@@ -1,0 +1,140 @@
+---
+title: 'CPS Summative Assignment 1 Part A Solutions'
+subtitle: 'Applications of dictionary methods'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+
+library("quanteda")
+library("quanteda.dictionaries")
+```
+
+
+
+## A Populism dictionary
+
+Here we will create and implement the populism dictionary from Rooduijn, Matthijs, and Teun Pauwels (2011) "Measuring Populism: Comparing Two Methods of Content Analysis." *West European Politics* 34(6): 1272-83. We will use it to identify populist rhetoric in British parties' Facebook posts.
+
+### Question 1 (1 point)
+
+We'll start by loading the data, which contains posts on the Facebook pages of the party and candidate for all five major British parties. 
+
+```{r}
+
+```
+
+Appendix B of the paper provides the term entries for a dictionary key for the concept populism. We will implement this as a dictionary object with quanteda, and apply it to the UK Facebook posts. (Note that in the article they apply them to the party manifestos.)
+
+For your convenience, I already typed the list of populist words here:
+
+```{r}
+populist_dict <- dictionary(list(
+  populism = c(
+      "elit*",
+      "consensus*",
+      "undemocratic*",
+      "referend*",
+      "corrupt*",
+      "propagand*",
+      "politici*",
+      "*deceit*",
+      "*deceiv*",
+      "*betray*",
+      "shame*",
+      "scandal*",
+      "truth*",
+      "dishonest*",
+      "establishm*",
+      "ruling*")))
+
+```
+
+### Question 2 (3 points)
+
+Now, create a corpus object with quanteda, and then group all the posts by a given party into a single DFM. Hint: Specify the `groups` argument of `dfm()`.
+
+Do you think it makes sense to normalize for document length in this context? If so, make sure you convert the DFM into proportions. If not, leave as is.
+
+Then, use `dfm_lookup` to identify the extent to which each party uses populist rhetoric on social media. What do you find?
+
+```{r}
+
+```
+
+**Your answer here**
+
+>  
+
+```{r}
+
+```
+### Question 3 (2 points)
+
+
+We will now discuss the _precision_ of your dictionary. Use the `kwic()` function to find instances of each of the dictionary terms above in this corpus. Do you think most instances do indeed refer to populist rhetoric? Note: This prompt does not require an extensive analysis needed; it is sufficient to make an educated guess based on a few examples.
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
+### Question 4 (2 points)
+
+What about recall? Are there any relevant words that were excluded? You may use `kwic()` to think through potential new words you may want to add. 
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
+### Question 5 (2 points)
+
+Media accounts have often depicted Jeremy Corbyn as a populist leader. If that's the case, we may expect to find that his Facebook posts tend to rely more often on populist rhetoric than Labour's Facebook page. Is that observation supported by the data? Write similar code as above to answer this question.
+
+**Your answer here**
+
+>
+
+```{r}
+
+```
+
+
+
+### Applying the Regressive Imagery Dictionary (5 points)
+
+Try analyzing the inaugural speeches from 1980 onward using the Regressive Imagery Dictionary, from Martindale, C. (1975) *Romantic progression: The psychology of literary history.* Washington, D.C.: Hemisphere.
+
+### Question 6 (1 point)
+
+The dictionary is available in the `quanteda.dictionaries` package as `data_dictionary_RID`. In the dictionary, look for `ICARIAN_IM` that contains the patterns that match Icarian words. Extract those patterns by repeatedly using `$` to navigate through the hierarchical structure of the dictionary. Store them in an object named `icarianDict`.
+
+```{r}
+
+```
+
+
+### Question 7 (3 points)
+
+Compare the Presidents based on the level of "Icarian Imagery". Construct a weighted DFM based on a subset of presidential speeches since 1980. After applying the dictionary sort the result in descending order. Which president is the most Icarian? Hint: You can use function from base R but there is no need to. You might want to look into the various `dfm_*` functions that quanteda provides.
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
