@@ -29,7 +29,7 @@ We'll start by loading the data, which contains posts on the Facebook pages of t
 
 ```
 
-Appendix B of the paper provides the term entries for a dictionary key for the concept populism. We will implement this as a dictionary object with quanteda, and apply it to the UK Facebook posts. (Note that in the article they apply them to the party manifestos.)
+Appendix B of the paper provides the term entries for a dictionary key for the concept populism. We will implement this as a dictionary object with quanteda and apply it to the UK Facebook posts. (Note that in the article they apply them to the party manifestos.)
 
 For your convenience, I already typed the list of populist words here:
 
@@ -128,7 +128,7 @@ The dictionary is available in the `quanteda.dictionaries` package as `data_dict
 
 ### Question 7 (3 points)
 
-Compare the Presidents based on the level of "Icarian Imagery". Construct a weighted DFM based on a subset of presidential speeches since 1980. After applying the dictionary sort the result in descending order. Which president is the most Icarian? Hint: You can use function from base R but there is no need to. You might want to look into the various `dfm_*` functions that quanteda provides.
+Compare the Presidents based on the level of "Icarian Imagery". Construct a weighted DFM based on a subset of presidential speeches since 1980. After applying the dictionary, sort the result in descending order. Which president is the most Icarian? Hint: You can use functions from base R but there is no need. You might want to look into the various `dfm_*` functions that quanteda provides.
 
 **Your answer here**
 
