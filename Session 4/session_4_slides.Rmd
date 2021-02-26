@@ -561,6 +561,26 @@ numerator *added* to the joint probability of the evidence occurring given the h
 
 ]
 
+---
+# Considering multiple features
+
+#### The Naive Bayes model (wrongly) assumes **conditional independence of word counts given the class**.
+
+- This is why the model is called "naive": it assumes that seeing a word does change the probability of observing other words in a document. 
+
+- However, the word "weather" is more likely to be followed by related words like "forecast" and "report" rather than unrelated words such as "guitar".
+
+--
+
+#### This assumption has practical advantages as we can *multiply* the conditional probabilities of a *w*ord given a *c*lass $P(w_j|c_k)$ to get the *joint* probability of the words occurring in a *d*ocument.
+
+Then, the probability that a document belongs to a class can be calculated with
+
+
+
+$$P(c_k|d)=P(c_k) \prod_{j}^{J} \frac{P(w_j|c_k)}{P(w_j)}$$
+
+where $\prod_j^J$ means to multiply the $J$ word probabilities.
 
 ---
 # P( spam | $ &#8745; $ )
@@ -572,16 +592,15 @@ What is the probability of spam given **two** dollar signs in the message?
 
 <img src="../figures/P_spam_given_d_d.png" class="centerimg" width="100%">
 
-
 ]
 
 --
 
 .pull-right[
 
-Assuming independence of features allows us to easily calculate the probability of spam given **multiple** features.
+Assuming conditional independence of features given the class allows us to easily calculate the probability of spam given **multiple** features.
 
-Independence simplifies the calculation, for example $$P(\$|s \cap\$)=P(\$|s)$$
+Independence simplifies the calculation, for example P(&#36; | s &#8745;  &#36;) = P( &#36;| s)
 
 Substantively, we assume that observing a &#36; does not affect the probability of observing further &#36; (or any other feature) 
 
@@ -623,7 +642,7 @@ $$
 
 ???
 
-Note how the conditional probabilities are only conditional on the message being spam but not on the features occurring in that message (independence assumption)
+Note how the conditional probabilities are only conditional on the message being spam but not on the features occurring in that message (assumption: conditional independence of word counts given the class)
 
 ---
 class: inverse, center, middle
