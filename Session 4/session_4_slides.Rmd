@@ -566,7 +566,7 @@ numerator *added* to the joint probability of the evidence occurring given the h
 
 #### The Naive Bayes model (wrongly) assumes **conditional independence of word counts given the class**.
 
-- This is why the model is called "naive": it assumes that seeing a word does change the probability of observing other words in a document. 
+- This is why the model is called "naive": it assumes that seeing a word does not change the probability of observing other words in a document. 
 
 - However, the word "weather" is more likely to be followed by related words like "forecast" and "report" rather than unrelated words such as "guitar".
 
