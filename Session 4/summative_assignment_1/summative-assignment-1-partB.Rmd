@@ -35,7 +35,7 @@ y <- factor(c("Spam","Spam","Spam","No Spam", NA, NA, NA), ordered = T)
 
 ### Question 1 (2 points)
 
-Calculate the probability of a word given the category using the relative frequency of spam as the prior probability. There are a couple of ways to this. For example, you can calculate the probabilities employing `dfm()` and a bit of arithmetic. You could also estimate the Naive Bayes using `textmodel_nb()` and extract the relevant object. 
+Calculate the probability of a word given the category using the relative frequency of spam as the prior probability. There are a couple of ways to do this. For example, you can calculate the probabilities employing `dfm()` and a bit of arithmetic. You could also estimate the Naive Bayes using `textmodel_nb()` and extract the relevant object. 
 
 ```{r}
 
