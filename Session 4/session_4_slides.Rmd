@@ -16,8 +16,6 @@ output:
       countIncrementalSlides: false
 ---
 
-<!-- # see live presentation with xaringan::inf_mr('Session 1/session_1_slides.Rmd') -->
-
 # Outline for today
 
 1. **Supervised machine learning**
@@ -33,9 +31,11 @@ output:
 
 4. **Naive Bayes**
     - Dissecting the Naive Bayes
-    - Using textmo
+    - Implementation in quanteda
+    
+5. **Prior probabilities**
 
-5. **Coding Exercise**
+6. **Coding Exercise**
 
 ---
 class: inverse, center, middle
@@ -578,7 +578,7 @@ Then, the probability that a document belongs to a class can be calculated with
 
 
 
-$$P(c_k|d)=P(c_k) \prod_{j}^{J} \frac{P(w_j|c_k)}{P(w_j)}$$
+$$P(c_k|d)=P(c_k|w_1 \cap w_2 \cap \dots w_J)=P(c_k) \prod_{j}^{J} \frac{P(w_j|c_k)}{P(w_j)}$$
 
 where $\prod_j^J$ means to multiply the $J$ word probabilities.
 
@@ -643,6 +643,133 @@ $$
 ???
 
 Note how the conditional probabilities are only conditional on the message being spam but not on the features occurring in that message (assumption: conditional independence of word counts given the class)
+
+---
+class: inverse, center, middle
+
+# Prior probabilities
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html> 
+
+
+---
+# Document frequency
+
+#### A prior probability is the baseline expectation of observing a category without considering any evidence. 
+
+`textmodel_nb()` allows specifying different priors for training a classifier.
+
+#### Relative document frequency
+
+Throughout this lecture we assumed that the relative frequency of a category occurring in the corpus is a reasonable baseline expectation of receiving a spam message
+
+.pull-left[
+```{r, echo=F}
+knitr::kable(y[1:4], align = "c", col.names = "y")
+```
+]
+
+.pull-right[
+
+$$P(\text{ s }) = \frac{3}{4}$$
+<br>
+$$P(\neg s) = \frac{1}{4}$$
+]
+<br>
+
+#### However, there may be nothing informative in the relative numbers of documents.
+
+
+---
+# Term frequency
+
+#### Using term frequency makes the priors equal to the fraction of total feature counts found in the grouped documents in each training class
+
+Therefore, classes with the largest number of features are assigned the largest priors
+
+--
+
+Coincidentally, in our example the fraction of total features is the same as the relative document frequency
+
+.pull-left[
+```{r, eval=F}
+dfm(txt, groups = y)
+```
+
+```{r, echo=F}
+as.matrix( dfm(txt, groups = y) )
+
+```
+]
+
+.right-code[
+```{r}
+rs <-rowSums(dfm(txt,groups=y))
+```
+```{r,echo=F}
+cat( paste( c(" "," ",rs), collapse='\n' ) )
+```
+]
+
+
+.pull-left[
+```{r}
+rs / sum(rs)
+```
+]
+
+---
+# Uniform priors
+
+#### Using uniform priors means to set the unconditional probability of observing one class to be the same as observing any other class
+
+--
+
+To illustrate, let's recalculate the probability of P(spam | $ ) with uniform priors
+
+$$
+\begin{align}
+P(\text{s}|\$)=&\frac{P(\text{s})P(\$|\text{s})}{P(\text{s})P(\$|\text{s})+P(\neg \text{ s})P(\$|\neg \text{ s})}
+\end{align}
+$$
+
+Equal prior probabilities simplify the calculation since $P(s)=P(\neg s)$
+
+$$
+\begin{align}
+P(\text{s}|\$)=&\frac{ P(\text{s})  P(\$|\text{s})}{P(\text{s})P(\$|\text{s})+P( \text{s})P(\$|\neg \text{ s})}
+\\=&\frac{P(\$|\text{s})}{P(\$|\text{s})+P(\$|\neg \text{ s})}
+\\=&\frac{0.375}{0.375 + 0.2} = `r round( (.375) / (.375 + .2) ,2)`
+\end{align}
+$$
+
+--
+
+#### Therefore, assuming uniform priors implies calculating the probability of the category given the evidence with **no priors**!
+
+---
+# Uniform priors
+
+
+#### Assuming that categories have the same probability of occurring can be an explicit *decision* of the analyst
+
+This is appropriate if there is no reason to expect the occurrence of one category to be more likely than others.
+<br>
+<br>
+
+
+
+#### Uniform priors can also result from the available data in the following scenarios
+
+1. Setting `prior="docfreq"` and having the *same number of documents* in each training class
+  
+  For example, there are 500 spam messages and 500 non-spam messages in the dataset
+<br>
+
+2. Setting `prior="termfreq"` and having the *same the total count of features* in each training class
+
+  For example, all spam messages taken together contain 100,000 words and all non-spam messages also contain 100,000 words
+
 
 ---
 class: inverse, center, middle
