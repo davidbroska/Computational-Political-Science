@@ -148,6 +148,8 @@ After all, we could just learn the broad idea of the Naive Bayes classifier and 
 --
 
 - We lay the foundation for interesting and widely used data science applications of Bayesian thinking
+
+  ... such as the Wordscores model covered next week!
  
 
 ---
@@ -657,7 +659,7 @@ class: inverse, center, middle
 
 #### A prior probability is the baseline expectation of observing a category without considering any evidence. 
 
-`textmodel_nb()` allows specifying different priors for training a classifier.
+`textmodel_nb()` allows specifying different priors for training a classifier
 
 #### Relative document frequency
 
@@ -753,7 +755,7 @@ $$
 
 #### Assuming that categories have the same probability of occurring can be an explicit *decision* of the analyst
 
-This is appropriate if there is no reason to expect the occurrence of one category to be more likely than others.
+This is appropriate if there is no reason to expect the occurrence of one category to be more likely than others
 <br>
 <br>
 
