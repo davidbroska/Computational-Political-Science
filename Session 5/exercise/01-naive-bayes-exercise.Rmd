@@ -1,0 +1,97 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r,include = F}
+library("quanteda")
+library("quanteda.textmodels")
+```
+
+
+# Supervised learning applied to text
+
+## Naive Bayes
+
+The code here illustrates how we can use supervised machine learning to predict categories for unseen documents based on a set of labeled documents. Our running example will focus on whether we can predict gender based on the character distribution of first names.
+
+The file `data/EN-names.csv` contains a list of nearly 25,000 popular names in the US labeled by the most frequent gender based on Social Security records.
+
+Let's read this dataset into R, convert it into a corpus called `cnames` with gender as a document-level variable.
+
+```{r}
+
+```
+
+As we saw in the lecture, we need to specify what the training set and test set will be. In this case, let's just take an 80% random sample of names as training set and the rest as test set, which we will use to compute the performance of our model. We will then create a document-feature matrix where each feature is a character.
+
+```{r}
+# shuffling to split into training and test set
+smp <- sample(c("train", "test"), size=ndoc(cnames), 
+                prob=c(0.80, 0.20), replace=TRUE)
+train <- which(smp=="train")
+test <- which(smp=="test")
+# tokenizing and creating DFM
+characters <- tokens(cnames, what="character")
+namesdfm <- dfm(characters)
+```
+
+We're now ready to train our model! Let's start with a Naive Bayes model using the `textmodel_nb()` function. Please compute the confusion matrix. 
+
+```{r}
+# training Naive Bayes model
+nb <- textmodel_nb(namesdfm[train,], docvars(cnames, "gender")[train])
+# predicting labels for test set
+preds <- predict(nb, newdata = namesdfm[test,])
+# computing the confusion matrix
+(cm <- table(preds, docvars(cnames, "gender")[test]))
+```
+
+How well did we do? We can compute precision, recall, and accuracy to quantify it.
+
+```{r, eval= F}
+# function to compute performance metrics
+precrecall <- function(mytable, verbose=TRUE) {
+    truePositives <- mytable[1,1]
+    falsePositives <- sum(mytable[1,]) - truePositives
+    falseNegatives <- sum(mytable[,1]) - truePositives
+    precision <- truePositives / (truePositives + falsePositives)
+    recall <- truePositives / (truePositives + falseNegatives)
+    if (verbose) {
+        print(mytable)
+        cat("\n precision =", round(precision, 2), 
+            "\n    recall =", round(recall, 2), "\n")
+    }
+    invisible(c(precision, recall))
+}
+
+```
+
+Not terribly great. But what if we try with character n-grams up to trigrams instead of unigrams? Re-run the above analysis using trigrams.
+
+```{r}
+
+```
+
+Slightly better! We can dig a bit more into the model by extracting the posterior class probabilities for specific characters.
+
+
+```{r, eval = F}
+# extracting posterior word probabilities
+PwGc <- nb$param
+Pc <- nb$priors
+PcGw <- PwGc * base::outer(Pc, rep(1, ncol(PwGc)))
+PcGw <- matrix(sapply(PcGw, function(x) sqrt(sum(x^2))), nrow=2, dimnames = dimnames(PwGc))
+
+
+PcGw[,c("a", "o", "e")]
+# and this is how we would extract the features with the highest and lowest posterior class probabilities
+df <- data.frame(
+  ngram = colnames(PcGw),
+  prob_female_ngram = PcGw["female",],
+  stringsAsFactors=F)
+df <- df[order(df$prob_female_ngram, decreasing = T),]
+head(df, n=10)
+
+```
