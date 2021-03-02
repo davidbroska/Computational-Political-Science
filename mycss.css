@@ -29,10 +29,14 @@
 }
 
 .left-code {
-  color: #777;
   width: 38%;
   height: 92%;
   float: left;
+}
+.right-code {
+  width: 38%;
+  height: 92%;
+  float: right;
 }
 .right-plot {
   width: 60%;
