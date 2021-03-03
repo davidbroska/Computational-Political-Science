@@ -593,6 +593,35 @@ df_kab <- knitr::kable(df, align = "c")
 kableExtra::column_spec(df_kab, 1:7, width_min = "0.8in") 
 ```
 
+---
+# Using textmodel_wordscores()
+
+#### For convenience we can use the quanteda function to obtain the above results
+
+```{r}
+ws_mod <- textmodel_wordscores(x,y) 
+```
+
+
+#### Wordscores
+
+```{r, eval=F}
+summary(ws_mod)
+```
+```{r,echo=F}
+summary(ws_mod)[[1]]
+round( summary(ws_mod)[[3]], 2)     # print wordscores
+```
+
+#### Scaled documents
+
+```{r, eval=F}
+predict(ws_mod)
+```
+```{r,echo=F}
+round(predict(ws_mod),2)
+```
+
 
 ---
 class: inverse, center, middle
