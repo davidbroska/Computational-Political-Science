@@ -412,12 +412,12 @@ marginals
 ####Probability of word given the document
 
 ```{r,eval=F}
-( xw <- dfm_weight(x[1:4,],scheme="prop") )
+( PwGd <- dfm_weight(x[1:4,],scheme="prop") )
 ```
 
 ```{r,echo=F}
-xw <- as.matrix( dfm_weight(x[1:4,],scheme="prop"))
-round( xw, 2)
+PwGd <- as.matrix( dfm_weight(x[1:4,],scheme="prop"))
+round( PwGd, 2)
 ```
 
 ---
@@ -436,20 +436,17 @@ Uniform priors: P(k<sub>1</sub>)=...=P(k<sub>4</sub>)= &frac14;
 ]
 
 .pull-right[
-```{r, echo=F}
-xw <- dfm_weight(x[1:4,],scheme="prop")
-```
 
-Probability of feature given the document:
+Probability of word given the document:
 
 ```{r, echo=F}
 
-kab_xw <- knitr::kable(round(as.matrix(xw),2), align = c("l", rep("c", ncol(xw)-1)), 
-                    col.names = colnames(xw))
+kab_PwGd <- knitr::kable(round(as.matrix(PwGd),2), align = c("l", rep("c", ncol(PwGd)-1)), 
+                    col.names = colnames(PwGd))
 
-kab_xw_c  <- kableExtra::column_spec(kab_xw, 1,width_max = "0.15in")
-kab_xw_cr <- kableExtra::row_spec(kab_xw_c, 0:nrow(xw), font_size = 17.5)
-kab_xw_cr
+kab_PwGd_c  <- kableExtra::column_spec(kab_PwGd, 1,width_max = "0.15in")
+kab_PwGd_cr <- kableExtra::row_spec(kab_PwGd_c, 0:nrow(PwGd), font_size = 17.5)
+kab_PwGd_cr 
 
 ```
 <br>
@@ -471,12 +468,11 @@ $$
 ####Now let's compute all probabilities of reading a document given a word
 
 ```{r, eval=F}
-( PwGd <- dfm_weight( dfm(x[1:4,]), scheme="prop") ) # P(word | document)
+PwGd # recall our matrix containing all P(word | document)
 ```
 
 ```{r, echo=F}
-PwGd <- as.matrix( dfm_weight( dfm(x[1:4,]), scheme="prop") )  # P(word | document)
-round(PwGd,2)
+round(PwGd,2) # recall our matrix containing all P(word | document)
 ```
 
 .pull-left[
@@ -506,24 +502,26 @@ round( tPwGd / rowSums( tPwGd ) ,2)
 ---
 # Scoring words
 
-Compute a $J$-length "score" vector $S$ for each word $j$ as the average of each document $i$’s scores $a_i$, weighted by each word's $P_{ij}$:
+Compute a $J$-length "score" vector $S$ for each word $j$ as the average of each document $i$’s scores $a_i$, weighted by each word's $P_{ij}$: 
 
 $$S_j=\sum_i^I a_i P_{ij}$$
 
 
 ```{r,eval=F}
-# transpose the P(document | word) matrix so that we have the documents as rows
+# transpose matrix so we can multiply words of the document with the document score
 t(PdGw) * y[1:4]
 ```
 ```{r, echo = F}
-# transpose the P(document|word) matrix so that we have the documents as rows
+# transpose matrix so we can multiply words of the document with the document score
 round( t(PdGw) * y[1:4] ,2)
 ```
 
 ```{r, eval=F}
+# then, sum up the result column-wise
 colSums( t(PdGw) * y[1:4] )
 ```
 ```{r,echo=F}
+# then, sum up the result column-wise
 round( colSums( t(PdGw) * y[1:4]) ,2)
 ```
 
@@ -536,11 +534,11 @@ We obtain the scored words *also* by using matrix multiplication. In matrix alge
 
 
 ```{r,eval=F}
-xwt / rowSums(xwt) # P(document | word)
+PdGw # P(document | word)
 ```
 
 ```{r,echo=F}
-round( xwt / rowSums( xwt ) ,2) # P(document | word)
+round( tPwGd ,2) # P(document | word)
 ```
 ]
 
@@ -594,9 +592,6 @@ colnames(df) <- c("k1 (s)", "k2 (s)","k3 (s)", "k4 (¬s)", "u1","u2","u3")
 df_kab <- knitr::kable(df, align = "c")
 kableExtra::column_spec(df_kab, 1:7, width_min = "0.8in") 
 ```
-
-
-
 
 
 ---
