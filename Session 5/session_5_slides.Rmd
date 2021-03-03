@@ -310,22 +310,24 @@ In fact, the class predictions for a collection of words from Naive Bayes can be
 
 
 ---
-# Wordscores
+# Wordscores 
 
-Wordscores method (Laver, Benoit & Garry, 2003):
+Analogous to a "training set" and a "test set" in classification, the Wordscores method by Laver, Benoit, and Garry (2003) uses two sets of texts:
 
-Two sets of texts
-- Reference texts: texts about which we know something (a
-scalar dimensional score)
-- Virgin texts: texts about which we know nothing (but whose
-dimensional score we’d like to know)
+#### Reference texts
 
-These are analogous to a “training set” and a “test set” in classification
+- texts about which we know something (a scalar dimensional score)
 
-Basic procedure:
+#### Virgin texts
 
-1. Analyze reference texts to obtain word scores
+- texts about which we know nothing (but whose dimensional score we'd like to know)
+
+<br>
+#### Basic procedure
+
+1. Analyze reference texts to obtain a single "score" for every word 
 2. Use word scores to score virgin texts
+
 
 ---
 # Wordscores procedure (I)
@@ -414,6 +416,7 @@ marginals
 ```
 
 ```{r,echo=F}
+xw <- as.matrix( dfm_weight(x[1:4,],scheme="prop"))
 round( xw, 2)
 ```
 
@@ -460,84 +463,91 @@ $$
 \end{align}
 $$
 
-
-
 ]
 
 ---
 # P( document | word )
 
-#### Now let's compute all probabilities of reading a document given a word
+####Now let's compute all probabilities of reading a document given a word
 
 ```{r, eval=F}
-( xw <- dfm_weight( dfm(x[1:4,]), scheme="prop") ) # P(word|document)
+( PwGd <- dfm_weight( dfm(x[1:4,]), scheme="prop") ) # P(word | document)
 ```
 
 ```{r, echo=F}
-xw <- as.matrix( dfm_weight( dfm(x[1:4,]), scheme="prop") )  # P(word|document)
-round(xw, 2)
+PwGd <- as.matrix( dfm_weight( dfm(x[1:4,]), scheme="prop") )  # P(word | document)
+round(PwGd,2)
 ```
 
 .pull-left[
 ```{r,eval=F}
-( xwt <- t(xw) ) # transpose xw matrix
+# transpose PwGd matrix
+( tPwGd <- t(PwGd) ) 
 ```
 
 ```{r, echo=F}
-xwt <- t(xw)
-round( xwt ,2)
+tPwGd <- t(PwGd)
+round( tPwGd ,2)
 ```
 ]
 
 .pull-right[
 ```{r,eval=F}
-xwt / rowSums(xwt) # P(document | word)
+# P(document | word)
+( PdGw <- tPwGd / rowSums(tPwGd) )
 ```
 ```{r,echo=F}
-round( xwt / rowSums( xwt ) ,2)
+PdGw <-tPwGd/rowSums(tPwGd) #P(document|word)
+round( tPwGd / rowSums( tPwGd ) ,2)
 ```
 ]
 
 
 ---
 # Scoring words
-
-
-#### Scoring words
 
 Compute a $J$-length "score" vector $S$ for each word $j$ as the average of each document $i$’s scores $a_i$, weighted by each word's $P_{ij}$:
 
 $$S_j=\sum_i^I a_i P_{ij}$$
 
-In matrix algebra, $\underset{1 \times J}{S} = \underset{1 \times I}{a} \cdot \underset{I \times J}{P}$
 
+```{r,eval=F}
+# transpose the P(document | word) matrix so that we have the documents as rows
+t(PdGw) * y[1:4]
+```
+```{r, echo = F}
+# transpose the P(document|word) matrix so that we have the documents as rows
+round( t(PdGw) * y[1:4] ,2)
+```
 
-This procedure will yield a single "score" for every word that reflects the balance of the scores of the reference documents, weighted by the relative document frequency of its normalized term frequency
-
-- Each text will have an associated "score" $a_d$, which is a single number locating this text on a single dimension of difference
-    - This can be on a scale metric, such as 1–20
-    - Can use arbitrary endpoints, such as -1, 1
-- We normalize the document-feature matrix by computing the relative frequency of each word within each document
+```{r, eval=F}
+colSums( t(PdGw) * y[1:4] )
+```
+```{r,echo=F}
+round( colSums( t(PdGw) * y[1:4]) ,2)
+```
 
 ---
 # Scoring words
 
+We obtain the scored words *also* by using matrix multiplication. In matrix algebra, $$\underset{1 \times J}{S} = \underset{1 \times I}{a} \cdot \underset{I \times J}{P}$$
+
 .pull-left[
 
-Recall our matrix containing all P(document | word)
+
 ```{r,eval=F}
-xwt / rowSums(xwt) 
+xwt / rowSums(xwt) # P(document | word)
 ```
 
 ```{r,echo=F}
-round( xwt / rowSums( xwt ) ,2)
+round( xwt / rowSums( xwt ) ,2) # P(document | word)
 ```
 ]
 
 .pull-right[
-We have also defined these wordscores (only for illustration purposes)
+
 ```{r}
-y[1:4] 
+y[1:4] # documents scale
 ```
 
 ]
@@ -546,12 +556,12 @@ y[1:4]
 
 
 ```{r, eval = F}
-# matrix multiplication with P(document | words) and scores 
-( ws <- (xwt / rowSums(xwt)) %*% y[1:4] )
+ # matrix multiplication with P(document|words) and scores
+( ws <- PdGw %*% y[1:4] )
 ```
 ```{r, echo = F}
 # matrix multiplication with P(document | words) and scores 
-ws <- (xwt / rowSums(xwt)) %*% y[1:4]
+ws <- PdGw %*% y[1:4]
 round( ws , 2)[,1]
 ```
 
@@ -563,24 +573,26 @@ round( ws , 2)[,1]
 
 We do this by taking the mean of the scores of its words, weighted by their term frequency
 
-Note that new words outside of the set $J$ may appear in the $K$ virgin documents — these are simply ignored (because we have no information on their scores)
-
-Note also that nothing prohibits reference documents from also being scored as virgin documents
+- Note that new words outside of the set $J$ may appear in the $K$ virgin documents — these are simply ignored (because we have no information on their scores)
+- Note also that nothing prohibits reference documents from also being scored as virgin documents
 
 ```{r, eval=F}
-dfm_weight(x ,scheme="prop") %*% ws
+# matrix multiplication with P(word | document) and obtained wordscores 
+dfm_weight(x, scheme="prop") %*% ws
 ```
 ```{r,echo=F}
 as.matrix(round( dfm_weight(x ,scheme="prop") %*% ws,2))[,1]
 ```
 
 
-#### Does this result make sense in the context of the spam example?
-
-
+#### Does this result make sense in the context of the spam example? 
+<br>
 ```{r, echo=F}
-`names<-`( txt[1:4], c("k1 (Spam)", "k2 (Spam)","k3 (Spam)", "k4 (No spam)"))
-txt[5:7]
+df <- t(data.frame(txt))
+rownames(df) <- NULL
+colnames(df) <- c("k1 (s)", "k2 (s)","k3 (s)", "k4 (¬s)", "u1","u2","u3")
+df_kab <- knitr::kable(df, align = "c")
+kableExtra::column_spec(df_kab, 1:7, width_min = "0.8in") 
 ```
 
 
