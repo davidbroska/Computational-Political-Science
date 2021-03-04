@@ -1,5 +1,5 @@
 ---
-title: 'CPS Summative Assignment 1 Part A Solutions'
+title: 'CPS Summative Assignment 1 Part A'
 subtitle: 'Applications of dictionary methods'
 author: "YOUR NAME HERE"
 output: html_document

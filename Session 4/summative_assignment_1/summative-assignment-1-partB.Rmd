@@ -1,5 +1,5 @@
 ---
-title: 'CPS Summative Assignment Part B Solutions'
+title: 'CPS Summative Assignment Part B'
 subtitle: 'Classification with Naive Bayes'
 author: "YOUR NAME HERE"
 output: html_document
