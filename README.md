@@ -7,20 +7,20 @@ david.broska\@zu.de
 
 Classes on Tuesdays 16:30-19:00 (Big Blue Button link on [ILIAS](https://learning.zu.de/goto.php?target=crs_19944&client_id=ilias))
 
-| Session |  Date  | Topic                                                  |               Assignment               |
-|:-------:|:------:|:-------------------------------------------------------|:--------------------------------------:|
-|    1    | Feb 02 | [Overview and key concepts](#session-1)                |                   \-                   |
-|    2    | Feb 09 | [Preprocessing and descriptive statistics](#session-2) |   [Formative](#formative-assignment)   |
-|    3    | Feb 16 | [Dictionary methods](#session-3)                       |                   \-                   |
-|    4    | Feb 23 | [Machine learning (for texts)](#session-4)             | [Summative 1](#summative-assignment-1) |
-|    5    | Mar 02 | [Supervised scaling models for texts](#session-5)      |                   \-                   |
-|    6    | Mar 09 | [Unsupervised scaling models for texts](#session-6)    | [Summative 2](#summative-assignment-2) |
-|    7    | Mar 16 | [Similarity and clustering](#session-7)                |                   \-                   |
-|    8    | Mar 23 | [Topic models](#session-8)                             | [Summative 3](#summative-assignment-3) |
-|   \-    |   \-   | *Break*                                                |                   \-                   |
-|    9    | Apr 13 | [Retrieving data from the web](#session-9)             |                   \-                   |
-|   10    | Apr 20 | [Published applications](#session-10)                  |                   \-                   |
-|   11    | Apr 27 | [Project Presentations](#session-11)                   |                   \-                   |
+| Session |  Date  | Topic                                                       |               Assignment               |
+|:-------:|:------:|:------------------------------------------------------------|:--------------------------------------:|
+|    1    | Feb 02 | [Overview and key concepts](#session-1)                     |                   \-                   |
+|    2    | Feb 09 | [Preprocessing and descriptive statistics](#session-2)      |   [Formative](#formative-assignment)   |
+|    3    | Feb 16 | [Dictionary methods](#session-3)                            |                   \-                   |
+|    4    | Feb 23 | [Machine learning for texts: Classification I](#session-4)  | [Summative 1](#summative-assignment-1) |
+|    5    | Mar 02 | [Machine learning for texts: Classification II](#session-5) |                   \-                   |
+|    6    | Mar 09 | [Supervised and unsupervised scaling](#session-6)           | [Summative 2](#summative-assignment-2) |
+|    7    | Mar 16 | [Similarity and clustering](#session-7)                     |                   \-                   |
+|    8    | Mar 23 | [Topic models](#session-8)                                  | [Summative 3](#summative-assignment-3) |
+|   \-    |   \-   | *Break*                                                     |                   \-                   |
+|    9    | Apr 13 | [Retrieving data from the web](#session-9)                  |                   \-                   |
+|   10    | Apr 20 | [Published applications](#session-10)                       |                   \-                   |
+|   11    | Apr 27 | [Project Presentations](#session-11)                        |                   \-                   |
 
 ### Course Description
 
@@ -124,18 +124,17 @@ The first summative assignment will be released after Session 4 and amounts to 1
 
 **Machine learning for texts: Classification II**
 
-Building on our knowledge about classification methods, we will discuss ways to evaluate the performance of classifiers. In particular, we look at precision, recall, accuracy, and F1. 
+Building on our knowledge about classification methods, we will discuss ways to evaluate the performance of classifiers. In particular, we look at precision, recall, accuracy, and F1.
 
 We will also introduce regularization for quantitative text analysis, particularly Lasso and Ridge regression.
 
 The computer exercise is about classifying names using Naive Bayes and Lasso regression.
 
-
 ------------------------------------------------------------------------
 
 ### Session 6
 
-**Supervised and unsupervised scaling models for texts**
+**Supervised and unsupervised scaling**
 
 In this session, we will build upon the Naive Bayes classifier and introduce the Wordscores method of Laver, Benoit, and Garry (2003) for scaling latent characteristics.
 
@@ -147,8 +146,6 @@ During the computer exercise, we scaling methods from the quanteda package to pl
 
 -   Laver, Michael, Kenneth Benoit, and John Garry. 2003. "Extracting Policy Positions from Political Texts Using Words as Data." *American Political Science Review* 97 (2): 21.
 -   Lowe, Will, and Kenneth Benoit. 2013. "Validating Estimates of Latent Traits from Textual Data Using Human Judgment as a Benchmark." *Political Analysis* 21 (3): 298–313. <https://doi.org/10.1093/pan/mpt002>.
-
-
 
 #### Summative assignment 2
 
