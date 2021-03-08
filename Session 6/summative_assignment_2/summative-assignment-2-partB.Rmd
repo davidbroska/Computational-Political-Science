@@ -1,0 +1,103 @@
+---
+title: 'CPS Summative Assignment 2 Part B'
+subtitle: 'Classifying movie reviews using Lasso regression'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+library(quanteda)
+library(quanteda.textmodels)
+library(glmnet)
+```
+
+
+In this assignment, we will apply Lasso regression to classify movie reviews from a classic computer science dataset of movie reviews, [(Pang and Lee 2004)](http://www.cs.cornell.edu/home/llee/papers/cutsent.pdf).
+
+### Question 1 (1 point)
+
+The corpus `data_corpus_moviereviews` has an attribute `Sentiment` that labels each text as either `pos` or `neg` according to the original imdb.com archived newspaper review star rating. The movie corpus contains 1000 positive examples followed by 1000 negative examples. When extracting training and testing labels, we want to get a mix of positive and negative in each set, so first we need to shuffle the corpus. Use the `corpus_sample*()` function create a new corpus object called `moviesShuffled`. To ensure reproducibility of your results please set a seed value of `1234` before.
+
+```{r}
+
+```
+
+### Question 2 (3 points)
+
+Next, make a DFM from the shuffled corpus, and make training labels. In this case, we are using the first 1500 training labels, and leaving the remaining 500 unlabeled to use as a test set. We will also trim the dataset to remove rare features with a minimum term frequency of 10.
+
+```{r}
+
+```
+
+### Question 3 (4 points)
+
+Use a lasso regression with five-fold cross-validation through the `cv_glmnet()` function in the `glmnet` package to classify the movie reviews. Then, show the graph with the cross-validated performance of the model based on the number of features included. You should find a curve-linear pattern. Why do you think this pattern emerges?
+
+```{r}
+set.seed(1234)
+
+```
+
+
+**Your answer here**
+
+> 
+
+
+### Question 4 (3 points)
+
+Predict the scores for the remaining 500 reviews in the test set and then compute precision and recall for the positive category, the F1 score, and the accuracy.
+
+```{r}
+precrecall <- function(mytable, verbose = T) {
+    truePositives <- mytable[1,1]
+    falsePositives <- sum(mytable[1,]) - truePositives
+    falseNegatives <- sum(mytable[,1]) - truePositives
+    precision <- truePositives / (truePositives + falsePositives)
+    recall <- truePositives / (truePositives + falseNegatives)
+    if (verbose) {
+        print(mytable)
+        cat("\n precision =", round(precision, 2), 
+            "\n    recall =", round(recall, 2), "\n")
+    }
+    invisible(c(precision, recall))
+}
+```
+
+
+```{r}
+
+```
+
+
+
+### Question 5 (2 points)
+
+Look at the coefficients with the highest and lowest values in the best cross-validated model. What type of features is the classifier relying on to make predictions? Do you think this is a good model?
+
+```{r}
+# extracting coefficients
+best.lambda <- which(lasso$lambda==lasso$lambda.1se)
+beta <- lasso$glmnet.fit$beta[,best.lambda]
+
+## identifying predictive features
+df <- data.frame(coef = as.numeric(beta),
+                word = names(beta), stringsAsFactors=F)
+
+df <- df[order(df$coef),]
+head(df[,c("coef", "word")], n=30)
+tail(df[,c("coef", "word")], n=30)
+
+# note that the coefficients for some features became 0
+table(df$coef == 0)
+```
+
+
+**Your answer here**
+
+> 
