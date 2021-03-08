@@ -102,11 +102,11 @@ During the practical part of this session, we will apply commonly used dictionar
 
 ### Session 4
 
-**Machine learning (for texts)**
+**Machine learning for texts: Classification I**
 
-This session offers an introduction to machine learning methods for texts, particularly for classifying documents. Among others, we will discuss the Naive Bayes model which is one of the most popular classifiers.
+This session offers an introduction to machine learning methods for texts, particularly for classifying documents. We will discuss the Naive Bayes model which is one of the most popular classifiers.
 
-Hands-on work gives participants the opportunity to apply classification methods and evaluate the results using metrics for precision, recall, and accuracy.
+Hands-on work gives participants the opportunity to apply the Naive Bayes classifier in R.
 
 *Reading:*
 
@@ -122,27 +122,33 @@ The first summative assignment will be released after Session 4 and amounts to 1
 
 ### Session 5
 
-**Supervised scaling models for texts**
+**Machine learning for texts: Classification II**
 
-In this session, we will build upon the Naive Bayes classifier and introduce the Wordscores method of Laver, Benoit, and Garry (2003) for scaling latent characteristics.
+Building on our knowledge about classification methods, we will discuss ways to evaluate the performance of classifiers. In particular, we look at precision, recall, accuracy, and F1. 
 
-During the computer exercise, we will use the Wordscores method to place political texts on an ideological scale.
+We will also introduce regularization for quantitative text analysis, particularly Lasso and Ridge regression.
 
-*Reading:*
+The computer exercise is about classifying names using Naive Bayes and Lasso regression.
 
--   Laver, Michael, Kenneth Benoit, and John Garry. 2003. "Extracting Policy Positions from Political Texts Using Words as Data." *American Political Science Review* 97 (2): 21.
 
 ------------------------------------------------------------------------
 
 ### Session 6
 
-**Unsupervised scaling models for texts**
+**Supervised and unsupervised scaling models for texts**
 
-Building on the previous session on text scaling, we will discuss unsupervised methods based on parametric (Wordfish) and non-parametric approaches (Correspondence analysis).
+In this session, we will build upon the Naive Bayes classifier and introduce the Wordscores method of Laver, Benoit, and Garry (2003) for scaling latent characteristics.
+
+We will also discuss unsupervised methods based on parametric (Wordfish) and non-parametric approaches (Correspondence analysis).
+
+During the computer exercise, we scaling methods from the quanteda package to place political texts on an ideological scale.
 
 *Reading:*
 
+-   Laver, Michael, Kenneth Benoit, and John Garry. 2003. "Extracting Policy Positions from Political Texts Using Words as Data." *American Political Science Review* 97 (2): 21.
 -   Lowe, Will, and Kenneth Benoit. 2013. "Validating Estimates of Latent Traits from Textual Data Using Human Judgment as a Benchmark." *Political Analysis* 21 (3): 298–313. <https://doi.org/10.1093/pan/mpt002>.
+
+
 
 #### Summative assignment 2
 
