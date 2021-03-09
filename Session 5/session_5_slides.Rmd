@@ -18,19 +18,39 @@ output:
 
 # Outline for today
 
+
 1. **Evaluating classifier performance**
   - Precision, Recall, F1
   - Accuracy
 
-2. **Coding exercise**
-  - Classifying movie reviews
+2. **Regularization**
+  - Ridge regression 
+  - Lasso regression
+
+3. **Coding exercise**
   - Which letters are most predictive of female and male names?
 
-3. **Wordscores model**
-  - How it relates to Bayes theorem
-  - How it is implemented
 
-4. **Wordscores coding example**
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | Overview and key concepts                            |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | *Machine learning for texts: Classification II*      |     \-        |     \-          |
+|    6    | Mar 09 | Supervised and unsupervised scaling                  | Summative 2   | Mar 15 23:59:59 |
+|    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
+|    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+
 
 
 ---
@@ -150,7 +170,7 @@ How do you interpret the result? How does accuracy relate to precision and recal
 
 .pull-right[
 
-Since we have 80 truely positive documents there are 35 false negatives
+Since we have 80 truly positive documents there are 35 false negatives
 
 <img src="../figures/performance_metrics_example_2.jpg" class="centerimg" width="100%">
 ]
@@ -170,6 +190,12 @@ $$\frac{ \text{TP} }{ \text{TP} + FP}=\frac{45}{45+15}=\frac{3}{4}=75\%$$
 #### Recall
 
 $$\frac{ \text{TP} }{ \text{TP} + FN}=\frac{45}{45+35}=\frac{9}{16}=56.3\%$$
+]
+--
+.pull-right[
+<small>
+Note: Recall also known as "Sensitivity"
+</small>
 ]
 
 ---
@@ -236,13 +262,82 @@ F1 is a good measure when the goal is to seek a balance between Precision and Re
 
 - Precision and recall can be reported separately for each category
 
-- Precision and recall (or F1) should be reported alongside accuracy. Why?
+- Precision and recall (or F1) should be reported alongside accuracy. [Why?](https://youtu.be/j-EB6RqqjGI)
 
--  There is generally a trade-off between precision and recall. Why?
+-  There is generally a trade-off between precision and recall. [Why?](https://towardsdatascience.com/tradeoffs-how-to-aim-for-the-sweet-spot-c20b40d5e6b6)
 
 
 ---
-# Trade-off
+# Bias-variance trade-off
+
+####What is the relationship between weight and height of mice?
+
+- At first, heavier mice tend to be larger but the increase levels off. 
+- As weight increases further, however, the mice are not larger but only obese.
+
+&rarr; The *true* relationship is best described by a curve with decreasing slope.
+
+<img src="../figures/weight_height.png" class="centerimg" width="64%">
+
+If we were to use a machine learning approach to predict height by weight on unseen data, we would create a training set (blue) and a test set (green).
+
+---
+# Bias-variance trade-off
+
+####The inability for a machine learning method to capture the true relationship is called bias.
+
+Broadly speaking, it is possible to apply a simple or a complex model on the training data 
+
+--
+
+.pull-left[
+#### Training a simple model
+
+<img src="../figures/weight_height_training_simple_model.png" class="centerimg" width="80%">
+
+Since the relationship is actually curvy, a straight line is not an accurate representation of the true relationship. 
+
+&rarr; The simple model has high bias.
+]
+
+.pull-right[
+#### Training a complex model
+
+<img src="../figures/weight_height_training_complex_model.png" class="centerimg" width="80%">
+
+In contrast, the squiggly line can replicated the arc in the data. 
+
+<br>
+&rarr; The complex model has very little bias.
+
+]
+
+--
+
+<small>
+Example by [Starmer (2018)](https://youtu.be/EuBBz3bI-aA)
+</small>
+
+
+---
+# Bias-variance trade-off
+
+
+While the simpler model fits the training data *worse* than than complex model, it produces a *better* fit to the test data.
+
+<img src="../figures/weight_height_simple_model.png" class="centerimg" width="63%">
+
+--
+
+While the complex model fits the training data *better* than the simpler model, it produces a *worse* fit to the test data.
+
+<img src="../figures/weight_height_complex_model.png" class="centerimg" width="63%">
+
+
+#### The amount by which the predictions change if the model is applied to a different training data set is called **variance**.
+
+---
+# Bias-variance trade-off
 
 - Generally we want to apply method to new data, e.g. predict class of unseen documents
 - However, the classifier is trained to maximize in-sample performance
@@ -268,363 +363,158 @@ Solutions
 ---
 # Cross validation
 
-#### Intuition
+Using the same data for training and testing would give us no clue about how well the method works for data it was not trained on, e.g. when we use all data for training
 
-- Create K training and test sets ("folds") within training set
+--
 
-- For k in K, run the classifier and estimate performance in test set within fold
+A *better* idea is to use &frac45; of the data for training and &frac15; for testing. But how do we know that the first &frac45; is the best way to divide up the data?
 
-- Choose best classifier based on cross-validated performance
+--
 
+An *even better* idea is to let the computer evaluate the performance on all K combinations training and test sets ("folds") 
 
-<img src="../figures/cross_validation.jpg" class="centerimg" width="100%">
+Then, we choose the method specification with the best cross-validated performance
+
+<img src="../figures/cross_validation.jpg" class="centerimg" width="91%">
 
 ---
 class: inverse, center, middle
+# Regularization
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html>
+
+---
+# Regularized regression
+
+Assume we have: 
+
+- $i = 1,2,..., N$ documents
+- Each document $i$ is in class $y_i=0$ or $y_i=1$
+- $j = 1,2,..., J$ unique features
+- $x_{ij}$ as the count of feature $j$ in document $i$
+
+We could try building a linear regression model as a classifier, using the values of $\beta_0, \beta_1, ..., \beta_J$ that minimize 
+
+$$\text{SSR}=\sum_{i=1}^N \left( y_i - \beta_0 - \sum_{j=1}^J \beta_j x_{ij} \right)^2$$
+where SSR denotes the sum of squared residuals
+
+--
+
+#### But can we?
+
+- If $J > N$, OLS does not have a unique solution
+- Even with $N>J$, OLS has low bias/high variance &rarr; overfitting
+
+---
+# Regularized regression
+
+What can we do? Add a penalty for model complexity so that we minimize either obtain
+
+
+#### Ridge regression
+
+$$\sum_{i=1}^N \left( y_i - \beta_0 - \sum_{j=1}^J \beta_j x_{ij} \right)^2 + \lambda \sum_{j=1}^J \beta_j^2$$
+or
+
+#### Lasso regression
+
+$$\sum_{i=1}^N \left( y_i - \beta_0 - \sum_{j=1}^J \beta_j x_{ij} \right)^2+ \lambda \sum_{j=1}^J |\beta_j|$$
+where $\lambda$ is the **penalty parameter** (to be estimated)
+
+
+
+---
+# Constrained Optimization
+
+Why is it that the lasso, unlike ridge regression, results in coefficient estimates that are exactly equal to zero?
+
+One can show that the lasso and ridge regression coefficient estimates solve the problems below (may now look familiar if you recall Lagrange multipliers from calculus)
+
+$$\underset{\beta}{\text{minimize}} = \sum_{i=1}^n \left( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij} \right)^2 \text{ subject to } \sum_{j=1}^p |\beta_j| < s$$
+
+<p style="margin-left:100px"> and </p>
+
+
+$$\underset{\beta}{\text{minimize}} = \sum_{i=1}^n \left( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij} \right)^2 \text{ subject to } \sum_{j=1}^p \beta_j^2 < s$$
+
+<p style="margin-left:100px"> respectively. </p>
+
+---
+# Visualizing regularization
+
+Assume the task is to minimize SSR of a regression line that predicts height by weight
+
+<img src="../figures/lasso_ridge_1.jpg" class="centerimg" width="80%">
+
+In typical regression settings, we would choose the slope where SSR is smallest at the lowest point of the parabola
+
+In machine learning, however, we would introduce bias to get lower variance! 
+
+We do this by adding the ridge or lasso regression penalty...
+
+--
+
+<small>
+Figures by [Starmer (2020)](https://youtu.be/Xm2C_gTAl8c)
+</small>
+
+---
+# Visualizing regularization
+
+When we add the *squared* penalty parameter in **Ridge** regression the parabolas move towards zero but the lowest point *is never* zero 
+
+<img src="../figures/lasso_ridge_2.jpg" class="centerimg" width="62.5%">
+
+--
+
+When we add the *absolute value* penalty parameter in **Lasso** regression the parabolas move towards zero and the lowest point *can be* zero
+
+<img src="../figures/lasso_ridge_3.jpg" class="centerimg" width="62.5%">
+
+---
+# Visualizing Lasso vs. Ridge Regression
+
+<img src="../figures/penalty_parameter.jpg" class="centerimg">
+
+- We penalize large coefficients more as the size of increases
+- Ridge regression shrinks some parameters close to zero but
+never quite gets there.
+- Lasso shrinks some parameters to exactly zero.
+
+#### In both models we find the best value of $\lambda$ through cross-validation 
+
+
+
+
+
+---
+# Regularized regression
+
+####Why the penalty (shrinkage)? 
+
+- Reduces the variance (avoid overfitting)
+- Identifies the model if $J > N$
+- Some coefficients become zero (feature selection)
+
+--
+
+####The penalty can take different forms: 
+
+- Ridge regression: $\lambda \sum_{j=1}^{J} \beta_j^2$ with $\lambda >0$; and when $\lambda =0$ becomes OLS
+- Lasso $\lambda \sum_{j=1}^{J} |\beta_j|$ where some coefficients become zero
+- Elastic Net: $\lambda_1 \sum_{j=1}^J \beta_j^2+ \lambda_2 \sum_{j=1}^J |\beta_j|$ (best of both worlds?)
+
+
+--
+
+####How do they perform?
+
+Since Lasso regression can exclude useless variable from equations it tends to be better than Ridge regression at reducing variance for models with many useless variables. 
+
+Ridge regression tends to do a little better than Lasso regression when most variables are useful.
+
+
+---
+class: middle, inverse, center
 # Coding exercise
-
-<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html>
-
-
----
-class: inverse, center, middle
-
-# Wordscores
-
-<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html> 
-
----
-# From classification to scaling
-
-Machine learning focuses on identifying classes (*classification*), while social science is typically interested in locating things on latent traits (*scaling*), for example:
-
-- Policy positions on economic vs social dimension
-- Inter- and intra-party differences
-- Soft news vs hard news
-- ...and any other continuous scale
-
-
-But the two methods overlap and can be adapted - will demonstrate later using the Naive Bayes classifier
-
-In fact, the class predictions for a collection of words from Naive Bayes can be adapted to scaling
-
-
----
-# Wordscores 
-
-Analogous to a "training set" and a "test set" in classification, the Wordscores method by Laver, Benoit, and Garry (2003) uses two sets of texts:
-
-#### Reference texts
-
-- texts about which we know something (a scalar dimensional score)
-
-#### Virgin texts
-
-- texts about which we know nothing (but whose dimensional score we'd like to know)
-
-<br>
-#### Basic procedure
-
-1. Analyze reference texts to obtain a single "score" for every word 
-2. Use word scores to score virgin texts
-
-
----
-# Wordscores procedure (I)
-
-<img src="../figures/wordscores_step_1.jpg" class="centerimg" width="85%">
-
----
-# Wordscores procedure (II)
-
-<img src="../figures/wordscores_step_2.jpg" class="centerimg" width="85%">
----
-# Wordscores procedure (III)
-
-<img src="../figures/wordscores_step_3.jpg" class="centerimg" width="85%">
----
-# Wordscores procedure (IV)
-
-<img src="../figures/wordscores_step_4.jpg" class="centerimg" width="85%">
-
-
-
----
-# Wordscore implementation
-
-```{r, include=F}
-library(quanteda)
-library(quanteda.textmodels)
-```
-
-
-```{r}
-# 4 texts with known and 3 texts with unknown category
-txt <- c(k1 = "$ Win $", 
-         k2 = "$ Prize $", 
-         k3 = "Earn $ Easily", 
-         k4 = "Paypal 100 $",
-         u1 = "$",
-         u2 = "$ $",
-         u3 = "Paypal 100 $ $")
-x <- dfm(txt) 
-y <- c(1, 1, 1, -1, NA, NA, NA)
-```
-
-
-.pull-left[
-
-training dfm from references texts
-
-```{r, echo=F}
-kab_x <- knitr::kable(quanteda::convert(x[1:4,], "data.frame"), align = "c", 
-                    col.names = c("",colnames(x))) 
-
-kableExtra::column_spec(kab_x, 2:ncol(x[1:4,]), width = "0.5in")
-```
-
-]
-
-.pull-right[
-
-training vector with known positions
-
-```{r, echo=F}
-kab_y <- knitr::kable(y[1:4], align = "c", col.names = "y")
-
-kableExtra::column_spec(kab_y, 1, width = "0.5in")
-```
-
-]
-
----
-# Wordscores
-
-#### Compute probability of a reading document given a word
-
-Start with a set of $D$ reference texts, represented by an $D \times W$ document-feature matrix $C_{dw}$ , where $d$ indexes the document and $w$ indexes the $W$ total word types.
-
-We normalize the document-feature matrix within each
-document by converting $C_{ij}$ into a relative document-feature
-matrix (within document), by dividing $C_{ij}$ by its word total
-marginals
-
-####Probability of word given the document
-
-```{r,eval=F}
-( PwGd <- dfm_weight(x[1:4,],scheme="prop") )
-```
-
-```{r,echo=F}
-PwGd <- as.matrix( dfm_weight(x[1:4,],scheme="prop"))
-round( PwGd, 2)
-```
-
----
-# P( k<sub>1</sub> | &#36; )
-
-.pull-left[
-
-<img src="../figures/conditional_prob_with_4_classes.png" width="93.5%" class="centerimg">
-
-
-Uniform priors: P(k<sub>1</sub>)=...=P(k<sub>4</sub>)= &frac14;
-
-####If we only read "&#36;" the probability of reading the document k<sub>1</sub> is  &frac13;.
-
-
-]
-
-.pull-right[
-
-Probability of word given the document:
-
-```{r, echo=F}
-
-kab_PwGd <- knitr::kable(round(as.matrix(PwGd),2), align = c("l", rep("c", ncol(PwGd)-1)), 
-                    col.names = colnames(PwGd))
-
-kab_PwGd_c  <- kableExtra::column_spec(kab_PwGd, 1,width_max = "0.15in")
-kab_PwGd_cr <- kableExtra::row_spec(kab_PwGd_c, 0:nrow(PwGd), font_size = 17.5)
-kab_PwGd_cr 
-
-```
-<br>
-
-$$
-\begin{align}
-&P(k_1|$)\\
-&=\frac{P(k_1)P($|k_1)}{P(k_1)P($|k_1)+\text{...}+P(k_2)P($|k_4)}\\
-&=\frac{P($|k_1)}{P($|k_1)+\text{...}+P($|k_4)}\\
-&=\frac{ \frac{2}{3} }{\frac{2}{3} + \frac{2}{3} + \frac{1}{3} + \frac{1}{3}}=\frac{1}{3}
-\end{align}
-$$
-
-]
-
----
-# P( document | word )
-
-####Now let's compute all probabilities of reading a document given a word
-
-```{r, eval=F}
-PwGd # recall our matrix containing all P(word | document)
-```
-
-```{r, echo=F}
-round(PwGd,2) # recall our matrix containing all P(word | document)
-```
-
-.pull-left[
-```{r,eval=F}
-# transpose PwGd matrix
-( tPwGd <- t(PwGd) ) 
-```
-
-```{r, echo=F}
-tPwGd <- t(PwGd)
-round( tPwGd ,2)
-```
-]
-
-.pull-right[
-```{r,eval=F}
-# P(document | word)
-( PdGw <- tPwGd / rowSums(tPwGd) )
-```
-```{r,echo=F}
-PdGw <-tPwGd/rowSums(tPwGd) #P(document|word)
-round( tPwGd / rowSums( tPwGd ) ,2)
-```
-]
-
-
----
-# Scoring words
-
-Compute a $J$-length "score" vector $S$ for each word $j$ as the average of each document $i$’s scores $a_i$, weighted by each word's $P_{ij}$: 
-
-$$S_j=\sum_i^I a_i P_{ij}$$
-
-
-```{r,eval=F}
-# transpose matrix so we can multiply words of the document with the document score
-t(PdGw) * y[1:4]
-```
-```{r, echo = F}
-# transpose matrix so we can multiply words of the document with the document score
-round( t(PdGw) * y[1:4] ,2)
-```
-
-```{r, eval=F}
-# then, sum up the result column-wise
-colSums( t(PdGw) * y[1:4] )
-```
-```{r,echo=F}
-# then, sum up the result column-wise
-round( colSums( t(PdGw) * y[1:4]) ,2)
-```
-
----
-# Scoring words
-
-We obtain the scored words *also* by using matrix multiplication. In matrix algebra, $$\underset{1 \times J}{S} = \underset{1 \times I}{a} \cdot \underset{I \times J}{P}$$
-
-.pull-left[
-
-
-```{r,eval=F}
-PdGw # P(document | word)
-```
-
-```{r,echo=F}
-round( tPwGd ,2) # P(document | word)
-```
-]
-
-.pull-right[
-
-```{r}
-y[1:4] # documents scale
-```
-
-]
-
-
-
-
-```{r, eval = F}
- # matrix multiplication with P(document|words) and scores
-( ws <- PdGw %*% y[1:4] )
-```
-```{r, echo = F}
-# matrix multiplication with P(document | words) and scores 
-ws <- PdGw %*% y[1:4]
-round( ws , 2)[,1]
-```
-
-
----
-# Scoring texts
-
-####The goal is to obtain a single score for any new text, relative to the reference texts
-
-We do this by taking the mean of the scores of its words, weighted by their term frequency
-
-- Note that new words outside of the set $J$ may appear in the $K$ virgin documents — these are simply ignored (because we have no information on their scores)
-- Note also that nothing prohibits reference documents from also being scored as virgin documents
-
-```{r, eval=F}
-# matrix multiplication with P(word | document) and obtained wordscores 
-dfm_weight(x, scheme="prop") %*% ws
-```
-```{r,echo=F}
-as.matrix(round( dfm_weight(x ,scheme="prop") %*% ws,2))[,1]
-```
-
-
-#### Does this result make sense in the context of the spam example? 
-<br>
-```{r, echo=F}
-df <- t(data.frame(txt))
-rownames(df) <- NULL
-colnames(df) <- c("k1 (s)", "k2 (s)","k3 (s)", "k4 (¬s)", "u1","u2","u3")
-df_kab <- knitr::kable(df, align = "c")
-kableExtra::column_spec(df_kab, 1:7, width_min = "0.8in") 
-```
-
----
-# Using textmodel_wordscores()
-
-#### For convenience we can use the quanteda function to obtain the above results
-
-```{r}
-ws_mod <- textmodel_wordscores(x,y) 
-```
-
-
-#### Wordscores
-
-```{r, eval=F}
-summary(ws_mod)
-```
-```{r,echo=F}
-summary(ws_mod)[[1]]
-round( summary(ws_mod)[[3]], 2)     # print wordscores
-```
-
-#### Scaled documents
-
-```{r, eval=F}
-predict(ws_mod)
-```
-```{r,echo=F}
-round(predict(ws_mod),2)
-```
-
-
----
-class: inverse, center, middle
-# Wordscore coding exercise
-
-<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html>
+-----------------
