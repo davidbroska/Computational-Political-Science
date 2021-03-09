@@ -135,7 +135,7 @@ Consider the probabilities calculated above in the following order: P(spam), P( 
 
 **Your answer here**
 
-> If the message is "earn" the Naive Bayes model indicates a higher probability of the text being spam than our baseline expectation of 0.75. In other words, our "belief" in seeing a spam message increases when compared to our expectation without considering any evidence.
+> If the message is "earn", the Naive Bayes model indicates a higher probability of the text being spam than our baseline expectation of 0.75. In other words, our "belief" in seeing a spam message increases when compared to our expectation without considering any evidence.
 
 > The probability of spam further increases if the message is "earn easily" (or "easily earn"). The reason is that those words belong to a document in the training dataset that is labeled as spam.
 

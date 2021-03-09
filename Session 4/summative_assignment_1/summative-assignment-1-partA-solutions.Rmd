@@ -149,7 +149,7 @@ Compare the Presidents based on the level of "Icarian Imagery". Construct a weig
 
 **Your answer here**
 
-> Bill Clinton is the most Icarian and Donald Trump the least Icarian. Democratic presidents seem to be more Icarian than their Republican counterparts.
+> Bill Clinton is the most Icarian and George W. Bush the least Icarian. Democratic presidents seem to be more Icarian than their Republican counterparts.
 
 ```{r}
 # Generate a new variable with the presidents' name.
