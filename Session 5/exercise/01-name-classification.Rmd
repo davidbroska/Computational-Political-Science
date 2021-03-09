@@ -103,8 +103,8 @@ Slightly better! We can dig a bit more into the model by extracting the posterio
 
 ```{r}
 # extracting posterior word probabilities
-PwGc <- nb$param
-Pc <- nb$priors
+PwGc <- nb_ng$param
+Pc <- nb_ng$priors
 PcGw <- PwGc * base::outer(Pc, rep(1, ncol(PwGc)))
 PcGw <- matrix(sapply(PcGw, function(x) sqrt(sum(x^2))), nrow=2, dimnames = dimnames(PwGc))
 

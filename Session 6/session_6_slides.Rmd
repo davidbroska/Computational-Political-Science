@@ -439,18 +439,20 @@ In individual meetings we will discuss your Zeppelin project while the others ar
 ]
 
 
+
+---
+class: inverse, center, middle
+
+# Wordscores
+------------
+
 ---
 # Supervised and unsupervised learning 
 
 <img src="../figures/fig1_grimmer_stuart_adapted.jpg" width="97%" class="centerimg">
 &nbsp; Fig. 1 in Grimmer and Stuart (2013)
 
----
-class: inverse, center, middle
 
-# Wordscores
-
-<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html> 
 
 ---
 # From classification to scaling
