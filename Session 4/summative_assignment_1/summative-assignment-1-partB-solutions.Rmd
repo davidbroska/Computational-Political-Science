@@ -1,0 +1,143 @@
+---
+title: 'CPS Summative Assignment Part B Solutions'
+subtitle: 'Classification with Naive Bayes'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+
+library("quanteda")
+library("quanteda.textmodels")
+```
+
+
+
+
+In the lecture, we used a small example to better understand the Naive Bayes classifier. In this assignment, we will strengthen our intuition of the model's internal mechanics.
+
+```{r}
+# 4 texts with known and 3 texts with unknown category
+txt <- c(k1 = "$ Win $", 
+         k2 = "$ Prize $", 
+         k3 = "Earn $ Easily", 
+         k4 = "Paypal 100 $",
+         u1 = "$",
+         u2 = "$ $",
+         u3 = "Paypal 100 $ $")
+x <- dfm(txt) 
+y <- factor(c("Spam","Spam","Spam","No Spam", NA, NA, NA), ordered = T)
+```
+
+### Question 1 (2 points)
+
+Calculate the probability of a word given the category using the relative frequency of spam as the prior probability. There are a couple of ways to do this. For example, you can calculate the probabilities employing `dfm()` and a bit of arithmetic. You could also estimate the Naive Bayes using `textmodel_nb()` and extract the relevant object. 
+
+```{r}
+nb <- textmodel_nb(x,y,prior="docfreq")
+( PwGc <- nb$param )  
+```
+
+
+### Question 2 (6 points)
+
+Compute the following probabilities based on the prior probability P(spam)=0.75 and the conditional probabilities in the table above.
+
+1. P( spam| earn )
+2. P( spam| earn ∩ easily )
+
+I would recommend you to draw a tree diagram and make manual calculations. If you prefer, however, you could also write a function to compute the probabilities.
+
+Please provide the numbers that led to your result. If you want, you can also attach a photo of your drawing/calculations.
+
+
+What is P( spam | earn )?
+
+**Your answer here**
+
+> 0.789
+
+```{r}
+# function to calculate the probability of hypothesis being true given the evidence
+p_hyp_giv_ev <- function(prior,             # prior probability of the hypothesis
+                         p_ev_giv_hyp_true, # probability of evidence given the hypothesis is true
+                         p_ev_giv_hyp_false # probability of evidence given the hypothesis is false
+                         ){
+  
+  # probability of evidence AND hypothesis is true
+  p_htrue_and_ev <- prior * p_ev_giv_hyp_true
+  
+  # probability of evidence AND hypothesis is false  
+  p_hfalse_and_ev <- (1-prior) * p_ev_giv_hyp_false
+  
+  # probability of hypothesis being true given the evidence
+  p_htrue_given_ev <- p_htrue_and_ev / (p_htrue_and_ev + p_hfalse_and_ev)
+  
+  return(p_htrue_given_ev)
+  
+}
+
+# P(spam | earn)
+p_hyp_giv_ev(prior = 0.75, p_ev_giv_hyp_true = 0.125, p_ev_giv_hyp_false = 0.1)
+
+```
+
+What is P( spam| earn ∩ easily )? 
+
+**Your answer here**
+
+> 0.824
+
+```{r}
+# recall that the Naive Bayes model assumes that words occur independently. So we can multiply the probabilities of a word given spam with each other to get the probability of the words occurring together in a spam message
+
+# P(spam| earn) = P(spam|easily) = 0.125
+joint_p_given_spam <- 0.125 * 0.125
+
+# P(no spam| earn) = P(no spam|easily) = 0.1
+joint_p_given_not_spam <- 0.1 * 0.1
+
+# P( spam| earn ∩ easily )
+p_hyp_giv_ev(prior=0.75, 
+             p_ev_giv_hyp_true = joint_p_given_spam, 
+             p_ev_giv_hyp_false = joint_p_given_not_spam)
+
+```
+
+
+### Question 3 (3 points)
+
+Verify your calculations by adding "earn" and "earn easily" as documents with unknown categories to the above corpus `txt`, estimate the Naive Bayes model, and predict the probabilities of those documents being spam. Please copy the code from above and rename every object, for example `txt2`, `x2`, `y2`, etc. 
+
+```{r}
+# Let's verify that our calculations were correct
+txt2 <- c(k1 = "$ Win $", 
+          k2 = "$ Prize $", 
+          k3 = "Earn $ Easily", 
+          k4 = "Paypal 100 $",
+          u1 = "earn",
+          u2 = "earn easily")
+x2 <- dfm(txt2) 
+y2 <- factor(c("Spam","Spam","Spam","No Spam", NA, NA), ordered = T)
+
+nb2 <- textmodel_nb(x2,y2,prior="docfreq")
+predict(nb2, type = "prob")
+```
+
+
+### Question 4 (2 points)
+
+Consider the probabilities calculated above in the following order: P(spam), P( spam| earn ), and P( spam| earn ∩ easily ). How do they change? How would you interpret this change?
+
+**Your answer here**
+
+> If the message is "earn" the Naive Bayes model indicates a higher probability of the text being spam than our baseline expectation of 0.75. In other words, our "belief" in seeing a spam message increases when compared to our expectation without considering any evidence.
+
+> The probability of spam further increases if the message is "earn easily" (or "easily earn"). The reason is that those words belong to a document in the training dataset that is labeled as spam.
+
+
+
