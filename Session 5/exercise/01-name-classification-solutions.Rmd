@@ -1,0 +1,172 @@
+---
+title: "Supervised learning applied to text"
+subtitle: "Classification with Naive Bayes and Lasso Regression"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+The code here illustrates how we can use supervised machine learning to predict categories for unseen documents based on a set of labeled documents. Our running example will focus on whether we can predict gender based on the character distribution of first names.
+
+The file `EN-names.csv` contains a list of nearly 25,000 popular names in the US labeled by the most frequent gender based on Social Security records.
+
+Let's read this dataset into R, convert it into a corpus called `cnames` with gender as a document-level variable.
+
+```{r, include=F}
+library("quanteda")
+library("quanteda.textmodels")
+d <- read.csv("EN-names.csv", stringsAsFactors=FALSE)
+# creating corpus object
+cnames <- corpus(d, text_field = "name")
+docvars(cnames, "gender") <- d$gender
+```
+
+As we saw in the lecture, we need to specify what the training set and test set will be. In this case, let's just take an 80% random sample of names as training set and the rest as test set, which we will use to compute the performance of our model. We will then create a document-feature matrix where each feature is a character.
+
+```{r}
+# shuffling to split into training and test set
+smp <- sample(c("train", "test"), size=ndoc(cnames), 
+                prob=c(0.80, 0.20), replace=TRUE)
+train <- which(smp=="train")
+test <- which(smp=="test")
+# tokenizing and creating DFM
+characters <- tokens(cnames, what="character")
+namesdfm <- dfm(characters)
+```
+
+## Naive Bayes
+
+We're now ready to train our model! Let's start with a Naive Bayes model using the `textmodel_nb()` function. Please compute the confusion matrix.
+
+```{r}
+# training Naive Bayes model
+nb <- textmodel_nb(namesdfm[train,], docvars(cnames, "gender")[train])
+# predicting labels for test set
+preds <- predict(nb, newdata = namesdfm[test,])
+# computing the confusion matrix
+(cm <- table(preds, docvars(cnames, "gender")[test]))
+```
+
+How well did we do? We can compute precision, recall, and accuracy to quantify it.
+
+```{r}
+# function to compute performance metrics
+precrecall <- function(mytable, verbose=TRUE) {
+    truePositives <- mytable[1,1]
+    falsePositives <- sum(mytable[1,]) - truePositives
+    falseNegatives <- sum(mytable[,1]) - truePositives
+    precision <- truePositives / (truePositives + falsePositives)
+    recall <- truePositives / (truePositives + falseNegatives)
+    if (verbose) {
+        print(mytable)
+        cat("\n precision =", round(precision, 2), 
+            "\n    recall =", round(recall, 2), "\n")
+    }
+    invisible(c(precision, recall))
+}
+# precision and recall
+precrecall(cm)
+# accuracy
+sum(diag(cm)) / sum(cm)
+
+```
+
+Not terribly great. But what if we try with character n-grams up to trigrams instead of unigrams? Re-run the above analysis using trigrams. Does the classifier's performance improve?
+
+```{r}
+# tokenize the corpus but now use trigrams
+characters_grams <- tokens_ngrams(characters, n = 1:3)
+# create dfm
+namesdfm_ng <- dfm(characters_grams)
+# Naive Bayes model
+nb_ng <- textmodel_nb(namesdfm_ng[train,], docvars(cnames, "gender")[train])
+# predict class on test data
+preds_ng <- predict(nb_ng, newdata = namesdfm_ng[test,], type = "class")
+# create confusion matrix 
+(cm_ng <- table(preds_ng, docvars(cnames, "gender")[test]))
+# precision, recall
+precrecall(cm_ng) 
+# F1
+2 * prod( precrecall(cm_ng)  ) / sum( precrecall(cm_ng) )
+# accuracy
+sum(diag(cm_ng)) / sum(cm_ng) 
+```
+
+Slightly better! We can dig a bit more into the model by extracting the posterior class probabilities for specific characters.
+
+
+```{r}
+# extracting posterior word probabilities
+PwGc <- nb_ng$param
+Pc <- nb_ng$priors
+PcGw <- PwGc * base::outer(Pc, rep(1, ncol(PwGc)))
+PcGw <- matrix(sapply(PcGw, function(x) sqrt(sum(x^2))), nrow=2, dimnames = dimnames(PwGc))
+
+
+PcGw[,c("a", "o", "e")]
+# and this is how we would extract the features with the highest and lowest posterior class probabilities
+df <- data.frame(
+  ngram = colnames(PcGw),
+  prob_female_ngram = PcGw["female",],
+  stringsAsFactors=F)
+df <- df[order(df$prob_female_ngram, decreasing = T),]
+head(df, n=10)
+```
+
+
+## Using Lasso regression
+
+Let's see if Lasso regression does a better job at classifying the n-grams according to gender. Fit the Lasso regression to the DFM containing the trigrams and the training vector of gender categories.
+
+```{r}
+library(glmnet)
+set.seed(123)
+lasso <- cv.glmnet(namesdfm_ng[train,], docvars(cnames, "gender")[train], 
+                   # set alpha=1 to use lasso regression
+                   alpha=1, 
+                   # use only 5 folds instead of 10 to speed things up
+                   nfolds=5,
+                   # fit the model for a binary outcome
+                   family="binomial")
+```
+Show the graph with the cross-validated performance of the model based on the number of features included. You should find a curve-linear pattern.
+
+```{r}
+plot(lasso)
+```
+
+Predict the gender categories with the trained Lasso regression, create the confusion matrix, and compute precision, recall, F1, and accuracy. Does the model produce better prediction than Naive Bayes? 
+
+```{r}
+lassoPreds <- predict(lasso, namesdfm_ng[test,], type="class")
+(lassoTable <- table(lassoPreds, docvars(cnames, "gender")[test]))
+
+# precision, recall
+pr <- precrecall(lassoTable[2:1, 2:1])
+# F1
+2 * prod(pr) / sum(pr)
+# accuracy
+sum(diag(lassoTable)) / sum(lassoTable)
+```
+
+Look at the coefficients with the highest and lowest values in the best cross-validated model. What type of features is the classifier relying on to make predictions? Do you think this is a good model?
+
+```{r}
+
+# extracting coefficients
+best.lambda <- which(lasso$lambda==lasso$lambda.1se)
+beta <- lasso$glmnet.fit$beta[,best.lambda]
+
+## identifying predictive features
+df <- data.frame(coef = as.numeric(beta),
+                word = names(beta), stringsAsFactors=F)
+
+df <- df[order(df$coef),]
+head(df[,c("coef", "word")], n=30)
+tail(df[,c("coef", "word")], n=30)
+```
+
+**Your answer here**
+
+> No, Lasso regression does not produce better predictiona than the Naive Bayes classifier with trigrams. It should be noted, however, that we only employed five-fold cross validation instead of the more commonly used ten folds. Using 10 folds might further improve the results.
