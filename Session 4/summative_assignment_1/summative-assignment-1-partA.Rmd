@@ -113,9 +113,9 @@ Media accounts have often depicted Jeremy Corbyn as a populist leader. If that's
 
 
 
-### Applying the Regressive Imagery Dictionary (5 points)
+### Applying the Regressive Imagery Dictionary
 
-Try analyzing the inaugural speeches from 1980 onward using the Regressive Imagery Dictionary, from Martindale, C. (1975) *Romantic progression: The psychology of literary history.* Washington, D.C.: Hemisphere.
+Try analyzing the inaugural speeches from 1980 onward using the Regressive Imagery Dictionary, from Martindale, C. (1975) *Romantic progression: The psychology of literary history.* Washington, D.C.: Hemisphere. Use the `data_corpus_inaugural` corpus that comes with the quanteda package.
 
 ### Question 6 (1 point)
 
