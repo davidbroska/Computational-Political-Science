@@ -12,6 +12,8 @@ knitr::opts_chunk$set(
 )
 library(quanteda)
 library(quanteda.textmodels)
+# if you haven't done so already, you also have to install the quanteda corpora package 
+# devtools::install_github("quanteda/quanteda.corpora") 
 ```
 
 
