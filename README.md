@@ -151,7 +151,7 @@ During the computer exercise, we scaling methods from the quanteda package to pl
 
 The second summative assignment will be released after Session 6 and amounts to 10% of the overall grade for the course. You are expected to work on this assignment on your own. Please send the .Rmd file and the compiled .html document to david.broska\@zu.de.
 
-**Deadline**: Mar 15, 23:59:59
+**Deadline**: Mar 22, 23:59:59
 
 ------------------------------------------------------------------------
 
