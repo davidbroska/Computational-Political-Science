@@ -1,0 +1,117 @@
+---
+output: html_document
+title: "Hierarchical and k-means clustering methods"
+---
+
+```{r, include = FALSE}
+library("quanteda")
+```
+
+
+## UK manifesto data 
+
+Extract a subset of the texts from the `quanteda.corpora::data_corpus_ukmanifestos` corpus that includes just the Conservative, Labour, and Lib Dem parties from 1970 onward. Create a DFM with stemming, removed stop-words, and removed punctuation.  
+
+```{r}
+# load data
+data("data_corpus_ukmanifestos", package = "quanteda.corpora")
+
+# create corpus
+manifestoCorpus <- corpus_subset(data_corpus_ukmanifestos, Party %in% c("Con", "Lab", "LD") & Year > 1970)
+
+# create dfm
+manifestoDfm <- dfm(manifestoCorpus, stem = TRUE, 
+                    remove = stopwords("en"), remove_punct = TRUE)
+```
+
+## Hierarchical clustering on texts
+
+Compute the matrix of Euclidean distances between each of the party manifestos in the previous exercise. Should you use relative frequencies rather than counts here? Apply the option that makes more sense based on what you know about Euclidean distances.
+
+**Your answer here**
+
+> With Euclidean distances, we generally prefer to work with DFMs that normalized by document length.
+
+```{r}
+manifestoDfmWeight <- dfm_weight(manifestoDfm, scheme = "prop")
+manifestoDistWeight <- textstat_dist(manifestoDfmWeight, method = "euclidean")
+clustHier <- hclust(as.dist(manifestoDistWeight))
+```
+
+Plot the dendrogram and describe the groupings.
+
+**Your answer here**
+
+> As expected, manifestos tend to be clustered by party. 
+
+```{r, fig.width = 6, fig.height = 8}
+plot(clustHier)
+```
+
+
+## k-means clustering on texts
+
+Perform a k-means clustering on the UK manifesto texts for k=3. Start with a regular document-feature-matrix, i.e a non-weighted DFM. Examine which manifestos fall into each cluster. What do you learn?
+
+**Your answer here**
+
+> It seems the clusters correspond more to different decades rather than parties.
+
+```{r}
+manifestoKmeans3 <- kmeans(manifestoDfm, 3)
+sort(manifestoKmeans3$cluster)
+```
+
+Now perform a k-means clustering for each text for $k$ from 1 to 8. For each outcome, save the total within group sum of squares.  Plot the log total within group sum of squares as a function of k.  Use this "scree plot" to select the best k using the elbow method described in the lecture. How many cluster would you select?
+
+**Your answer here**
+
+> It looks two clusters might be sufficient.
+
+```{r}
+ss <- rep(NA, 8)
+for (k in 1:8){
+  ss[k] <- kmeans(x = manifestoDfm, centers = k)$tot.withinss
+}
+
+plot(x = 1:8, y = log(ss), type = "b", 
+     xlab = "Number of clusters", 
+     ylab = "Total within-group sum of squares")
+```
+
+Examine the clusters of Party labels produced by this "best-fitting" k cluster. Do the groupings make sense?
+
+**Your answer here**
+
+> We still have the same problem as earlier.
+
+```{r}
+manifestoKmeans2 <- kmeans(x = manifestoDfm, centers = 2)
+sort(manifestoKmeans2$cluster)
+```
+
+
+Now repeat the above analysis after weighting the dfm by relative proportion of terms within documents. What difference did this make?
+
+**Your answer here**
+
+> With just a few exceptions, now it seems each cluster corresponds to a different party.
+
+```{r}
+manifestoDfmWeight <- dfm_weight(manifestoDfm, scheme = "prop")
+
+ss <- rep(NA, 8)
+for (k in 1:8){
+  ss[k] <- kmeans(x = manifestoDfmWeight, centers = k)$tot.withinss
+}
+
+plot(x = 1:8, y = log(ss), type = "b", 
+     xlab = "Number of clusters", ylab = "Total within-group sum of squares")
+
+
+manifestoKmeans3 <- kmeans(x = manifestoDfmWeight, centers = 3)
+sort(manifestoKmeans3$cluster)
+```
+
+
+
