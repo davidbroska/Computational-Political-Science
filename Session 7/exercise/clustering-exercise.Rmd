@@ -1,0 +1,101 @@
+---
+output: html_document
+title: "Hierarchical and k-means clustering methods"
+---
+
+```{r, include = FALSE}
+library("quanteda")
+```
+
+
+## UK manifesto data 
+
+Extract a subset of the texts from the `quanteda.corpora::data_corpus_ukmanifestos` corpus that includes just the Conservative, Labour, and Lib Dem parties from 1970 onward. Create a DFM with stemming, removed stop-words, and removed punctuation.  
+
+```{r}
+# load data
+data("data_corpus_ukmanifestos", package = "quanteda.corpora")
+
+# create corpus
+manifestoCorpus <- corpus_subset(data_corpus_ukmanifestos, Party %in% c( ... ) & Year > ...)
+
+# create dfm
+manifestoDfm <- dfm( ... )
+```
+
+## Hierarchical clustering on texts
+
+Compute the matrix of Euclidean distances between each of the party manifestos in the previous exercise. Should you use relative frequencies rather than counts here? Apply the option that makes more sense based on what you know about Euclidean distances.
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
+Plot the dendrogram and describe the groupings.
+
+**Your answer here**
+
+> 
+
+```{r, fig.width = 6, fig.height = 8}
+
+```
+
+
+## k-means clustering on texts
+
+Perform a k-means clustering on the UK manifesto texts for k=3. Start with a regular document-feature-matrix, i.e a non-weighted DFM. Examine which manifestos fall into each cluster. What do you learn? Hint: examine the object that results from `kmeans()`
+
+**Your answer here**
+
+> 
+
+```{r}
+manifestoKmeans3 <- kmeans( ... )
+sort( ...$... )
+```
+
+Now perform a k-means clustering for each text for $k$ from 1 to 8. For each outcome, save the total within group sum of squares.  Plot the log total within group sum of squares as a function of k.  Use this "scree plot" to select the best k using the elbow method described in the lecture. How many cluster would you select?
+
+**Your answer here**
+
+> 
+
+```{r}
+ss <- rep(NA, 8)
+for (k in 1:8){
+  ss[k] <- kmeans(x = manifestoDfm, centers = k)$tot.withinss
+}
+
+plot(x = 1:8, y = log(ss), type = "b", 
+     xlab = "Number of clusters", 
+     ylab = "Total within-group sum of squares")
+```
+
+Examine the clusters of Party labels produced by this "best-fitting" k cluster. Do the groupings make sense?
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
+
+Now repeat the above analysis after weighting the dfm by relative proportion of terms within documents. What difference did this make?
+
+**Your answer here**
+
+> 
+
+```{r}
+
+```
+
+
+
