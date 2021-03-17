@@ -201,7 +201,7 @@ $$
 # Comparing more than two observations
 
 .pull-left[
-When can look at $\frac{n-1}{2}$ pairwise comparisons between different documents
+We can look at $\frac{n-1}{2}$ pairwise comparisons between different documents
 
 ```{r}
 txt2 <- c(A = "Win Prize", 
@@ -283,7 +283,7 @@ $$\| \vec{u} \| = \sqrt{u_1^2 + u_2^2 + ... + u_J^2}=\sqrt{\sum_{j=1}^J u_j^2}$$
 
 
 .pull-left[
-```{r, echo = F}
+```{r, echo = F, out.width="95%"}
 ggplot( convert(x[1,], "data.frame"), aes(win,prize)) + 
   theme_bw(base_size = 25) +
   annotate("segment", x=0, xend=1, y=0, yend=1, size=1.5, arrow=arrow()) +
@@ -648,18 +648,20 @@ ggplot(df, aes(win,prize)) +
   geom_text(data=data.frame(doc_id ="",win=0.9,prize=2), aes(label="2"), size=8) +
   geom_line(data = data.frame(doc_id="",win=c(1,1),prize=c(1,3)),linetype="dashed") +
   geom_point(size = 4, aes(color=h3)) +
-  scale_color_manual(values=c("darkgreen"))
+  scale_color_manual(values=c("darkgreen")) +
+  geom_text(aes(label=doc_id), nudge_y = 0.1, nudge_x = 0.09, size = 6.5)
 ```
 
 
 ]
 
 .pull-right[
-Usually, we would continue until all items have been merged into a single cluster by the same procedure as above. 
 
-However, there were only two clusters left which we can merge into a single one without calculations. 
+We continue the clustering procedure until all items were merged into a single cluster.
 
-So we are done!
+Employing the complete linkage criterion again, we find that the maximum distance between the sets, i.e. the distance between B and D, is 3.61. 
+
+Note that this calculation is only necessary to find the distance *at which* the sets were joined. The sets are joined anyway since there are only two left!
 ]
 
 ---
