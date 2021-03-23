@@ -49,7 +49,7 @@ The overall goal of this course is to let participants enrich their methodologic
 
 ### Credits
 
-I am indebted to Prof. Kenneth Benoit, Dr. Pablo Barbará, and Dr. Blake Miller who developed an introductory course for quantitative text analysis at the London School of Economics. I also thank Dr. David Zimmerman for preparing an excellent introduction to programming in R. I have adapted a large proportion of these materials for the Computational Political Science course.
+I am indebted to Kenneth Benoit, Pablo Barbará, Fredrick Geiecke, and Blake Miller who developed an introductory course for quantitative text analysis at the London School of Economics. I also thank David Zimmerman for preparing an excellent introduction to programming in R. I have adapted a large proportion of these materials for the Computational Political Science course.
 
 ------------------------------------------------------------------------
 
