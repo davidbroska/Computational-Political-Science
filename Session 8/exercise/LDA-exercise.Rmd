@@ -1,0 +1,114 @@
+---
+title: "Latent dirichlet allocation"
+subtitle: "Coding exercise"
+output: html_document
+---
+
+```{r, message=F, warning=F}
+# install.packages("readr")
+library("quanteda")
+library("topicmodels")
+library("ggplot2")
+library("dplyr")
+```
+
+
+1. The running example in this exercise will focus on understanding the communication strategies of Donald Trump on Twitter. First, read the file `trump-tweets.csv`, which contains Trump's tweets from January 1st 2017 to June 29th 2018. Create a histogram with the number of tweets by month.
+
+```{r}
+tweets <- readr::read_csv("trump-tweets.csv", col_types="cTDc")
+
+
+tweets %>% 
+  mutate(monthly = date %>% cut(breaks = "month") %>% as.Date()) %>% 
+  group_by(monthly) %>% 
+  count() %>% 
+  # create plot
+  ggplot(aes(monthly, n)) + 
+  geom_col() + 
+  theme_bw() +
+  labs(x = "Date", y = "Number of tweets") +
+  scale_x_date(labels = date_format("%Y-%m"),
+               breaks = as.Date(c("2017-01-01","2017-07-01", 
+                                  "2018-01-01","2018-06-01"))) 
+```
+
+Create a corpus object and a DFM by removing stopwords, punctuation, and numbers.
+
+```{r}
+twcorpus <- ...
+cdfm <- ...
+```
+
+2. Run an LDA model. You may want to experiment with different number of topics or just stick to `K=30` as in the previous example, and to experiment with different pre-processing decisions. For reproducibility, please set the seed=123. Also, 500 iterations will be sufficient for this coding exercise. 
+
+```{r}
+# estimate LDA with K topics
+K <- ...
+lda <- LDA(cdfm, k = ..., method = "Gibbs", 
+                control = list(verbose=25L, seed = ... , burnin = 100, iter = ...))
+```
+
+Look at the words most associated with each topic for a sample of topics. Do you find that the results are valid according to the different definitions of validity we discussed in the lecture? Can you put labels to the topics? Hint: you might want to use the functions `get_terms()` and `get_topics()`. 
+
+```{r}
+
+```
+
+3. Pick a topic whose prevalence you think may have evolved over time and plot it. (For example, North Korea). What do you find?
+
+```{r}
+# Topic 
+paste(terms[, ... ], collapse=", ")
+# add probability to df
+tweets$prob_topic <- lda@gamma[, ...]
+# creating month variable
+tweets$month <- substr(tweets$date, 1, 7)
+# now aggregate at the month level
+agg <- aggregate(prob_topic~month, data=tweets, FUN=mean)
+months <- seq(as.Date('2017-01-01'), as.Date("2018-06-01"), by="month")
+# and plot it
+plot(months, agg$prob_topic, type="l", 
+     xlab="Month", ylab="Avg. prob. of article about topic 15",
+     main="Estimated proportion of articles")
+
+```
+
+**Your answer here**
+
+> We see a spike in the lead-up to the first Trump-Kim summit.
+
+
+4. For this topic, compute the probabilities that each word is associated with the topic. You should be able to get them from the `beta` value within the `LDA` object. Note that the values of this matrix are in the log scale; in order to get the probabilities you'll need to exponentiate them. Sort the words from highest to lowest probability and display the top 30. If your code is correct, you should see the same result as when you ran `terms()` earlier:
+
+```{r}
+# extracting probabilities from topic 
+df <- data.frame(
+  words = lda@terms,
+  prob = exp(lda@beta[ ...,]),
+  stringsAsFactors = F
+)
+df <- df[order(df$prob,decreasing=TRUE),]
+head(df, n=15)
+paste(terms[, ...], collapse=", ")
+```
+
+5. Now, use this metric but to extract the probability that a given word belongs to each of the topics. Choose the word "russia" (or any other word you find relevant) and compute those probabilities. Note that these probabilities will probably be very small, but you can normalize them so that they all up to one for this given word. To which topic does the word "Russia" belong?
+
+
+```{r}
+# finding most likely topic for word 'korea'
+probs <- exp(lda@beta[,lda@terms=="russia"])
+# normalizing so that probabilities add up to 1
+round(probs/sum(probs),3)
+# finding topic with highest probability
+max.topic <- which.max(round(probs/sum(probs),3))
+# words for that topic
+paste(terms[,max.topic], collapse=", ")
+```
+
+**Your answer here**
+
+> 
+
+
