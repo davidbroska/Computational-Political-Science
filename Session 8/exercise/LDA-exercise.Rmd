@@ -4,12 +4,13 @@ subtitle: "Coding exercise"
 output: html_document
 ---
 
-```{r, message=F, warning=F}
+```{r setup, message=F, warning=F}
 # install.packages("readr")
 library("quanteda")
 library("topicmodels")
 library("ggplot2")
 library("dplyr")
+library("scales")
 ```
 
 
