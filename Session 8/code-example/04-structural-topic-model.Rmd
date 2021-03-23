@@ -180,7 +180,7 @@ toLDAvis(stmodel, docs = stm_input$documents)
 
 ## Fitting a topic model with topic prevalence and topic content covariates
 
-Next, we fit another structural topic model with both prevalence and topic content covariates. This allows to not just analyse how topic shares within documents vary cross different groups, but also how words in topics vary. The following will take a longer time to run than the previous model because of the additional covariate.
+Next, we fit another structural topic model with both prevalence and topic content covariates. This allows to not just analyze how topic shares within documents vary cross different groups, but also how words in topics vary. The following will take a longer time to run than the previous model because of the additional covariate.
 
 
 ```{r}
@@ -205,7 +205,7 @@ There is still, however, a similar health care topic:
 cloud(stmodel_additional_content_variable, topic = 41, scale = c(2,.25))
 ```
 
-With the help of the new content covariate, we can now analyse how the two parties discuss the same topic differently:
+With the help of the new content covariate, we can now analyze how the two parties discuss the same topic differently:
 
 ```{r}
 plot(stmodel_additional_content_variable, type = "perspectives", topics = 41)
@@ -222,6 +222,6 @@ For other topics, however, the results are less reasonable. While the purpose of
 - Using a larger corpus with many more than the sample of ~10,000 posts (implies, however, that model estimation would take much longer)
 - etc.
 
-For a discussion of model selection and evaluation for structural topic models (e.g. different initialisations, covariates, values of K), see also e.g. Section "3.4. Evaluate: Model selection and search" the package [vignette](https://cran.r-project.org/web/packages/stm/vignettes/stmVignette.pdf) or the Section _Model Specification and Selection_ in ``Structural Topic Models for Open-Ended Survey Responses'' by Roberts et al. (2014).
+For a discussion of model selection and evaluation for structural topic models (e.g. different initializations, covariates, values of K), see also e.g. Section "3.4. Evaluate: Model selection and search" the package [vignette](https://cran.r-project.org/web/packages/stm/vignettes/stmVignette.pdf) or the Section _Model Specification and Selection_ in ``Structural Topic Models for Open-Ended Survey Responses'' by Roberts et al. (2014).
 References
 - This notebook is based on code from the vignette of the `stm` package https://cran.r-project.org/web/packages/stm/vignettes/stmVignette.pdf. See the vignette also for further functionalities of the package

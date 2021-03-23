@@ -14,11 +14,11 @@ library("quanteda")
 ```
 
 
-A common question, e.g. when analysing scans of old books, is how to read/parse the textual content of PDFs into programming languages such as R or Python. For R, the package [pdftools](see also https://cran.r-project.org/web/packages/pdftools/pdftools.pdf) has a range of functionalities to do this.
+A common question, e.g. when analyzing scans of old books, is how to read/parse the textual content of PDFs into programming languages such as R or Python. For R, the package [pdftools](see also https://cran.r-project.org/web/packages/pdftools/pdftools.pdf) has a range of functionalities to do this.
 
 ## 1.1 PDFs containing text
 
-As an example, let us consider Newton's Principia (1687) in its English translation. To obtain the book, go to Google Books under link https://books.google.de/books?id=KaAIAAAAIAAJ&dq=editions:9svGePME4p8C&hl=en, click on the drop-down menu in the upper right hand corner, and download the book as a PDF. The file is also available as epublication (sometimes books can furthermore be downloaded as plain text), but we will use this book as an example of text in a PDF. Note that an option to obtain many old books immediately as R objects is the package `gutenbergr` (see also https://cran.r-project.org/web/packages/gutenbergr/vignettes/intro.html) which is based on on http://gutenberg.org.
+As an example, let us consider Newton's Principia (1687) in its English translation. To obtain the book, go to Google Books under link https://books.google.de/books?id=KaAIAAAAIAAJ&dq=editions:9svGePME4p8C&hl=en, click on the drop-down menu in the upper right hand corner, and download the book as a PDF. The file is also available as e-publication (sometimes books can furthermore be downloaded as plain text), but we will use this book as an example of text in a PDF. Note that an option to obtain many old books immediately as R objects is the package `gutenbergr` (see also https://cran.r-project.org/web/packages/gutenbergr/vignettes/intro.html) which is based on on http://gutenberg.org.
 
 The PDF is parsed into R using the `pdf_text` function which returns a character vector with one row corresponding to one page:
 
