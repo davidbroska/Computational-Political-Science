@@ -198,7 +198,7 @@ Latent Dirichlet Allocation (LDA) by [Blei et al. (2003)](http://www.cs.columbia
 --
 
 <small>
-Figure from [Blei et al. (2003)](http://www.cs.columbia.edu/~blei/papers/BleiNgJordan2003.pdf)
+Figure by [Blei (2012)](http://www.cs.columbia.edu/~blei/papers/Blei2012.pdf)
 </small>
 
 
@@ -351,18 +351,6 @@ Say we have a corpus with $D=1,000$ documents, a vocabulary of $V=10,000$ total 
 
 <img src="../figures/topic_models_beta_matrix_example.jpg">
 
-
----
-# Estimation intuition
-
-- Estimation the topic models is done in a Bayesian framework
-
-- Our $\text{Dir}(\alpha)$ and $\text{Dir}(\eta)$ are the so called *prior distributions* of the $\theta_d$ and $\beta_k$
-
-- With Bayes' theorem, with the help of our data, and the model, we update these prior distributions to obtain a so called *posterior distribution* for each $\theta_d$ and $\beta_k$
-
-- The means of these posterior distributions are the rows in the above matrices commonly given by statistical packages and referred to as $\theta$ and $\beta$
-
 ---
 # Topics
 
@@ -387,16 +375,30 @@ Say we have a corpus with $D=1,000$ documents, a vocabulary of $V=10,000$ total 
 </center>
 
 ---
+# Estimation intuition
+
+- Estimation the topic models is done in a Bayesian framework
+
+- Our $\text{Dir}(\alpha)$ and $\text{Dir}(\eta)$ are the so called *prior distributions* of the $\theta_d$ and $\beta_k$
+
+- With Bayes' theorem, with the help of our data, and the model, we update these prior distributions to obtain a so called *posterior distribution* for each $\theta_d$ and $\beta_k$
+
+- The means of these posterior distributions are the rows in the above matrices commonly given by statistical packages and referred to as $\theta$ and $\beta$
+
+
+---
 # Obtain posterior distributions
 
 - Algorithms to obtain posterior distributions are not the focus of this lecture 
 
 - Common algorithm to obtain posterior distributions for the $\theta_d$ and $\beta_k$ are from two main groups
 
-  1. Sampling algorithms such as *Gibbs sampling* approximate the posterior distribution with an empirical distribution by drawing a sequence of samples in a way that ensure its limit distribution is the true posterior distribution
+  1. Sampling algorithms such as **Gibbs sampling** approximate the posterior distribution with an empirical distribution by drawing a sequence of samples in a way that ensure its limit distribution is the true posterior distribution
   
-  2. Variational methods approximate the posterior distribution with a  parametrized family of distributions. The error of this approximation  is minimized and obtaining posterors thus becomes an optimization problem
+  2. **Variational methods** approximate the posterior distribution with a  parametrized family of distributions. The error of this approximation  is minimized and obtaining posterors thus becomes an optimization problem
   
+  
+<br>
 See *Probabilistic Topic Models* by [Blei (2012)](https://dl.acm.org/doi/10.1145/2133806.2133826) for links to further resources
 
 
@@ -422,17 +424,25 @@ and can also lead to a better fit
 ---
 # Structural topic model
 
-The structural topic model was introduced by Roberts et al.
-(2013). It includes
-
+The structural topic model was introduced by Roberts et al. (2013)
 
 #### Topic prevalence covariates
 
-Topic proportions within documents can vary through covariates (e.g. social media posts by Republican politicians might have different topic proportions than those posted by Democrats)
+Topic proportions within documents can vary through covariates 
+
+E.g. social media posts by Republican politicians might have different topic proportions than those posted by Democrats
+
+--
+
+<br>
 
 #### Topical content covariates
 
-Word proportions within topics can vary through covariates (e.g. when talking about a health care topic, Republican politicians might use different words than Democrats)
+Word proportions within topics can vary through covariates 
+
+E.g. when talking about a health care topic, Republican politicians might use different words than Democrats
+
+<br>
 
 Without any covariates supplied, the model reduce to the correlated topic model
 
@@ -459,9 +469,13 @@ A physics topics from a dynamic topic model that was fit to articles in *Science
 ---
 # Selecting K and beyond 
 
+#### Challenge
+
 In particular selecting the amount of topics K, but also parameters, covariates, and potentially initializations is a very challenging exercise without a single solution
 
-Researchers typically consult a combination of quantitative metrics and human judgment
+#### What to do?
+
+####Researchers typically consult a combination of quantitative metrics and human judgment
 
 ---
 # Quantitative metrics
@@ -519,16 +533,29 @@ Many automated metrics exist, see e.g. Grimmer and Stewart (2013), Mimno et al. 
 ---
 # Quantitative metrics
 
-- For a discussion of model selection for (structural) topic models (e.g. different choices of K, initializations, and covariates) and evaluation, see e.g. Section “3.4. Evaluate: Model selection and search” in the package vignette or the Section Model Specification and Selection in “Structural Topic Models for Open-Ended Survey Responses” by Roberts et al. (2014)
 
-- In Roberts et al. (2014), the authors e.g. argue that “a semantically interpretable topic has two qualities: (1) it is cohesive in the sense that high-probability words for the topic tend to co-occur within documents, and (2) it is exclusive in the sense that the top words for that topic are unlikely to appear with in top words of other topics.”
+#### According to Roberts et al. (2014), a semantically interpretable topic has two qualities: 
 
-- Semantic coherence and exclusivity, with many other quantitative metrics, are outputs of the function ‘searchK‘ in the ‘stm’ package
+1. It is **cohesive** in the sense that high-probability words for the topic tend to co-occur within documents
+
+2. It is **exclusive** in the sense that the top words for that topic are unlikely to appear with in top words of other topics.
+
+--
+
+Semantic coherence and exclusivity, with many other quantitative metrics, are outputs of the function ‘searchK‘ in the ‘stm’ package
+
+--
+
+
+For a discussion of model selection for (structural) topic models (e.g. different choices of K, initializations, and covariates) and evaluation, see e.g. Section “3.4. Evaluate: Model selection and search” in the package vignette or the Section Model Specification and Selection in “Structural Topic Models for Open-Ended Survey Responses” by Roberts et al. (2014)
+
+
+
 
 ---
 # Takeaways
 
-- No quantitative metric can replace human judgement when selecting K or other model parameters, and evaluating the fit of a particular topic model more generally
+####No quantitative metric can replace human judgement when selecting K or other model parameters, and evaluating the fit of a particular topic model more generally
 
 - “The most effective method for assessing model fit is to carefully read documents that are closely associated with particular topics to verify that the semantic concept covered by the topic is reflected in the text.” from “A Model of Text for Experimentation in the Social Sciences” by Roberts et al. (2016)
 
