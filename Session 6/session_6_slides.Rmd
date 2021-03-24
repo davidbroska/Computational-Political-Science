@@ -18,22 +18,18 @@ output:
 
 # Outline for today
 
-1. **A word about designing research...**
+1. **Supervised scaling**
+  - Wordscores model
+  - How it relates to Naive Bayes
+  - Wordscore example
   
-  - Research questions and research design
-  - How are we going to evaluate research papers in session 10
-  - A recommendation on how to present your research ideas in session 11
-
-2. **Wordscores model**
-  - How it relates to Bayes theorem
-  - How it is implemented
-
-3. **Regularization** (revisit slides of session 5)
-  - Ridge regression 
-  - Lasso regression
-
-3. **Coding exercise** (revisit exercise of session 5)
-  - Which letters are most predictive of female and male names?
+2. **Unsupervised Learning**
+  - Basics of unsupervised scaling methods
+  - Parametric scaling models: Wordfish 
+  
+3. **Coding examples**
+  - Scaling UK manifestos with Wordscores
+  - Scaling Irish budget debate 2010 using Wordfish
 
 
 ---
@@ -46,398 +42,13 @@ output:
 |    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
 |    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
 |    5    | Mar 02 | Machine learning for texts: Classification II        |     \-        |     \-          |
-|    6    | Mar 09 | *Supervised and unsupervised scaling*                | Summative 2   | Mar 15 23:59:59 |
+|    6    | Mar 09 | *Supervised and unsupervised scaling*                | Summative 2   | Mar 22 23:59:59 |
 |    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
 |    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
 |   \-    |   \-   | *Break*                                              |     \-        |     \-          |
 |    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
 |   10    | Apr 20 | Published applications                               |     \-        |     \-          |
 |   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
-
----
-class: inverse, center, middle
-
-# A word about designing research...
-
-<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html> 
-
-
----
-# Quality criteria
-
-####While teachers are paid to read student reports, readers outside the university have no such incentive. 
-
-####Writers must find other ways to convince their audience to read their work.
-
---
-
-<br>
-
-A good research design begins with a research question:
-- for which the answer/s matter
-- that builds on an identifiable body of knowledge
-- that is feasible to (at least partially) answer
-
-Why?  Because good research is *all* of the below:
-- consequential: tells us something important
-- novel: tells us something new
-- valid: tells us something true
-
-
----
-# The consequentiality criterion
-
-There are lots of practicable yet trivial research questions but good research should be consequential
-
-Explain how your research problem is also your reader's problem by showing the consequence or the costs of not solving it.
-
---
-
-#### Costs of not solving a conceptual problem
-
-Ignorance about a conceptual problem is a lack of understanding that keeps us from understanding something else even more significant. 
-
-- If we cannot answer how our depictions of romantic love have changed <sub>second question</sub>, then we cannot answer how our culture shapes the expectations of young people about marriage and families?<sub>consequence/larger, more important question</sub>
-
---
-
-#### Costs of not solving a practical problem
-
-The cost of a practical problem is a tangible thing or situation we would like to avoid 
-
-- If we do not know the extent of the losses due to the economic crisis, we cannot plan the budget for the next year.
-
----
-# The novelty criterion
-
-There are a lot of people doing social research
-
-- Someone has already tried to answer a question similar to your 
-question.
-
-- Reviewing the research literature demonstrates that the exact 
-question has not been satisfactorily answered.
-
-- One goal for research is novelty, but you cannot assess novelty 
-without an honest assessment of what has already been done.
-Research should make a specific contribution to an identifiable 
-literature (this should primarily be the scholarly literature but may 
-also include ‘grey literature’ [see Robson and McCartan 2016: 50-
-56])
-
----
-# The feasibility criterion
-
-###Research design is about understanding feasibility tradeoffs
-
-<br> 
-
-- If you deploy unlimited budgets or godlike powers, then you are not really engaging with the difficulty of the problem.
-
-- A research design should include the best arguments in favor of your research design decisions 
-
-- Real research must be feasible in order to be completed and generate valid conclusions.
-
-- For the purposes of this course, feasibility means in the context of your degree program.
-
----
-# Expectations on graduate research
-
-####Your research proposal is not going to be the most consequential or the most novel, given the fact that supervisors demand that it be feasible for you to complete in your current degree.
-
-<br>
-
-What supervisors typically want to see is that you can explain 
-- what you are proposing to do, 
-- why it is worth doing, 
-- how it will work, 
-- what we will learn from it, 
-- and what are its limitations.
-
-If you have done this, you will have no difficulty with...
-
----
-# Dinner party test
-
-####Scene: You and a stranger at a dinner party / pub <br>
-
-.pull-left[
-*Stranger*: "So what do you do?"
-
-
-<br>*Stranger* (inevitably): "So what’s it about?"
-
-<br><br><br><br>*Stranger* (desperately seeks escape and/or stiff drink, vowing never to ask that question again)
-]
-
-.pull-right[
-<br>*You* (reluctantly): "I'm working on my student research project"
-
-<br>*You* (ramble on for 10 minutes secretly thinking): "this stranger can't possibly understand the complexity and nuance of what I'm doing ..."
-]
-
---
-
->If you cannot give a synoptic, ordinary language explanation in two or three minutes of what you are focusing on and what you hope to achieve, the **chances are very high that in a very fundamental way you do not yet understand your thesis topic**. (Dunleavy 2003: 22)
-
----
-# Template for a Research Design
-
-
-
-1. Background/literature review
-
-2. Research question(s)
-
-3. Data collection strategies
-
-4. Data analysis strategies
-
-5. Potential impact and relevance of the study
-
-6. Limitations and further research
-
-7. References / bibliography
-
-<br>
-
-####This is an important template that we keep in mind as we go through the reading exercises!
-
-
----
-# Implicit Questions
-
-#### Implicitly, a research design asks these questions
-<br>
-
-1. What do we know already?
-
-2. What are you going to try to learn?
-
-3. What kind of evidence are you going to collect and how 
-will you collect it?
-
-4. How does that evidence enable us to draw conclusions?
-
-5. What might those conclusions be and why do they 
-matter?
-
-6. What are the limitations of what you are going to do? What have you done to mitigate these limitations? What more could be done with extra time and/or resources?
-
-7. References / bibliography
-
-
----
-# Research questions
-
-####[R]esearch questions can provide the key to planning and carrying out a successful research project (Robson and McCartan 2016: 59)
-
-
-They help to:
-
-Define your project (summarize its focus)
-
---
-
-- Set boundaries (demarcate the parameters of your project and so enhance 
-feasibility)
-
---
-
-- Give direction (signal what literature to search [relevance vs 
-comprehensiveness], what data to collect, what methods to employ…)
-
---
-
-- Define success (answerable research questions enable you to show that 
-you have done what you set out do to)
-
-
----
-# Setting-up research questions
-
-We need to consider not only what questions enable us to do, but also where we get them from - how can we set-up/motivate our research question/s
-  - ‘Consequentiality’ and ‘novelty’ criteria is key to this
-  - Importance of showing that our research matters and that it contributes somehow to our existing understanding of social phenomena
-
---
-
-.pull-left[
-‘Gap-spotting’ in the academic literature a conventional way of motivating research 
-  - Substantiate our contribution by reviewing what we (collectively) know already 
-  - Multiple modes of ‘gap-spotting’, e.g. confusion spotting, neglect spotting… (Sandberg and 
-Alvesson 2011); also methodological gap spotting
-]
-
-.pull-right[
-<img src = "../figures/mind-the-gap-goals-scaled.jpg" class="centerimg" width="100%"> 
-]
-
-
----
-# Supplementary sources
-
-Can also signal the importance of our work in other ways. These include framing our research in relation to:
-
-- contemporary social problems/puzzles (e.g. political debates or policy 
-conundrums)
-
-- why does this research matter beyond the ivory towers?
-
-- apparent ‘gaps’ between official discourse and social practice
-
-- socio-technical developments and trends
-
-- interdisciplinary (‘spending time in the next village’ – e.g. how have 
-commensurate processes been studied in other disciplines?)
-
-- ‘problematisation’ (Sandberg and Alvesson 2011)
-
-- personal experience (‘starting where you are’ [Robson and McCartan 
-2016: 49-50])
-
-
-
----
-# Identifying research questions
-
-.pull-left[
-<img src="../figures/limitations_future_research.jpg">
-]
-.pull-right[
-- Unlike much funded or commissioned research, for independent projects 
-(BA and MA theses) you are expected to come up with research 
-questions yourselves
-- Identifying and reading around topics of interest (being sure to include cutting 
-edge studies) should help with this 
-- You might identify the gap yourself but often empirical papers also include 
-further research directions in their conclusions. Could you feasibly address any of these?
-- Journal editorials/review papers can often serve as a source of inspiration
-
-]
-
-
----
-# Topic ≠ research question/s
-
-- Once you have a topic, clarifying the purpose/s of your 
-research can be crucial to developing research questions
-
-- Beyond contributing to knowledge, typical broad purposes 
-include exploration, description and explanation (and possibly 
-impact for more applied research)
-
-- Don’t be afraid of coming up with multiple questions – this is normal, and a set of (often nested) questions can indeed be advantageous/more readily answerable (as long as the questions are feasible)
-
-- Use the feasibility criterion to help you prioritize your research 
-questions
-
---
-
-
-#### Ultimately, you should be able to fill in these blanks:
-
-1. Topic: I am studying ...
-2. Question: because I want to find out what/why/how ...,
-3. Significance: in order to help my reader understand ...
-
-
----
-# Example immigration-related questions
-
-
-### What is the type of answer you expect from doing research?
-.pull-left[
-
-1. <mark>How many</mark> people in my dataset of German residents said they thought there should be less immigration?
-2. <mark>How</mark> do people living in post-industrial towns in Germany perceive immigration in their local areas?
-3. <mark>What fraction</mark> of people in Germany think there should be less immigration?
-4. <mark>What kinds</mark> of people in Germany tend to say there should be less immigration?
-5. Do people in Germany become more or less favorable towards immigration <mark>if</mark> they work with immigrants?
-6. <mark>Why</mark> do some people in Germany say there should be less immigration?
-]
-
-.pull-right[
-1. A question about particular data
-<br>
-<br>
-
-2. An exploratory question about a population
-<br>
-<br>
-3. A quantifiable question about a population
-
-4. A question about a relationship in a broader population
-
-5. A question about causal relationship size
-
-6. A question about causal relationship mechanisms
-
-]
-
-
----
-# Topically Related Research Questions
-### What is the type of answer you expect from doing research?
-.pull-left[
-
-1. How many people in my dataset of German residents said they thought there should be less immigration?
-2. How do people living in post-industrial towns in Germany perceive immigration in their local areas?
-3. What fraction of people in Germany think there should be less immigration?
-4. What kinds of people in Germany tend to say there should be less immigration?
-5. Do people in Germany become more or less favorable towards immigration if they work with immigrants?
-6. Why do some people in Germany say there should be less immigration?
-]
-
-.pull-right[
-1. Description
-<br>
-<br>
-
-2. Exploration
-<br>
-<br>
-3. Population Inference (description)
-
-4. Population Inference (description)
-
-5. Causal Inference (cause-effect) [explanation]
-
-6. Causal Inference (causal mechanisms) [exploration/explanation]
-
-]
-
-
----
-# Tell me about your research
-
-.left-column[
-<br>
-<img src="../figures/ww.jpg" width="100%" class="centerimg">
-
-]
-.right-column[
-In individual meetings we will discuss your Zeppelin project while the others are encouraged to work on the reading assignments
-
-
-#### Preparation for dinner-party test 
-
-1. Topic: I am studying ...
-2. Question: because I want to find out what/why/how ...,
-3. Significance: in order to help my reader understand ...
-
-#### Projecting outcomes of the study
-
-- What kind of answer do expect from your study? 
-- How might your results change our view on the social phenomenon that you are studying?
-
-
-#### Methods
-
-- Which methods might be useful for collecting and analyzing data?
-
-]
-
 
 
 ---
@@ -798,11 +409,6 @@ kableExtra::column_spec(df_kab, 1:7, width_min = "0.8in")
 - Note that new words outside of the set $J$ may appear in the $K$ virgin documents — these are simply ignored (because we have no information on their scores)
 - Note also that nothing prohibits reference documents from also being scored as virgin documents
 
----
-# Scoring texts
-
-
-
 
 ---
 # Using textmodel_wordscores()
@@ -836,7 +442,231 @@ round(predict(ws_mod),2)
 
 ---
 class: inverse, center, middle
-# Wordscore coding exercise
+# Unsupervised scaling
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html>
+
+---
+# Unsupervised scaling methods
+
+Text gets converted into a quantitative matrix of features
+
+- words, typically
+- could be dictionary entries, or parts of speech
+
+Documents are scaled based on similarity or distance in feature use but the fundamental problem is distance on which scale?
+
+- Ideally, something we care about, e.g. policy positions, ideology, preferences, sentiment
+- But often other dimensions (language, rhetoric style, authorship) are more predictive
+
+First dimension in unsupervised scaling will capture main source of variation, whatever it is
+
+Unlike supervised models, validation comes after estimating
+the model
+
+---
+# Unsupervised scaling methods
+
+#### Two main approaches
+
+**Parametric methods** model feature occurrence according to some stochastic distribution, typically in the form of a measurement model
+
+- for instance, model words as a multi-level Bernoulli distribution, or a Poisson distribution
+- word effects and “positional” effects are unobserved parameters to be estimated
+- e.g. Wordﬁsh (Slapin and Proksch 2008) and Wordshoal (Lauderdale and Herzog 2016)
+
+**Non-parametric methods** typically based on the Singular Value Decomposition of a matrix
+- correspondence analysis
+- factor analysis
+- other (multi)dimensional scaling methods
+
+---
+class: inverse, middle, center
+# Parametric scaling models
+---------------------------------------------------
+
+
+---
+# Wordfish (Slapin and Proksch 2008)
+
+####The goal is unsupervised scaling of ideological positions
+
+The frequency with which politician $i$ uses word $k$ is drawn from a Poisson distribution:
+
+$$w_{ik} \sim \text{Poisson}(\lambda_{ik} )$$
+$$\lambda_{ik} = \exp(\alpha_i +  \psi_k +  \beta_k \times \theta_i )$$
+with latent parameters:
+
+
+
+$\alpha_i$ is “loquaciousness” of politician $i$ (document fixed effect, hence it’s associated with the party or politician)
+
+$\psi_k$ is frequency of word $k$ (word fixed effect)
+
+$\beta_k$ is discrimination parameter of word $k$
+
+$\theta_i$ is the politician's ideological position
+
+
+
+**Key intuition**: controlling for document length and word frequency, words with negative $k$ will tend to be used more often by politicians with negative $\theta_i$ (and vice versa)
+
+
+---
+# Wordfish (Slapin and Proksch 2008)
+
+
+#### Why Poisson?
+<br>
+
+- Poisson distributed variables are bounded between (0, &infin;) and take on only discrete values 0, 1, 2, ..., &infin;
+
+- Exponential transformation: word counts are function of log document length and word frequency
+
+<br>
+
+$$
+\begin{align}
+w_{ik} &\sim \text{Poisson}(\lambda_{ik}) \\
+\lambda_{ik} &= \exp(\alpha_i + \psi_k + \beta_k \times \theta_i) \\
+\log(\lambda_{ik}) &= \alpha_i + \psi_k \times \theta_i
+\end{align}
+$$
+
+---
+# How to estimate this model 
+
+#### Conditional maximum likelihood estimation:
+
+- If we knew $\psi$ and $\beta$ (the word parameters) then we have a Poisson regression model
+
+- If we knew $\alpha$ and $\beta$ (the party/politician/document parameters) then we have a Poisson regression model too!
+
+- So we alternate them and hope to converge to reasonable estimates for both
+
+- Implemented in the quanteda package `textmodel_wordfish()`
+
+
+An alternative is MCMC with a Bayesian formulation or variational inference using an Expectation-Maximization algorithm (Imai et al 2016)
+
+
+---
+# Conditional max. likelihood for wordfish
+
+Start by guessing the parameters (some guesses are better than other, e.g. SVD)
+
+Algorithm: 
+
+1. Assume the current *legislator parameters* are correct and fit as a Poisson regression model
+
+2. Assume the current *word parameters* are correct and fit as a Poisson regression model 
+
+3. Normalize $\theta$s to mean 0 and variance 1
+
+Iterate until convergence (change in value below a certain threshold)
+
+---
+# Identification 
+
+The *scale* and *direction* of $\theta$ is undetermined - like most models with latent variables 
+
+To identify the model in Wordfish
+
+- Fix one $\alpha$ to zero to specify the left-right direction (Wordfish option 1)
+
+- Fix one $\hat \theta$s to mean zero and variance 1 to specify the scale (Wordfish option 2)
+
+- Fix two $\hat \theta$s to specify the direction and scale (Wordfish option 3 and Wordscores)
+
+Note: Fixing two reference scores does not specify the policy domain, it just identifies the model
+
+---
+# "Features" of parametric scaling
+
+- Standard (statistical) inference about parameters
+
+- Uncertainty accounting for parameters 
+
+- Distributional assumptions are made explicit (as part of the data generating process motivating the choice of stochastic distribution)
+
+  - conditional independence
+  - stochastic process (e.g. $\text{E}(Y_{ij}=\text{Var}(Y_{ij})=\lambda_{ij}$)
+
+- Permits hierarchical reparameterization (to add covariates)
+
+- Generative model: given the estimated parameters, we could
+generate a document for any specified length
+
+---
+# Some reasons why this model is wrong
+
+- Violations of conditional independence:
+
+  - Words occur in sequence (serial correlation)
+
+  - Words occur in combinations (e.g. as collocations) “carbon tax” / “income tax” / “inheritance tax” / “capital gains tax” /”bank tax”
+
+  - Legislative speech uses rhetoric that contains frequent
+synonyms and repetition for emphasis (e.g. “Yes we can!”)
+
+- Heteroskedastic errors (variance not constant and equal to
+mean):
+
+  - overdispersion when “informative” words tend to cluster
+together
+
+  - underdispersion could (possibly) occur when words of high frequency are uninformative and have relatively low between-text variation (once length is considered)
+
+
+
+---
+# Overdispersion 
+
+
+#### Overdispersion in German manifesto data (data taken from Slapin and Proksch 2008)
+
+<img src="../figures/overdisperson_slapin_proksch_2008.jpg" class = "centerimg" width = "90%">
+
+
+---
+# One solution to model overdispersion
+
+Negative binomial model (Lo, Proksch, and Slapin 2014):
+
+$$
+\begin{align}
+w_{ik} &\sim \text{NB}(r, \frac{\lambda_{ik}}{\lambda_{ik} + r_i}) \\
+\lambda_{ik} &= \exp(\alpha_i + \psi_k + \beta_k \times \theta_i)
+\end{align}
+$$
+
+where ri is a variance inflation parameter that varies across
+documents.
+
+It can have a substantive interpretation (ideological ambiguity),
+e.g. when a party emphasizes an issue but fails to mention key
+words associated with it that a party with similar ideology
+mentions.
+
+---
+# Example from Slapin and Proksch 2008
+
+<img src="../figures/slapin_proksch_2008_party_positions.jpg" class="centerimg" width="69%">
+
+---
+# Example from Slapin and Proksch 2008
+
+<img src="../figures/slapin_proksch_2008_left_right.jpg" class="centerimg" width="69%">
+
+---
+# Example from Slapin and Proksch 2008
+
+<img src="../figures/slapin_proksch_2008_table.jpg" class="centerimg" width="90%">
+
+
+---
+class: inverse, center, middle
+# Coding exercise
 
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html>
 
