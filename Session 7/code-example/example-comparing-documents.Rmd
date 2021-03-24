@@ -45,7 +45,7 @@ And here's an example of how we would apply these metrics in practice. Let's say
 
 ```{r}
 # data source: http://www.cs.cmu.edu/~ark/personas/
-movie <- readr::read_csv(unz("movie-plots.csv.zip", "movie-plots.csv"), col_types="cccc")
+movie <- readr::read_csv(unz("../../data/movie-plots.csv.zip", "movie-plots.csv"), col_types="cccc")
 # now we find a movie i like
 scifi <- which(movie$name=="Gravity")
 movie[scifi,]

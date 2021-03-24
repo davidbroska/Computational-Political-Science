@@ -17,7 +17,7 @@ Let's read this dataset into R, convert it into a corpus called `cnames` with ge
 library("quanteda")
 library("quanteda.textmodels")
 
-d <- read.csv("EN-names.csv", stringsAsFactors=FALSE)
+d <- read.csv("../../data/EN-names.csv", stringsAsFactors=FALSE)
 # creating corpus object
 cnames <- corpus(..., text_field = ...)
 # create "gender" as new document variable in the corpus

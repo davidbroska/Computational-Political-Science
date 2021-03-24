@@ -13,7 +13,7 @@ Our running example will be the set of tweets posted by Donald Trump's Twitter a
 
 ```{r}
 library(streamR)
-tweets <- parseTweets("trump-tweets.json")
+tweets <- parseTweets("../../data/trump-tweets.json")
 head(tweets)
 ```
 
