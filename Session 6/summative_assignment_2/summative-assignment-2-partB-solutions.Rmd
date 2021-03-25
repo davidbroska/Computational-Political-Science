@@ -1,0 +1,139 @@
+---
+title: 'CPS Summative Assignment 2 Part B Solutions'
+subtitle: 'Classifying movie reviews using Lasso regression'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+library(quanteda)
+library(quanteda.textmodels)
+library(glmnet)
+```
+
+
+In this assignment, we will apply Lasso regression to classify movie reviews from a classic computer science dataset of movie reviews, [(Pang and Lee 2004)](http://www.cs.cornell.edu/home/llee/papers/cutsent.pdf).
+
+### Question 1 (1 point)
+
+The corpus `data_corpus_moviereviews` has an attribute `Sentiment` that labels each text as either `pos` or `neg` according to the original imdb.com archived newspaper review star rating. The movie corpus contains 1000 positive examples followed by 1000 negative examples. When extracting training and testing labels, we want to get a mix of positive and negative in each set, so first we need to shuffle the corpus. Use the `corpus_sample*()` function create a new corpus object called `moviesShuffled`. To ensure reproducibility of your results please set a seed value of `1234` before.
+
+```{r}
+set.seed(1234)  # use this just before the command below
+moviesShuffled <- corpus_sample(data_corpus_moviereviews, size = 2000)
+```
+
+### Question 2 (3 points)
+
+Next, make a DFM from the shuffled corpus, and make training labels. In this case, we are using the first 1500 training labels, and leaving the remaining 500 unlabeled to use as a test set. We will also trim the dataset to remove rare features with a minimum term frequency of 10.
+
+```{r}
+movieDfm <- dfm_trim( dfm(moviesShuffled, verbose = FALSE), min_termfreq = 10)
+
+# training class: extract sentiment of 1500 movies
+train_labels <- docvars(moviesShuffled, "sentiment")
+# test class: create empty values to be filled
+train_labels[1501:2000] <- NA
+
+# convert to ordered variable
+trainclass <- factor(train_labels)
+
+table(trainclass, useNA = "ifany")
+```
+
+### Question 3 (4 points)
+
+Use a lasso regression with five-fold cross-validation through the `cv_glmnet()` function in the `glmnet` package to classify the movie reviews. Then, show the graph with the cross-validated performance of the model based on the number of features included. You should find a curve-linear pattern. Why do you think this pattern emerges?
+
+```{r}
+set.seed(1234)
+lasso <- cv.glmnet(x=movieDfm[1:1500,], y=trainclass[1:1500], 
+                  # set alpha=1 to use lasso regression
+                   alpha= 1, 
+                   # use only 5 folds instead of 10 to speed things up
+                   nfolds= 5,
+                   # fit the model for a binary outcome
+                   family="binomial")
+plot(lasso)
+```
+
+
+**Your answer here**
+
+> From left to right, the error decreases to a minimum and then increases again. The left side shows the error for very complex models with many features and therefore low values for the penalty parameter lambda. Conversely, the right side of the plot shows error values for simple models with low penalty values. Note that in Lasso regression the number of features depends on the value of the penalty parameter.
+The approximate U-shape of the error curve can be explained by considering the trade-off when choosing between complex and less complex models. More complex models might fit well to the training data but produce only a loose fit to new data and thus a high generalization error. On the other hand, more simple models also produce a high error if the true function is indeed complex. Cross-validation allows us to choose a model specification for a given penalty value that reconciles both sides of the trade-off: For the best possible generalizations, we do not want to overfit to the training data but also avoid choosing too simple model specifications.
+
+> Note: Your answer does not have to be this extensive!
+
+
+### Question 4 (3 points)
+
+Predict the scores for the remaining 500 reviews in the test set and then compute precision and recall for the positive category, the F1 score, and the accuracy.
+
+```{r}
+precrecall <- function(mytable, verbose = T) {
+    truePositives <- mytable[1,1]
+    falsePositives <- sum(mytable[1,]) - truePositives
+    falseNegatives <- sum(mytable[,1]) - truePositives
+    precision <- truePositives / (truePositives + falsePositives)
+    recall <- truePositives / (truePositives + falseNegatives)
+    if (verbose) {
+        print(mytable)
+        cat("\n precision =", round(precision, 2), 
+            "\n    recall =", round(recall, 2), "\n")
+    }
+    invisible(c(precision, recall))
+}
+```
+
+
+```{r}
+moviePreds <- predict(lasso, movieDfm[1501:2000,], type="class")
+(movTable <- table(moviePreds, docvars(moviesShuffled, "sentiment")[1501:2000]))
+
+# precision, recall
+pr <- precrecall(movTable[2:1, 2:1])
+# F1
+2 * prod(pr) / sum(pr)
+# Accuracy
+sum(diag(movTable)) / sum(movTable)
+
+```
+
+
+
+### Question 5 (2 points)
+
+Look at the coefficients with the highest and lowest values in the best cross-validated model. What type of features is the classifier relying on to make predictions? Do you think this is a good model?
+
+```{r}
+# extracting coefficients
+best.lambda <- which(lasso$lambda==lasso$lambda.1se)
+beta <- lasso$glmnet.fit$beta[,best.lambda]
+
+## identifying predictive features
+df <- data.frame(coef = as.numeric(beta),
+                word = names(beta), stringsAsFactors=F)
+
+df <- df[order(df$coef),]
+head(df[,c("coef", "word")], n=30)
+tail(df[,c("coef", "word")], n=30)
+
+# note that the coefficients for some features became 0
+table(df$coef == 0)
+```
+
+
+**Your answer here**
+
+> We will look at the coefficients with the highest and lowest values based on the lambda which is one standard deviation away from the minimum of the cross-validation error (lamda.1se). In the graph shown above this value of lambda is represented by the dashed line closest to the more simple model.
+
+>For some of the features with the highest positive coefficients, it is plausible that the model uses these to predict positive movie reviews. These include “wonderfully”, “excellent”, or “enjoyed”. For some features, however, it is less obvious that they are suitable for predicting positive reviews. For example, these include “flaws”, “follows”, or “allows”.
+
+>However, it is difficult to say whether the coefficients for these words are indeed nonsensical when it comes to classifying reviews. Possibly, these words are indeed more likely to be used in the context of positive reviews and the model therefore captures a structure in the texts that is not directly visible.
+
+> Note: Your answer does not have to be this extensive!

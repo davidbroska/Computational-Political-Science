@@ -1,0 +1,144 @@
+---
+title: 'CPS Summative Assignment 2 Part A Solutions'
+subtitle: 'Classifying and scaling amicus briefs'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+library(quanteda)
+library(quanteda.textmodels)
+# if you haven't done so already, you also have to install the quanteda corpora package 
+# devtools::install_github("quanteda/quanteda.corpora") 
+```
+
+
+In this assignment, we will continue our work on document classification with Naive Bayes and supervised scaling employing Wordscores. In particular, this exercise uses *amicus curiae* briefs from US Supreme Court cases on affirmative action in college admissions analyzed by [(Evans et al 2007)](http://onlinelibrary.wiley.com/doi/10.1111/j.1740-1461.2007.00113.x/full).
+
+[Amicus curiae](http://en.wikipedia.org/wiki/Amicus_curiae) are persons or organizations not party to a legal case who are permitted by the court to offer it advice in the form of an *amicus brief*. The amicus briefs in this corpus are from an affirmative action case in which an applicant to a university who was denied a place petitioned the Supreme Court, claiming that they were unfairly rejected because of affirmative action policies. *Amicus curiae* could advise the court either in support of the petitioner, therefore opposing affirmative action, or in favor of the respondent — the University- therefore supporting affirmative action.
+
+The corpus consists of 102 documents that are either labeled with P (Pro-Petitioner) representing the "conservative" position on affirmative action or with R (Pro-Respondent) representing the "liberal" stance on the issue. For more information on the dataset please run `?quanteda.corpora::data_corpus_amicus` in R.
+
+We will use the original briefs from the [Bolinger case](http://en.wikipedia.org/wiki/Grutter_v._Bollinger#Case_.28_Supreme_Court_.29) examined by Evans et al (2007) for the training set, and the amicus briefs as the test set.
+
+```{r}
+data(data_corpus_amicus, package = "quanteda.corpora")
+summary(data_corpus_amicus, 5)
+```
+
+### Question 1 (1 points)
+
+The first four texts will be our training set - these are already set in the docvars to the `data_corpus_amicus` object. Extract all training classes from the corpus using `docvars()` and assign them an object called `trainclass`. Similarly, extract all test labels from the corpus and assign them to an object called `testclass`.
+
+```{r}
+# set training class
+trainclass <- docvars(data_corpus_amicus, "trainclass")
+# set test class
+testclass  <- docvars(data_corpus_amicus, "testclass")
+```
+
+### Question 2 (3 points)
+
+Construct a DFM called `amicusDfm` and predict the test class values using the Naive Bayes classifier.
+
+```{r}
+amicusDfm <- dfm(data_corpus_amicus)
+amicusNB <- textmodel_nb(amicusDfm, trainclass)
+amicusNBpred <- predict(amicusNB)
+head(amicusNBpred)
+```
+### Question 3 (3 points)
+
+Compute accuracy, precision, and recall for both categories. Hint: You will have to create two confusion matrices. One of them has the set of `AR` *and* `A` in the cell for the true positives and the other has the set of `AP` *and* `P` as true positives.
+
+```{r}
+# function to compute performance metrics
+precrecall <- function(mytable, verbose=TRUE) {
+    truePositives <- mytable[1,1]
+    falsePositives <- sum(mytable[1,]) - truePositives
+    falseNegatives <- sum(mytable[,1]) - truePositives
+    precision <- truePositives / (truePositives + falsePositives)
+    recall <- truePositives / (truePositives + falseNegatives)
+    if (verbose) {
+        print(mytable)
+        cat("\n precision =", round(precision, 2), 
+            "\n    recall =", round(recall, 2), "\n")
+    }
+    invisible(c(precision, recall))
+}
+```
+
+    
+```{r}
+amicusPredTable <- table(amicusNBpred, testclass)
+sum(diag(amicusPredTable)) / sum(amicusPredTable)
+precrecall(amicusPredTable)
+precrecall(amicusPredTable[2:1, 2:1])
+```
+    
+### Question 4 (3 points)
+
+Now rerun steps of questions 2 and 3 after weighting the DFM using *tf-idf*, and see if this improves prediction. What do you find?
+    
+```{r}
+# computing TF-IDF weights
+amicusDfmTfidf <- dfm_tfidf(amicusDfm)
+# running model again and computing predictions
+amicusNBTfidf <- textmodel_nb(amicusDfmTfidf, trainclass)
+amicusNBpredTfidf <- predict(amicusNBTfidf)
+amicusPredTableTfidf <- table(amicusNBpredTfidf, testclass)
+# performance metrics
+sum(diag(amicusPredTableTfidf)) / sum(amicusPredTableTfidf)
+precrecall(amicusPredTableTfidf)
+precrecall(amicusPredTableTfidf[2:1, 2:1])
+```
+
+**Your answer here** 
+
+> It diminishes our precision for predicting petitioner, but improves recall; improves precision on predicting Respondent but diminishes recall.
+
+
+Evans et al. (2007) use Naive Bayes and Wordscore to answer the question of whether an amicus brief was written in support of the liberal or the conservative position on affirmative action. Although liberalism and conservatism is not a clear-cut distinction, the authors use the Naive Bayes classifier as a baseline to assess the plausibility of the results from the Wordscore scaling method.
+
+### Question 5 (1 point)
+
+Let's apply the Wordscore method to the amicus curie briefs. We start by converting the document labels into numbers. In the training vector, replace the Pro-Petitioner ("conservative") position with `-1` and the Pro-Respondent ("liberal") stance with `1`.
+
+
+```{r}
+docscales <- ifelse(trainclass == "P", -1, 1)
+```
+
+
+### Question 6 (3 points)
+
+Now use the numerical training vector to fit the Wordscore model to the `amicusDfm` specified above. Extract the Wordscores using `coef()`, assign them to an object called `scored_words`, sort this vector by magnitude, and display the words with the 10 largest and the 10 lowest Wordscores.
+
+
+```{r}
+ws <- textmodel_wordscores(amicusDfm, docscales)
+scored_words <- coef(ws)
+
+head( sort(scored_words, decreasing = T), n=10)
+tail( sort(scored_words, decreasing = T), n=10)
+```
+
+### Question 7 (3 points)
+
+The object `scored_words` is a named vector containing the words that can be extracted with `names()`. Use `grep()` to find the index of words that match the patterns "race-based" and "race-conscious*". Then, display the scores of the words matched with the patterns. Finally, use `kwic()` to examine the context of the words.
+
+
+```{r}
+scored_words[ grep("race-based", names(scored_words))]
+scored_words[ grep("race-conscious*", names(scored_words))]
+
+# print first 10 rows
+kwic(data_corpus_amicus, "race-based")[1:10,]
+kwic(data_corpus_amicus, "race-conscious*")[1:10,]
+```
+
+
