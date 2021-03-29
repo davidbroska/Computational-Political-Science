@@ -1,5 +1,5 @@
 ---
-title: 'CPS Summative Assignment 3 Part B Solutions'
+title: 'CPS Summative Assignment 3 Part B'
 subtitle: 'Winning arguments on social media'
 author: "YOUR NAME HERE"
 output: html_document
