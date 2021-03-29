@@ -223,6 +223,7 @@ post_rdfm_uniq <- post_r_uniq %>%
 
 # estimate LDA with K topics
 K <- 30
+set.seed(123)
 lda <- LDA(post_rdfm_uniq, k = K, method = "Gibbs",
            control = list(verbose=0L, seed = 123, burnin = 100, iter = 500))
 
