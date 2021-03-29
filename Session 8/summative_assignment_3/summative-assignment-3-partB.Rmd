@@ -1,0 +1,292 @@
+---
+title: 'CPS Summative Assignment 3 Part B Solutions'
+subtitle: 'Winning arguments on social media'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include=F}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+# install.packages("gridExtra")
+library(gridExtra)
+library(quanteda)
+library(topicmodels)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+What are the characteristics of arguments that are more likely to change people's minds? In this part of the assignment, we will try to answer this question using data collected from social media and all the text analytic methods we have covered throughout this course. This problem set was inspired by the article ["Winning arguments"](https://arxiv.org/pdf/1602.01103.pdf) by Tan et al. (I recommend you take a look at the paper for some background information.)
+
+## Collecting data from Reddit
+
+The data for this assignment come from the [*Change My View*](https://www.reddit.com/r/changemyview) subreddit on Reddit. This subreddit is a forum where someone gives an opinion and then in the comments other users try to make arguments to change that person's opinion. Whenever his/her opinion changes, this is noted with a `delta`, which means he/she changed their mind.
+
+The `RedditExtractoR` package facilitates data collection with the `get_reddit` function. For your convenience, I have already collected the data for you using the code below, which took around 40 minutes to run. In this assignment, we will use the `cmv-comments.csv` dataset.
+
+Note that this code for collecting data won't be executed when compiling the .Rmd file to an .html document because the option for the code is set to `eval=FALSE`.
+
+```{r data-collection, eval=FALSE}
+library(RedditExtractoR)
+
+# collecting up to 50 pages of posts in r/changemyview
+rd <- get_reddit(subreddit="changemyview", sort="new", page_threshold=50)
+
+# deleting bot messages and removed messages
+rd <- rd[rd$user!="DeltaBot",]
+
+# finding comments that gave deltas
+rd$delta <- grepl("!delta|#8710|\006", rd$comment)
+
+# finding comments that changed people's minds
+deltas <- which(rd$delta) # comments that assign deltas
+changed_views <- rd[deltas-1,] # comments that received deltas
+changed_views$delta <- 1
+
+# taking a random sample of rest of comments as control group
+others <- (1:nrow(rd))[-c(deltas, deltas-1)]
+set.seed(123)
+notcmv <- sample(others, length(deltas))
+did_not_change_views <- rd[notcmv,]
+did_not_change_views$delta <- 0
+
+# putting both sets together
+r <- rbind(changed_views, did_not_change_views)
+
+# deleting removed / deleted comments
+r <- r[-grep("comment has been removed", r$comment),]
+r <- r[r$comment!="[deleted]",]
+
+# keeping comments longer than 10 words
+r <- r[ntoken(r$comment)>10,]
+
+# create file name with current time stamp
+filename <- paste0(as.character(Sys.Date()), "-cmv-comments.csv")
+
+# save data set as .csv file
+write.csv(r, file = filename, row.names=F)
+```
+
+### Question 1 (3 points)
+
+Start by reading the `cmv-comments.csv` dataset. Save it to the workspace with the name `r`. As with most real-world data sets, the Reddit dataset has some issues that require data cleaning. Note that two comments only include links but no further text. Remove those observations from the dataset with the following texts in the `comment` variable:
+
+- [https://imgur.com/a/zh1s9](https://imgur.com/a/zh1s9
+- https://www.washingtonpost.com/news/monkey-cage/wp/2017/08/24/did-enough-bernie-sanders-supporters-vote-for-trump-to-cost-clinton-the-election/?utm_term=.d07e3eac1191
+
+Use the cleaned dataset to create a corpus object with the text in the `comment` variable. Call the corpus object `rc`. Then, create a document-feature-matrix named `rdfm` from the corpus object.
+
+```{r}
+
+```
+
+# Descriptive statistics for text
+
+The first step in most analyses is to describe the collected data set. Descriptive statistics are useful to familiarize ourselves and our readers with the data.
+
+### Question 2 (3 points)
+
+What linguistic features make comments more convincing? For example, we could ask whether comments that receive a delta have higher levels of complexity? The code below computes the type-to-token ratio and the Flesh-Kincaid readability index as measures of comment complexity.
+
+```{r}
+# compute type-to-token ratio and variations
+r$ttr <- textstat_lexdiv(rdfm, measure="TTR")[["TTR"]]
+
+# Flesch-Kincaid readability index
+r$fk <- textstat_readability(rc, measure = "Flesch.Kincaid")[["Flesch.Kincaid"]]
+
+# boxplot type-to-token ratio
+bplot_ttr <- ggplot(r, aes(factor(delta), ttr, fill = factor(delta))) + 
+  geom_boxplot() +
+  # add mean ttr to plot
+  stat_summary(fun="mean", geom="point", shape=20, size=3, color="red", fill="red") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(y = "Type-to-token ratio", x = "Delta") 
+
+
+# boxplot FK index
+bplot_fk <- ggplot(r, aes(factor(delta), fk, fill = factor(delta))) + 
+  geom_boxplot() +
+  # add mean FK to plot
+  stat_summary(fun="mean", geom="point", shape=20, size=3, color="red", fill="red") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(y = "Flesch-Kincaid readability index", x = "Delta") +
+  # remove extreme outlier
+  coord_cartesian(ylim = quantile(r$fk, c(0.001, 0.999)))
+
+# plot side by side 
+# note that you might need to install the gridExtra package
+grid.arrange(bplot_ttr, bplot_fk, nrow = 1)
+```
+
+The left panel of the figure above shows that the lexical diversity as measured by the type-to-token ratio is lower for those comments which persuaded the original poster. It should be mentioned, however, that this metric sensitive the to overall length of a comment, as shorter texts may exhibit fewer word repetitions.
+
+The right panel of the figure displays the distribution of the Flesch-Kincaid readability as function of delta. It turns out that persuasive comments tend to have a higher readability score indicating better accessibility for a broader audience. Also, the most readable comment with a Flesh-Kincaid value of `r max(r$fk)` is a comment that changed the view of the original poster (this extreme outlier was removed in the boxplot above).
+
+In summary, both measures indicate that less complex comments tend to be more convincing. 
+
+<small>
+<!-- The following r code prints most readable comment as measured by FK received a delta in *text format*. It is surrounded by two html tags which makes the text smaller in the html document -->
+`r r[which.max(r$fk), "comment"]`
+</small>
+
+Adjust the code used to measure the language complexity to answer the following question: Are comments that receive a delta longer than comments which do not? Use a quanteda function to measure the length of comments and compare the delta and non-delta comments with a boxplot. What do you find?
+
+```{r, fig.align='center'}
+
+```
+
+**Your answer here**
+
+> 
+
+
+### Question 3 (2 points)
+
+Are off-topic comments less likely to be convincing? To answer this question, we compute a metric of distance between `post_text` - the text of the original post (from the author who wants to be convinced) - and `comment` - the text of the comment that was found persuasive. We do this for each row of the dataset. We can use any appropriate metric but we should pay attention to whether any type of normalization is required.
+
+The code below produces two boxplots for euclidean distance and cosine distance, that is, 1 - cosine similarity. Interpret the boxplot and explain why you think or why you don't think that these distance metrics capture whether a comment is `off-topic` or not. If you do not think that distance metrics measure the extent to which texts are about the same topic, what concept do they measure instead? 
+
+```{r boxplot-distances, fig.cap="Distances between comment and post computed on normalized term frequencies", out.width="90%", fig.align="center"}
+# create post dfm
+post_rdfm <- r %>% corpus(text_field = "post_text") %>% dfm()
+# weight post dfm
+tw_post_rdfm <- post_rdfm %>% dfm_weight("prop")
+
+# weight comment dfm 
+tw_rdfm <- rdfm %>% dfm_weight("prop")
+
+# compute euclidean distance
+euc_dist <- textstat_dist(tw_rdfm, tw_post_rdfm, method="euclidean") %>% as.matrix()
+# compute cosine similarity
+cos_simi <- textstat_simil(tw_rdfm, tw_post_rdfm, method="cosine") %>% as.matrix()
+
+# organize measures into dataframe and compute cosine distance (1-similarity)
+dist_df <- tibble(delta = r$delta, 
+                  euc_dist = diag(euc_dist),
+                  cos_dist = 1 - diag(cos_simi))
+
+
+# create labels for plot
+plot_labels <- as_labeller(c("cos_dist"="Cosine distance (1-similarity)",
+                             "euc_dist"="Euclidean distance"))
+
+# create boxplot
+dist_df %>% 
+  gather(var, val, - delta) %>% 
+  ggplot(aes(factor(delta), val, fill = factor(delta))) +
+  geom_boxplot() +  
+  theme_bw() +
+  stat_summary(fun="mean", geom="point", shape=20, size=3, color="red", fill="red") +
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "none") +
+  labs(x = "Delta", y = "Distance") +
+  facet_wrap(~ var, labeller = plot_labels)
+
+```
+
+**Your answer here**
+
+> 
+
+
+# Topic modeling
+
+Are there specific topics about which people are more likely to change their mind? In the remaining questions, we will examine whether persuasion is more likely to happen for some topics than others.
+
+The code below fits a LDA topic model to the text of the original post (`post_text`). Based on previous analyses, 30 topics seemed to be appropriate. 
+
+```{r}
+# create dfm with unique post text
+post_r_uniq <- r %>% 
+  # indicate whether any comment was assigned a delta
+  group_by(post_text) %>% 
+  mutate(has_delta = any(delta == 1) %>% 
+           ifelse(.,"yes","no") %>% 
+           factor(levels = c("no","yes"))) %>% 
+  ungroup() %>% 
+  distinct(post_text, has_delta, .keep_all = T)
+
+# create dfm of unique post texts
+post_rdfm_uniq <- post_r_uniq %>% 
+  corpus(text_field = "post_text") %>% 
+  dfm(remove = stopwords("en"), remove_numbers = T, remove_punct = T) %>% 
+  dfm_trim(min_docfreq = 2)
+
+
+# estimate LDA with K topics
+K <- 30
+lda <- LDA(post_rdfm_uniq, k = K, method = "Gibbs",
+           control = list(verbose=0L, seed = 123, burnin = 100, iter = 500))
+
+```
+
+### Question 4 (4 points)
+
+Use the function `get_terms()` to extract the matrix which contains the top 15 (or more) tokens that are most strongly associated with a topic. Assign this matrix to the object `docterms`. 
+
+Based on this matrix, label each of the 30 topics with a name that seems most reasonable to you. You can do this in the following way. Create a character vector called `tlabels` that includes 30 topic labels. Then, overwrite the column names of `docterms` by assigning the labels to the column names of the matrix extracted by `colnames()`.
+
+
+```{r}
+
+```
+
+### Question 5 (2 points)
+
+A convincing analysis uses effective tools to communicate results to the reader. Use the following function to display the `docterms` matrix in .html file that results from knitting the .Rmd file. Create one table per 10 topics so that you have three tables in total.
+
+```{r}
+# define custom function to print df
+custom_kable <- function(.tbl){
+  
+  .tbl %>% 
+    knitr::kable(format = "html") %>% 
+    kableExtra::kable_styling()
+  
+}
+
+
+```
+
+
+### Question 6 (2 points)
+
+The code below adds a new variable to the data frame that refers to the most likely topic for that post and computes the proportion of threads related to that topic for which a delta was assigned. Please interpret the plot to answer the initial question of whether there are specific topics about which people are more likely to change their minds.
+
+**Your answer here**
+
+>
+
+```{r prop-topics,fig.cap="Proportion of deltas assigned to a thread of a given topic", fig.align='center'}
+# get column number of most likely topic per doc
+tnumber_of_doc <- get_topics(lda)
+# get associated label of topic
+tlabel_of_doc  <- tlabels[tnumber_of_doc]
+# assign to post_text dataframe
+post_r_uniq$tlabel <- tlabel_of_doc
+
+
+# compute proportion of deltas assigned to a thread of a given topic
+prop_topics <- post_r_uniq %>% 
+  group_by(has_delta) %>% 
+  count(tlabel) %>% 
+  mutate(prop = n / sum(n)) %>%
+  arrange(-prop)
+
+ggplot(prop_topics, aes(tlabel, prop, fill = has_delta)) + 
+  geom_col(position = "dodge") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_bw() +
+  labs(x = "Topic", y = "Proportion", fill = "Delta\ngranted") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.25))
+
+```
+
