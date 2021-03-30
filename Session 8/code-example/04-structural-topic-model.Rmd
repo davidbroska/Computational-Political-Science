@@ -22,7 +22,7 @@ library("lubridate")
 In this notebook, we will illustrate functionalities of structural topic models with the help of a random sample of 10,000 public Facebook posts by members of the U.S. Congress from 2017. With this data, we will use and explore code examples from the `stm` package [vignette](https://cran.r-project.org/web/packages/stm/vignettes/stmVignette.pdf). Loading the data:
 
 ```{r}
-df <- read.csv("data/fb-congress-data.csv")
+df <- read.csv("../../data/fb-congress-data.csv")
 df$message <- stri_unescape_unicode(df$message) # unescaping unicodes
 colnames(df)
 ```

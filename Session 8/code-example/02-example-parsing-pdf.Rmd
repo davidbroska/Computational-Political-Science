@@ -23,7 +23,7 @@ As an example, let us consider Newton's Principia (1687) in its English translat
 The PDF is parsed into R using the `pdf_text` function which returns a character vector with one row corresponding to one page:
 
 ```{r}
-principia <- pdf_text("data/Newton_s_Principia.pdf")
+principia <- pdf_text("../../data/Newton_s_Principia.pdf")
 class(principia)
 length(principia)
 ```

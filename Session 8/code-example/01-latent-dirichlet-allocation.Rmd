@@ -21,7 +21,7 @@ library(quanteda)
 
 ```{r message = F}
 # reading data and preparing corpus object
-nyt <- read.csv("data/nytimes.csv", stringsAsFactors = FALSE)
+nyt <- read.csv("../../data/nytimes.csv", stringsAsFactors = FALSE)
 nytcorpus <- corpus(nyt$lead_paragraph)
 nytdfm <- dfm(nytcorpus, remove=stopwords("english"), verbose=TRUE,
                remove_punct=TRUE, remove_numbers=TRUE)
