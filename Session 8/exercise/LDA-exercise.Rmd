@@ -17,7 +17,7 @@ library("scales")
 1. The running example in this exercise will focus on understanding the communication strategies of Donald Trump on Twitter. First, read the file `trump-tweets.csv`, which contains Trump's tweets from January 1st 2017 to June 29th 2018. Create a histogram with the number of tweets by month.
 
 ```{r}
-tweets <- readr::read_csv("trump-tweets.csv", col_types="cTDc")
+tweets <- readr::read_csv("../../data/trump-tweets.csv", col_types="cTDc")
 
 
 tweets %>% 

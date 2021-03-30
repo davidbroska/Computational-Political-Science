@@ -1,0 +1,207 @@
+---
+title: "Latent dirichlet allocation"
+subtitle: "Coding exercise solutions"
+output: html_document
+---
+
+```{r, message=F, warning=F}
+# install.packages("readr")
+library("quanteda")
+library("topicmodels")
+library("ggplot2")
+library("dplyr")
+library("scales")
+```
+
+
+1. The running example in this exercise will focus on understanding the communication strategies of Donald Trump on Twitter. First, read the file `trump-tweets.csv`, which contains Trump's tweets from January 1st 2017 to June 29th 2018. Create a histogram with the number of tweets by month.
+
+```{r}
+tweets <- readr::read_csv("../../data/trump-tweets.csv", col_types="cTDc")
+
+tweets %>% 
+  mutate(monthly = date %>% cut(breaks = "month") %>% as.Date()) %>% 
+  group_by(monthly) %>% 
+  count() %>% 
+  # create plot
+  ggplot(aes(monthly, n)) + 
+  geom_col() + 
+  theme_bw() +
+  labs(x = "Date", y = "Number of tweets") +
+  scale_x_date(labels = date_format("%Y-%m"),
+               breaks = as.Date(c("2017-01-01","2017-07-01", 
+                                  "2018-01-01","2018-06-01"))) 
+```
+
+Create a corpus object and a DFM by removing stopwords, punctuation, and numbers.
+
+```{r}
+ctweets <- corpus(tweets)
+
+dfm_tweets <- ctweets %>% 
+  dfm(remove = stopwords("english"), 
+      remove_punct = T, remove_numbers = T) %>% 
+  dfm_trim(min_docfreq = 2)
+
+# keep tweets with at least 5 tokens
+tweets     <- tweets[rowSums(dfm_tweets) >= 5, ]
+ctweets    <- ctweets[rowSums(dfm_tweets) >= 5]
+dfm_tweets <- dfm_tweets[rowSums(dfm_tweets) >= 5, ]
+```
+
+2. Run an LDA model. You may want to experiment with different number of topics or just stick to `K=30` as in the previous example, and to experiment with different pre-processing decisions. For reproducibility, please set the seed=123. Also, 500 iterations will be sufficient for this coding exercise. 
+
+```{r}
+# estimate LDA with K topics
+K <- 30
+set.seed(123)
+lda <- LDA(dfm_tweets, k = K, method = "Gibbs", 
+           control = list(verbose=0L, seed = 123, burnin = 100, iter = 500))
+```
+
+Look at the words most associated with each topic for a sample of topics. Do you find that the results are valid according to the different definitions of validity we discussed in the lecture? Can you put labels to the topics? Hint: you might want to use the functions `get_terms()` and `get_topics()`. 
+
+```{r}
+# define labels
+labels <- c("victory", "hurricane", "people", "presidency", "history", 
+            "power", "event", "happening", "order", "future", 
+            "politics I", "immigration", "fake news", "twitter", 
+            "obama", "good", "democrats", "republican", "texas", 
+            "politics II", "florida", "tax cuts", "together", "trade", 
+            "praise", "economy", "jobs", "Email controversy", "misc.", "north korea")
+
+# extract words of each topic
+terms <- get_terms(lda, 15) 
+colnames(terms) <- labels
+
+# define custom function to print df
+custom_kable <- function(.tbl){
+  
+  .tbl %>% 
+    knitr::kable(format = "html") %>% 
+    kableExtra::kable_styling(bootstrap_options = "hover")
+  
+}
+
+# output
+custom_kable(terms[, 1:10])
+custom_kable(terms[,11:20])
+custom_kable(terms[,21:30])
+```
+
+
+3. Pick a topic whose prevalence you think may have evolved over time and plot it. (For example, North Korea). What do you find?
+
+```{r abs-freq-tweets, fig.cap="Tweets about the email controversy (abs. freq.)"}
+# add predicted topic to dataset
+tweets$pred_topic <- get_topics(lda)
+tweets$yearmonth  <- as.Date(gsub("-[0-9]{2}$","-01", tweets$date))
+
+# frequency table with articles about email controversy per month
+t28_per_month <- tweets %>% 
+  filter(pred_topic == 28) %>% 
+  group_by(yearmonth) %>% 
+  count(name = "n")
+
+
+ggplot(t28_per_month, aes(yearmonth, n)) + 
+  geom_line() +
+  theme_bw() +
+  labs(x = "Date", y = "Tweets (absolute frequency)",
+       title = "Hillary Clinton email controversy and election fraud") +
+  scale_x_date(labels = date_format("%Y-%m"), 
+               breaks = as.Date(c("2017-01-01","2017-07-01", 
+                                  "2018-01-01","2018-06-01"))) 
+```
+
+
+```{r rel-freq-tweets, fig.cap="Tweets about the email controversy (rel. freq.)"}
+# overall number of tweets
+t_per_month <- tweets %>% 
+  group_by(yearmonth) %>% 
+  count(name = "N") 
+
+# combine tables and compute relative frequency
+tbl <- left_join(t28_per_month, t_per_month, by = "yearmonth") %>% 
+  mutate(rel_freq = n / N)
+
+# plot predicted number of tweets about North Korea
+ggplot(tbl, aes(yearmonth, rel_freq)) + 
+  geom_line() +
+  theme_bw() +
+  labs(x = "Date", y = "Tweets (relative frequency)",
+        title = "Hillary Clinton email controversy and election fraud") +
+  scale_x_date(labels = date_format("%Y-%m"), 
+               breaks = as.Date(c("2017-01-01","2017-07-01", 
+                                  "2018-01-01","2018-06-01"))) 
+```
+
+
+**YOUR ANSWER HERE.**
+
+*Analysing one topic over time*
+
+>For this exercise, I chose topic 10 which is associated with the controversy about the [Hillary Clinton email controversy](https://en.wikipedia.org/wiki/Hillary_Clinton_email_controversy). She used a private email server for official public communication instead of an account maintained on secure federal servers. The discussion received a lot of attention during the 2016 presidential elections, for example with the release of the results of an FBI investigation announced by James Comey in May 2016. Also after a second inquiry conducted around the time of the elections in late October 2016, the result is that no charges should be filed against Clinton. In June 2018 the issue had received renewed attention as another report was released on the FBI investigation by Department of Justice Office. The decision not to prosecute Clinton was found to be correct.
+
+>Figure \@ref(fig:abs-freq-tweets) shows the absolute frequencies on that topic for a given month. Since the number of tweets varies strongly from month to month, I also computed the relative frequencies, i.e. the number of tweets on that topic as a share of all tweets for that month (figure \@ref(fig:rel-freq-tweets)).
+It turns out that Trump addressed the topic with various intensity between January 2017 and June 2018. However, around the publication of the Department of Justice Office's report, activity is increasing again. Against the background of the events described above, figure \@ref(fig:rel-freq-tweets) thus meets our initial expectations. The following tweet shows that Trump is impatiently awaiting the report, not missing the opportunity to disparage Clinton and Comey:
+
+
+```{r}
+tweets %>% filter(pred_topic == 28, id_str == 1003949263481696256) %>% pull(text)
+```
+
+>*Validity*
+
+>As shown in task 2, it is possible to assign an overarching label for many of the resulting topics. Those topics that do not have an apparent meaning were assigned to a residual category ("misc."). Overall, there seems to be no substantial concern regarding the semantic validity of the topics.
+
+>To ensure predictive validity, I examined whether variation in the topic usage displayed meets expectations based on further research on a specific case. Figure \@ref(fig:rel-freq-tweets) shows that the email controversy was indeed more frequently addressed in Trump's tweets when the Department of Justice Office's report was released.
+
+>Although it is also important to assess convergent/discriminant construct validity, it is beyond the scope of this assignment to compare this measurement of the topic with similar quantitative analyses. 
+
+<br>
+
+
+4. For this topic, compute the probabilities that each word is associated with the topic. You should be able to get them from the `beta` value within the `LDA` object. Note that the values of this matrix are in the log scale; in order to get the probabilities you'll need to exponentiate them. Sort the words from highest to lowest probability and display the top 30. If your code is correct, you should see the same result as when you ran `terms()` earlier:
+
+```{r}
+# probabilities that a word is associated with topic 10
+tibble(features      = lda@terms, 
+       probabilities = exp(lda@beta[28, ])) %>% 
+  arrange(- probabilities) %>% 
+  head(30)
+```
+
+5. Now, use this metric but to extract the probability that a given word belongs to each of the topics. Choose the word "russia" (or any other word you find relevant) and compute those probabilities. Note that these probabilities will probably be very small, but you can normalize them so that they all up to one for this given word. To which topic does the word "Russia" belong?
+
+```{r}
+# get index of the word "clinton"
+index_of_feature <- which(lda@terms == "clinton")
+
+# organize probabilities that the word belongs to a topic into df
+tibble(feature = "clinton",
+       topic   = colnames(terms),
+       p       = exp(lda@beta[,index_of_feature])) %>% 
+  mutate(normalised_p = p / sum(p)) %>% 
+  arrange(- p)
+       
+```
+
+
+```{r}
+# get index of the word "russia"
+index_of_feature <- which(lda@terms == "russia")
+
+# organize probabilities that the word belongs to a topic into df
+tibble(feature = "russia",
+       topic   = colnames(terms),
+       p       = exp(lda@beta[,index_of_feature])) %>% 
+  mutate(normalised_p = p / sum(p)) %>% 
+  arrange(- p)
+```
+
+**YOUR ANSWER HERE.**
+
+>As expected, with the highest probability the word "clinton" belongs to the email controversy discussed above. 
+
+
