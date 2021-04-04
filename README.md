@@ -193,6 +193,12 @@ The third summative assignment will be released after Session 8 and amounts to 1
 
 In this session, we will cover techniques to turn web data into text or numbers, also known as web scraping. We will learn how to retrieve data via APIs, scrape documents in XML, and parse content from websites with non-static components with Selenium.
 
+*Reading*
+
+If you are not already familiar with the common ways of displaying data on web, it is worthwhile to have a look at these introductions to [HTML and CSS](https://learn.shayhowe.com/html-css/), [XML](https://www.w3schools.com/xml/xml_whatis.asp), [RSS](https://www.w3schools.com/xml/xml_rss.asp), and [XPath](https://www.w3schools.com/xml/xpath_syntax.asp).
+
+A working knowledge of these concepts is required to do screen-scraping, i.e. retrieving data from websites. Please read [this brief introduction](https://www.datacamp.com/community/tutorials/r-web-scraping-rvest) to screen-scraping using the R package `rvest`.
+
 ------------------------------------------------------------------------
 
 ### Session 10
