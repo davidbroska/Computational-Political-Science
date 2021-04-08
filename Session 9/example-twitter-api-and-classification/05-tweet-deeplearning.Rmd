@@ -53,6 +53,7 @@ training_indices <- sample(1:nrow(df), floor(nrow(df)*(1-test_fraction)))
 Loading GloVe word embeddings:
 
 ```{r}
+# download as zip data from https://www.kaggle.com/thanakomsn/glove6b300dtxt
 embeddings = fread_zip("../../data/glove.6B.300d.zip")
 colnames(embeddings) <- c('word', paste('dim',1:300,sep = '_'))
 ```
