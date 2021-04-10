@@ -1,0 +1,25 @@
+---
+title: "Scraping a static HTML website"
+output: html_document
+---
+
+```{r}
+library(rvest)
+library(tidyverse)
+```
+
+
+Go to http://books.toscrape.com/catalogue/page-1.html and scrape the first five pages of data on books with regards to their
+
+- title
+- price
+- star rating
+- availability
+
+Organize your results in a neatly formatted table. 
+
+```{r}
+
+```
+
+

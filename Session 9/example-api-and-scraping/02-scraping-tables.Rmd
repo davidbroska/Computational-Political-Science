@@ -1,0 +1,160 @@
+---
+title: "Scraping web data in table format"
+output: html_document
+---
+
+
+We will start by loading the `rvest` package, which will help us scrape data from the web.
+
+```{r}
+library(rvest)
+library(tidyverse)
+```
+
+The goal of this exercise is to scrape the counts of social security number applicants by year in the US, and then clean the data so that we can generate a plot showing the evolution in this variable over time.
+
+The first step is to read the html code from the website we want to scrape using the `read_html()` function. If we want to see the html in text format, we can then use `html_text()`.
+
+```{r}
+url <- "https://www.ssa.gov/oact/babynames/numberUSbirths.html"
+# Storing the url's HTML code
+html_content <- read_html(url)
+```
+
+
+```{r}
+# Not very informative
+str(html_content)
+print(html_content)
+# Looking at first 1000 characters
+substr(html_content, 1, 1000)
+```
+
+To extract all the tables in the html code automatically, we use `html_table()`. Note that it returns a list of data frames which has length 1 here as there is only one table on this website.
+
+```{r}
+
+# Extracting tables in the document
+tab <- html_table(html_content, fill = TRUE)
+
+# Check object
+str(tab)
+# Website only had one table -> list of length 1 containing the dataframe
+
+# Save the dataframe (tibble)
+social_security_data <- tab[[1]]
+social_security_data <- as_tibble(social_security_data)
+social_security_data
+```
+
+Now let us clean the data so that we can use it for our analysis. We need to convert the population values into a numeric format, which requires deleting the commas. We will also change the variable names so that it is easier to work with them.
+
+```{r}
+## Remove commas and then make variable numeric
+social_security_data$Male <-  as.numeric(gsub(",", "", social_security_data$Male))
+social_security_data$Female <- as.numeric(gsub(",", "", social_security_data$Female))
+social_security_data$Total <- as.numeric(gsub(",", "", social_security_data$Total))
+
+## Rename variables
+colnames(social_security_data) <- c('year', 'male', 'female', 'total')
+```
+
+And now we can plot to see how the number of people applying for a Social Security Number in the US has increased over time.
+
+Classic R plot:
+
+```{r}
+plot(social_security_data$year, social_security_data$male, type = 'l', col = 'red')
+lines(social_security_data$year, social_security_data$female, col = 'blue')
+legend(x = 'topleft', col = c("red", "blue"), lty = 1, legend = c("male", "female"))
+```
+
+Using ggplot2 first requires the data to be in a tidy long format:
+
+```{r}
+
+# Pivot longer function
+social_security_data_long <- pivot_longer(data = social_security_data[, 1:3],
+  cols = c("male", "female"), names_to = "gender", values_to = "individuals")
+
+# Creating the plot
+ggplot(social_security_data_long) +
+  aes(x = year, y = individuals, group = gender, colour = gender) + geom_line()
+```
+
+### Scraping web data in table format: A more advanced example
+
+When there are multiple tables on the website, scraping them becomes a bit more complicated. Let's work through an exemplary scenario: Scraping a table from Wikipedia with a list of the most populated cities in the United States.
+
+```{r}
+url <- "https://en.wikipedia.org/wiki/List_of_United_States_cities_by_population"
+html <- read_html(url)
+tables <- html_table(html, fill=TRUE)
+length(tables)
+```
+
+The function now returns 13 different tables. The option `fill=TRUE` is used because some of the tables appear to have incomplete rows.
+
+In this case, we have to identify the table of interest. This can be done with right click and "Inspect" or "Inspect Element" in the browser. Clicking on the relevant part of the page's code then allows to copy identifiers such as the CSS selector.
+
+CSS selector: table.wikitable:nth-child(18) (extracted with Firefox "Inspect Element")
+
+An alteranative option is to look at the full source code of the website. In Google Chrome e.g., go to _View_ > _Developer_ > _View Source_. All browsers should have similar options to view the source code of a website. In the source code, search for the text of the page (e.g. _2019 rank_). Right above it you will see: `<table class="wikitable sortable ..." ...>`. This is the CSS selector. Using this selector, however, might still return several tables.
+
+Now that we know what we're looking for, let's use `html_nodes()` to identify all the elements of the page that have that CSS class (note that we use a dot before the name of the class because the R function expects CSS notation). Whereas we will find several elements with the CSS selector ".wikitable" which we would have to search subsequently, we will only find one with the very specific selector obtained with inspect element.
+
+
+```{r}
+tables_raw <- html_nodes(html, css = "table.wikitable:nth-child(18)")
+length(tables_raw)
+```
+
+There is only one element contained in this list, so we seem to have found the table.
+
+```{r}
+data_pop <- html_table(tables_raw[[1]], fill=TRUE)
+str(data_pop)
+```
+
+As in the previous case, we still need to clean the data before we can use it. For this particular example, let's see if this dataset provides evidence in support of [Zipf's law for population ranks](https://en.wikipedia.org/wiki/Zipf%27s_law). Keeping only the columns of interest and transforming into a tibble:
+
+```{r}
+data_pop <- as_tibble(select(data_pop, c("City", "2019estimate", "2019rank")))
+data_pop
+```
+
+Renaming and cleaning columns:
+
+```{r}
+
+# Renaming the columns
+data_pop <- rename(data_pop, city_name = "City", population = "2019estimate",
+                   rank = "2019rank")
+
+# Removing superscripts in the city names
+data_pop$city_name <- gsub('\\[.*\\]', '', data_pop$city_name)
+
+# Removes commas and transform population figures into numbers
+data_pop$population <- as.numeric(gsub(",", "", data_pop$population))
+
+data_pop
+```
+
+Now we're ready to generate the figure:
+
+```{r}
+p <- ggplot(data_pop, aes(x=rank, y=population, label=city_name))
+pq <- p + geom_point() + geom_text(hjust=-.1, size=3) +
+	scale_x_log10("log(rank)") + 
+  scale_y_log10("log(population)", labels=scales::comma) +
+  theme_minimal()
+pq
+```
+
+These power laws (https://en.wikipedia.org/wiki/Power_law) are thereby incredibly general. For example, have a look how the first 10 million words in 30 Wikipedias (dumps from October 2015): https://en.wikipedia.org/wiki/Zipf%27s_law#/media/File:Zipf_30wiki_en_labels.png
+
+We can also check if this distribution follows Zipf's law estimating a log-log regression:
+
+```{r}
+summary(lm(log(rank) ~ log(population), data = data_pop))
+```

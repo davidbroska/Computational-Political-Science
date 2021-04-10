@@ -1,0 +1,140 @@
+---
+title: "Scraping RSS feeds"
+output: html_document
+---
+
+Loading packages:
+
+```{r}
+library("rvest")
+library("tidyverse")
+library("lubridate")
+library("stringi")
+```
+
+In this example, we will scrape an RSS feed and some articles from the [The Guardian](www.theguardian.com). Combining the techniques we have covered in the course so far, the goal is to produce a dataset in which one line represents an article. 
+
+Note that scraping RSS feeds is very similar to scraping HTML websites. Broadly speaking, we use the `xml_*` functions instead of the `html_*` functions.
+
+You can read through the [Guardian's RSS documentation](https://www.theguardian.com/help/feeds). As you can see, RSS is provided for each of the news category and the url is always https://www.theguardian.com/####/rss. You can even find some sub category of a specific news category. For instance, the following works: [https://www.theguardian.com/world/japan/rss](https://www.theguardian.com/world/japan/rss). As an example, let us look at the Brexit RSS feed:
+
+```{r}
+url <- "https://www.theguardian.com/politics/eu-referendum/rss"
+```
+
+Before scraping, we can check the structure of the xml document on the browser. We need to know what the node for each article is called and find the xml tag item. Now we read in the document and extract these nodes:
+
+```{r}
+# Reading the xml document
+rss_xml <- read_xml(url)
+
+## Extracting the item nodes in the RSS feed
+nodes <- xml_nodes(rss_xml, css = "item")
+length(nodes)
+```
+
+From these nodes, we extract titles, description, dates, and urls, and combine everything in a dataframe:
+
+```{r}
+# Extract titles
+title <- nodes %>%
+  xml_node("title") %>%
+  xml_text()
+
+# Extract description
+description <- nodes %>%
+  xml_node("description") %>%
+  xml_text() %>%
+  stri_replace_all_regex("<.+?>", " ") # removes residual tags
+  
+# Extract date and process as datetime
+datetime <- nodes %>%
+  xml_node("dc\\:date") %>% 
+  xml_text() %>%
+  parse_datetime() 
+
+# Extract url
+article_url <- nodes %>%
+  xml_node(css = "guid") %>%
+  xml_text()
+
+# Combine everything in a dataframe/tibble
+data_guardian_articles <- tibble(title,
+                                 description,
+                                 datetime,
+                                 article_url,
+                                 full_text = "")
+```
+
+This is the dataframe:
+
+```{r}
+data_guardian_articles
+```
+
+Next, let us prototype how you could scrape the text in the body of each of those URLs. We pick the first URL and write some code to get an object that contains the text of the article. We select all paragraphs in the file.
+
+```{r}
+test_url <- article_url[1]
+
+test_text <- test_url %>%
+  read_html() %>%
+  html_nodes(css = "p") %>% 
+  html_text() %>%
+  paste(collapse = "\n")
+
+test_text
+```
+
+Now that the code works, let us put it into a function that generalises to all URLs in the dataset. This function can be used with a loop or apply later. Recall that we have an empty column in the dataframe called 'text' which we can now fill. Each iteration of e.g. a loop fills the ith element of that vector with the text of the article.
+
+```{r}
+text_extractor <- function(current_url, sec = 2){
+
+  current_text <- current_url %>%
+    read_html() %>% 
+    html_nodes(css = "p") %>%
+    html_text() %>%
+    paste(collapse = "\n") 
+
+  Sys.sleep(sec)
+  
+  return(current_text)
+}
+```
+
+Before we begin the loop, let us reduce the dataset to only the first 10 articles to save some time in this illustration:
+
+```{r}
+# Storing only the first ten rows of the dataframe
+data_guardian_articles_small <- data_guardian_articles[1:10,]
+```
+
+For loop:
+
+```{r}
+for (i in 1:nrow(data_guardian_articles_small)) {
+  
+  # Currently scraping article ...
+  print(i)
+  
+  # Obtain URL of current article
+  current_url <- as.character(data_guardian_articles[i,"article_url"])
+  
+  # Obtain full text of article
+  data_guardian_articles_small[i, "full_text"] <- text_extractor(current_url)
+  
+}
+```
+
+In R, however, we often use apply functions which offer a more compact notation. The function `sapply()` allows to apply another function element-wise to a vector and returns a vector. This vector is assigned to the dataframe as a new column:
+
+```{r}
+data_guardian_articles_small$full_text_2 <- sapply(data_guardian_articles_small$article_url, text_extractor)
+```
+
+Both the for loop and the `sapply()` approach yielded the same outcome:
+
+```{r}
+data_guardian_articles_small
+```

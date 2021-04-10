@@ -1,0 +1,81 @@
+---
+title: "Scraping data with CSS selectors"
+output: html_document
+---
+
+```{r}
+library(rvest)
+```
+
+Let us use our simple self-made website to illustrate how elements of websites can be selected and scraped. First, let us read the HTML content of the site:
+
+```{r}
+url <- "https://github.com/davidbroska/Computational-Political-Science"
+html <- read_html(url)
+```
+
+Next, let us scrape all paragraphs from our website. Recall that the CSS selector of a paragraph was "p".
+
+```{r}
+paragraphs <- html_nodes(html, css = "p")
+# how elements are there in total?
+length(paragraphs) 
+```
+
+The list has length `r length(paragraphs)`, i.e. there are `r length(paragraphs)`paragraphs in our website. In more detail:
+
+```{r}
+paragraphs
+```
+
+If we want to return the text without HMTL tags, we can use the function "html_text()". For example, the first element has the following text:
+
+```{r}
+html_text(paragraphs[[1]])
+```
+
+We use the `trim` argument to get rid of superfluous spacing *around* the text:
+
+```{r}
+html_text(paragraphs[[1]], trim = T)
+```
+
+We can return the texts of all paragraphs contained in the list with a loop:
+
+```{r}
+for (i in 1:length(paragraphs)) {
+  
+  print(html_text(paragraphs[[i]], trim = T))
+  
+}
+```
+
+Now imagine we do not want to scrape all paragraph texts. Fortunately, paragraphs (or more likely other elements) about certain topics could have been assigned different class names by the developers who built the website. 
+In our example, we made up a class for paragraphs that link to parts of the website. In CSS selector notation this is ".anchor" where "." refers to the class of the element. We can scrape only these paragraphs with an anchor link with this code:
+
+```{r}
+tags <- html_nodes(html, css = ".anchor") %>% html_attr('href')
+tags
+```
+
+
+Similarly, we can scrape the table that shows the course schedule. In CSS selector notation, we refer to it as "table":
+
+```{r}
+tab <- html_nodes(html, css = "table") %>% html_table()
+tab
+```
+
+
+Lastly, when inspecting an element and copying the CSS selector in your browser, often a so called pseudo class is returned which names the nth child of a parent element. Conceptually, this makes use of the tree representation of such documents. For example, let us select and scrape only the first paragraph in the second division. "Inspect element" (`Ctrl+shif+I` in Chrome and right-click on the node and choose "Copy selector") yields exactly such a type of CSS selector `#readme > div.Box-body.px-5.pb-5 > article > p:nth-child(101)`. This simply means that the paragraph of interest is the 101st child of the division of parent elements.
+
+Scraping with this CSS selector yields the first part of the description for session 10 from our website:
+
+```{r}
+html %>% 
+  html_nodes(css = "#readme > div.Box-body.px-5.pb-5 > article > p:nth-child(101)") %>% 
+  html_text()
+html %>% 
+  html_nodes(css = "#readme > div.Box-body.px-5.pb-5 > article > p:nth-child(102)") %>% 
+  html_text()
+```

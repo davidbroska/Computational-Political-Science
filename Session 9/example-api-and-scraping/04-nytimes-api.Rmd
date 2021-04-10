@@ -1,0 +1,219 @@
+---
+title: "Using the New York Times API"
+output: html_document
+---
+
+### Article Search API
+
+Loading packages:
+
+```{r}
+library("httr")
+library("jsonlite")
+library("tidyverse")
+```
+
+To understand how APIs work, we will take the New York Times Article Search API as an example. This API allows users to search articles by string and dates, and returns counts of articles and a short description of each article (but not the full text). You can create a new account and obtain a key [here](https://developer.nytimes.com/get-started). Afterwards, paste your key here:
+
+```{r, eval = FALSE}
+apikey <- "yourkeyhere"
+```
+
+The fist step is to identify the base URL of the endpoint and the parameters that we can use to query the API, for the Article Search API you can find this URL structure [here](https://developer.nytimes.com/docs/articlesearch-product/1/overview). Now we can do a first API call using the **httr** package.
+
+```{r}
+base_url <- "http://api.nytimes.com/svc/search/v2/articlesearch.json"
+r <- GET(base_url, query = list(q = "inequality", "api-key" = apikey))
+r
+```
+
+From the output of the response object which we named `r`, we can see that the query was successful (`Status: 200`), the content is in `json` format, and its size is `218 kB`.
+
+There are different options how to proceed with this output using the `content` function. We can look at its text (note that as JSON uses a lot of quotation marks, R signals with a forward slash for each of them that they are not the outer quotation marks of the main character/string in R):
+
+```{r, eval = FALSE}
+substr(content(r, "text"), 1, 1000)
+```
+
+We can also write it to disk as a JSON file:
+
+```{r}
+file_con <- file("nyt.json")
+writeLines(content(r, "text"), con = file_con)
+close(file_con)
+```
+
+Or we can parse the JSON content into a corresponding R object (here a list) to learn more about its structure. We will use these corresponding R objects (mainly lists) in the following for our computations:
+
+```{r}
+json <- content(r, "parsed")
+class(json)
+names(json) # list with 3 elements
+json$status # This should be "OK"
+names(json$response) # the actual data/response in the json object parsed with httr
+length(json$response$docs) # The returned documents (capped at 10)
+json$response$meta # The meta data of the request (hits returns the total number of articles)
+```
+
+So while the amount of returned documents here is capped at ten, there exists the hits key in the meta data which gives the total amount of articles which contained the keyword. This is every helpful for us and we can use it in a function.
+
+If we check the documentation, we find that we can subset by date with the `begin_date` and `end_date` parameters. Let us see how this works:
+
+```{r}
+r <- GET(base_url, query = list(q = "inequality",
+                                "api-key" = apikey,
+                                "begin_date" = 20190101,
+                                "end_date" = 20191231))
+json <- content(r, "parsed")
+json$response$meta
+```
+
+Between these two dates, there were 1,462 articles in the NYT mentioning "inequality".
+
+Now imagine we want to look at the evolution of mentions of this word over time. Following the coding practices we introduced earlier, we want to write a function that will take a word and a set of dates as arguments and return the counts of articles:
+
+```{r}
+nyt_count <- function(q, date1, date2) {
+  
+  # Get the return of the request
+  r <- GET(base_url, query = list(q = q,
+                                  "api-key" = apikey,
+                                  "begin_date" = date1,
+                                  "end_date" = date2))
+  
+  # Add a check whether rate limit was hit and retry until status code OK
+  while (r$status_code != 200){
+    message("Error occured. Retry after 10 seconds..")
+    Sys.sleep(10) # Wait 10 seconds
+    r <- GET(base_url, query = list(q = q,
+                                    "api-key" = apikey,
+                                    "begin_date" = date1,
+                                    "end_date" = date2))
+    
+  }
+  
+  # Parse the return into R once no error
+  json <- content(r, "parsed")
+  
+  # Return the article count
+  return(json$response$meta$hits)
+}
+
+# Article count for January 2019
+nyt_count(q = "inequality", date1 = 20190101, date2 = 20190131)
+```
+
+This seems to work. But we want to run this function multiple times, so let us write another function that helps us do that:
+
+```{r}
+nyt_years_count <- function(q, yearinit, yearend) {
+  
+  # Create a sequence of years to loop over and an empty numeric vector
+  years <- seq(yearinit, yearend)
+  counts <- integer()
+  
+  # loop over years
+  for (y in years) {
+    
+    # Message to track progress
+    message(y)
+    
+    # Retrieve count
+    counts <- c(counts, nyt_count(q = q,
+                                  date1 = paste0(y, "0101"),
+                                  date2 = paste0(y, "1231")))
+    
+    # Wait 6 seconds between requests as only 10 requests per minute allowed
+    Sys.sleep(6)
+    
+  }
+  return(counts)
+}
+```
+
+```{r, error = TRUE}
+# Let us see what happens...
+nyt_years_count(q = "inequality", yearinit = 2019, yearend = 2020)
+```
+
+This seems to work as well. Next, we run this function for 50 years and plot the outcome:
+
+```{r}
+counts_inequality <- nyt_years_count(q = "inequality", yearinit = 1970, yearend = 2020)
+```
+
+```{r}
+plot(1970:2020, counts_inequality, type = "l", main = "Mentions of inequality in the NYT by year",
+     ylab = "Article count", xlab = "")
+```
+
+Note: This output will be somewhat biased by changes in the amount of (print) content. To be more precise, we should divide the time series by the total counts of articles. 
+
+Let us try to improve rewrite the function such that it works with any date interval, not just years and such that it returns a dataframe:
+
+```{r}
+nyt_dates_count <- function(q, init, end, by){
+  
+  # Note that init and end are now date objects and we can create a sequence with them
+  dates <- seq(from = init, to = end, by = by)
+  dates <- format(dates, "%Y%m%d") # changing date format to match NYT API date format
+  counts <- rep(NA, length(dates) - 1)
+  
+  # Loop over periods
+  for (i in 1:(length(dates) - 1)) { ## note the -1 here
+    # Update to track progress
+    message(dates[i])
+    # Retrieve count
+    counts[i] <- nyt_count(q = q, date1 = dates[i],
+                           date2 = dates[i + 1])
+    # Wait 6 seconds between requests as only 10 requests per minute allowed
+    Sys.sleep(6)
+  }
+  
+  # Now the function also returns a dataframe with two columns: date & count
+  df <- data.frame(date = as.Date(dates[-length(dates)], format = "%Y%m%d"), count = counts)
+  return(df)
+}
+```
+
+We can combine this in a plot with dashed lines for specific dates, as the x-axis is now in a date format:
+
+```{r}
+counts <- nyt_dates_count(q = "obama", init = as.Date("2007/01/01"), 
+                          end = as.Date("2012/12/31"), by = "month")
+```
+
+```{r}
+plot(counts$date, counts$count, type = "l", 
+     main = "Mentions of 'Obama' in the NYT by month",
+     xlab = "Month", ylab = "Article count")
+abline(v = as.Date("2007/02/10"), lty = "dashed")
+abline(v = as.Date("2008/08/27"), lty = "dashed", col = "red")
+abline(v = as.Date("2008/11/04"), lty = "dashed", col = "darkred")
+
+```
+
+### Archive API
+
+Lastly, let us look at the Archive API which allows to download all materials for a given month. In the public version of the API, articles do not contain full texts, but usually headlines and very often at least one of abstract, snippet, and/or lead lead paragraphs The structure of the URL/endpoint can be found on  https://developer.nytimes.com/docs/archive-product/1/overview. For example, the correct URL to request all articles September 2008 would be https://api.nytimes.com/svc/archive/v1/2008/9.json?api-key=yourkey. We will use the `sprintf` function from last week to create this URL for July 1855 as an example:
+
+```{r}
+exemplary_archive_url <-sprintf("https://api.nytimes.com/svc/archive/v1/%g/%g.json?api-key=%s", 1855, 7, apikey)
+exemplary_archive_url
+```
+
+Now we can run the associated query:
+
+```{r}
+r <- GET(exemplary_archive_url)
+r
+```
+
+The main data for this month can be obtained with the key "docs" within "response". We can transform this information into a dataframe with:
+
+```{r}
+json_as_text <- content(r, "text")
+json <- fromJSON(json_as_text)
+df <- json$response$docs %>% as_tibble()
+df
+```
