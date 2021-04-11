@@ -69,6 +69,44 @@ You find the literature on <a href=https://learning.zu.de/goto.php?target=fold_3
 </p>
 
 
+---
+# Research Design
+
+####A research design typically has the following structure and answers implicit questions
+
+1. Background/literature review: What do we know already?
+
+--
+
+2. Research question(s): What are you going to try to learn?
+
+--
+
+3. Data collection strategies: What kind of evidence are you going to collect and how will you collect it?
+
+--
+
+4. Data analysis strategies: How does that evidence enable us to draw conclusions?
+
+--
+
+5. Potential impact and relevance of the study: What might those conclusions be and why do they matter?
+
+--
+
+6. Limitations and further research: What are the limitations of what you are going to do? What have you done to mitigate these limitations? What more could be done with extra time and/or resources?
+
+--
+
+7. References / bibliography
+
+#### You can use this structure for the presentation of the reading (session 10) and your own intended research (session 11)
+
+
+
+
+
+
 
 ---
 # Outline for today (session 9)
@@ -275,7 +313,7 @@ library(rvest)
 
 Let's create a simple HTML page
 
-```{html}
+```{}
 <!DOCTYPE html>
 <html>
   <head>
@@ -302,7 +340,7 @@ It will look like this:
 ---
 # Slightly more features
 
-```{html}
+```{}
 <!DOCTYPE html>
 <html>
   <head>
@@ -332,7 +370,7 @@ It will look like this:
 ---
 # With some content divisions
 
-```{html}
+```{}
 <!DOCTYPE html>
 <html>
   <head>
@@ -356,7 +394,7 @@ It will look like this:
 ---
 # Adding some simple CSS
 
-```{html}
+```{}
 <!DOCTYPE html>
 <html>
   <head>
@@ -614,6 +652,7 @@ page %>% html_nodes(xpath= '//h3') %>%
   html_text() %>% paste(collapse = "\n") %>% cat()
 ```
 ]
+--
 
 .pull-left[
 ```{r eval=F}
