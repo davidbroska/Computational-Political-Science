@@ -55,7 +55,7 @@ I am indebted to Kenneth Benoit, Pablo Barbará, Friedrich Geiecke, and Blake Mi
 
 ## Schedule
 
-### [Session 1](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%201)
+### [Session 1](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2001)
 
 **Overview and key concepts**
 
@@ -68,7 +68,7 @@ We will familiarize ourselves with the key themes and concerns of the seminar, d
 
 ------------------------------------------------------------------------
 
-### [Session 2](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%202)
+### [Session 2](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2002)
 
 **Preprocessing and descriptive statistics**
 
@@ -86,7 +86,7 @@ This assignment does *not* count towards the final degree. Instead, it is meant 
 
 ------------------------------------------------------------------------
 
-### [Session 3](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%203)
+### [Session 3](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2003)
 
 **Dictionary methods**
 
@@ -100,7 +100,7 @@ During the practical part of this session, we will apply commonly used dictionar
 
 ------------------------------------------------------------------------
 
-### [Session 4](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%204)
+### [Session 4](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2004)
 
 **Machine learning for texts: Classification I**
 
@@ -120,7 +120,7 @@ The first summative assignment will be released after Session 4 and amounts to 1
 
 ------------------------------------------------------------------------
 
-### [Session 5](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%205)
+### [Session 5](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2005)
 
 **Machine learning for texts: Classification II**
 
@@ -132,7 +132,7 @@ The computer exercise is about classifying names using Naive Bayes and Lasso reg
 
 ------------------------------------------------------------------------
 
-### [Session 6](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%206)
+### [Session 6](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2006)
 
 **Supervised and unsupervised scaling**
 
@@ -155,7 +155,7 @@ The second summative assignment will be released after Session 6 and amounts to 
 
 ------------------------------------------------------------------------
 
-### [Session 7](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%207)
+### [Session 7](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2007)
 
 **Similarity and clustering**
 
@@ -165,7 +165,7 @@ During the computer exercise, we will use these methods to build a basic recomme
 
 ------------------------------------------------------------------------
 
-### [Session 8](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%208)
+### [Session 8](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2008)
 
 **Topic models**
 
@@ -187,7 +187,7 @@ The third summative assignment will be released after Session 8 and amounts to 1
 
 ------------------------------------------------------------------------
 
-### [Session 9](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%209)
+### [Session 9](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2009)
 
 **Retrieving data from the web**
 
