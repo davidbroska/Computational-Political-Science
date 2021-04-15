@@ -36,7 +36,7 @@ There are no strict prerequisites for this course but basic R programming skills
 
 ### Assessment
 
-The overall goal of this course is to let participants enrich their methodological repertoire and strengthen their skills in conducting computational social science research. Participants will therefore be responsible for carrying out their own small-scale research project on a topic of their interest using some of the methods presented in this course. Three coding assignments are intended to lay the foundation for the final project: participants practice the creation and analysis of textual data using content analytic and statistical software.
+The overall goal of this course is to let participants enrich their methodological repertoire and strengthen their skills in conducting computational social science research. Participants will therefore be responsible for carrying out their own small-scale research project on a topic of their interest using some of the methods presented in this course. Three coding assignments are intended to lay the foundation for the final project: participants practice the creation and analysis of textual data using content analytic and statistical software. Additional guidelines on the final project are available [here](https://github.com/davidbroska/Computational-Political-Science/blob/master/Session%2011/final_project_guidelines.pdf)
 
 -   Project (70%)
 -   Assignments (30%)
