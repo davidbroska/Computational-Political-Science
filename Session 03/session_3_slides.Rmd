@@ -89,9 +89,12 @@ Dictionaries limit scope of analysis
 
 ---
 # Dictionary vs thesaurus
+```{r, include=F}
+library(quanteda)
+
+```
 
 ```{r}
-library(quanteda)
 corpus <- c("We aren't schizophrenic but I am",
             "I bought myself a car")
 # first person pronouns

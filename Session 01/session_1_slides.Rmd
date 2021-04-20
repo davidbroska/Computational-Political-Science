@@ -235,7 +235,7 @@ humans
 
 
 ---
-# Quantitative text analysis requires assumptions
+# Quantitative text analysis assumptions
 
 1. Texts represent an observable implication of some **underlying
 characteristic** of interest
@@ -276,7 +276,7 @@ class: inverse, center, middle
 
 # Examples
 
-<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html> 
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=800px></html>  
 
 ---
 # Compare documents
@@ -418,7 +418,7 @@ Upper right corner of RStudio, click new Projects
 
 Then the working directory is set where the project (`.Rproj`) is saved.
 
-Fore more, read this [blog](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
+Fore more, you can read this [blog](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
 
 ---
 

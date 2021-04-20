@@ -15,7 +15,7 @@ Let's apply this technique to tweets by the four leading candidates in the 2016 
 library(quanteda)
 
 # adjust this file path if necessary
-tweets <- read.csv('../../Session 2/formative_assignment/candidate-tweets.csv', stringsAsFactors=F)
+tweets <- read.csv( '../../data/candidate-tweets.csv', stringsAsFactors=F)
 ```
 
 We will use the positive and negative categories in the augmented General Inquirer dictionary to measure the extent to which these candidates adopted a positive or negative tone during the election campaign.
@@ -123,7 +123,7 @@ How would we normalize by text length? (Maybe not necessary here given that twee
 ```{r}
 # collapse by account into 4 documents
 twdfm <- dfm(twcorpus, groups = "screen_name")
-twdfm
+round(twdfm[,1:5],2)
 
 # turn word counts into proportions
 twdfm[1:4, 1:10]
