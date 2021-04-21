@@ -596,21 +596,25 @@ space still has much richer structures which we cannot see
 ---
 # Similarities
 
-I Always use original vectors to compute similarities, not the
-visualization ones
-I Similarity between word vectors are usually computed with
-cosine similarity(x, y) =
-x·y
-||x|| ||y||
-I Cosine similarity is the cosine of the angle between the two
+- Always use original vectors to compute similarities, not the visualization ones
+
+- Similarity between word vectors are usually computed with 
+
+
+$$\text{cosine similarity}(x, y) = \frac{x·y}{
+||x||\text{ } ||y||}$$
+
+- Cosine similarity is the cosine of the angle between the two
 vectors and therefore normalised on the interval [−1, 1]
-I A cosine similarity of 1 implies an angle between the two
+
+- A cosine similarity of 1 implies an angle between the two
 vectors of 0 degrees, 0 implies 90 degrees, and −1 implies 180
 degrees
-I If you want to use Euclidian distance instead, normalise all
-vectors to the same length as otherwise diﬀerences in lengths
+
+- If you want to use Euclidian distance instead, normalize all
+vectors to the same length as otherwise differences in lengths
 can mechanically drive diﬀerences in semantic similarity
-(particularly relevant to document vectors with diﬀerent
+(particularly relevant to document vectors with different
 amount of words but the same shares of words)
 
 

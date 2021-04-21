@@ -201,7 +201,7 @@ A working knowledge of these concepts is required to do screen-scraping, i.e. re
 
 ------------------------------------------------------------------------
 
-### Session 10
+### [Session 10](https://github.com/davidbroska/Computational-Political-Science/tree/master/Session%2010)
 
 **Published applications**
 
