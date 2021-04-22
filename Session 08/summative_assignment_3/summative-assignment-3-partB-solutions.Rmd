@@ -1,5 +1,5 @@
 ---
-title: 'CPS Summative Assignment 3 Part B'
+title: 'CPS Summative Assignment 3 Part B Solutions'
 subtitle: 'Winning arguments on social media'
 author: "YOUR NAME HERE"
 output: html_document
@@ -80,7 +80,17 @@ Start by reading the `cmv-comments.csv` dataset. Save it to the workspace with t
 Use the cleaned dataset to create a corpus object with the text in the `comment` variable. Call the corpus object `rc`. Then, create a document-feature-matrix named `rdfm` from the corpus object.
 
 ```{r}
+r <- read.csv("../../data/cmv-comments.csv", stringsAsFactors = F)
 
+# remove comments 
+r <- r[r$comment != "[https://imgur.com/a/zh1s9](https://imgur.com/a/zh1s9)", ]
+r <- r[r$comment != "https://www.washingtonpost.com/news/monkey-cage/wp/2017/08/24/did-enough-bernie-sanders-supporters-vote-for-trump-to-cost-clinton-the-election/?utm_term=.d07e3eac1191", ]
+
+# convert to corpus object 
+rc <- corpus(r, text_field = "comment")
+
+# create dfm
+rdfm <- dfm(rc)
 ```
 
 # Descriptive statistics for text
@@ -139,13 +149,23 @@ In summary, both measures indicate that less complex comments tend to be more co
 
 Adjust the code used to measure the language complexity to answer the following question: Are comments that receive a delta longer than comments which do not? Use a quanteda function to measure the length of comments and compare the delta and non-delta comments with a boxplot. What do you find?
 
-```{r, fig.align='center'}
+```{r box-plots-ntoks, fig.cap="Number of tokens as function of delta", fig.align='center'}
+# count tokens
+r$ntoks <- ntoken(rdfm)
 
+# boxplot
+ggplot(r, aes(factor(delta), ntoks, fill = factor(delta))) + 
+  geom_boxplot() +
+  stat_summary(fun="mean", geom="point", shape=20, size=3, color="red", fill="red") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(y = "Number of tokens", x = "Delta")
 ```
 
 **Your answer here**
 
-> 
+> Delta comments are indeed longer on average than those which do not receive a delta. However, the boxplot also shows that the distribution of the number of tokens per comment is strongly skewed to the right, i.e. there are comments which are considerably longer than the majority of the data. Instead of the mean (shown by the red dot), it is therefore more sensible to report the median. The median number of tokens for comments that have or have not persuaded users on reddit is `r median( r$ntoks[which(r$delta==1)] )` and `r median( r$ntoks[which(r$delta==0)])` respectively. In other words, convincing comments tend to be longer than those which did not receive a delta.
 
 
 ### Question 3 (2 points)
@@ -194,7 +214,8 @@ dist_df %>%
 
 **Your answer here**
 
-> 
+> The left pane of the figure above shows the Cosine distances (1-similarity) between the original post and comments for each delta. It turns out that persuasive comments tend to be more similar to the original post. 
+This does not necessarily imply, however, that less similar comments are "off-topic". Euclidean distance and Cosine similarity (or distance) are a measure of a lexical difference/similarity. In other words, they quantify the degree to which texts use the same vocabulary. Without further assumptions, they do not measure whether texts are about the same topic.
 
 
 # Topic modeling
@@ -237,7 +258,19 @@ Based on this matrix, label each of the 30 topics with a name that seems most re
 
 
 ```{r}
+# define topic labels
+tlabels <- c(
+  "economy", "persuation", "work", "wording", "movie",
+  "family", "countries and power", "reflection", "online forum", "immigration",
+  "opinion 1", "humanity", "belief", "opinion 2","politics",
+  "morality 1", "racism", "food", "united states", "history", 
+  "afford goods", "morality 2", "hygiene", "miscellaneous 1", "hate speech", 
+  "games", "health", "reddit.com", "gender", "miscellaneous 2")
 
+
+# extract words of each topic
+docterms <- get_terms(lda, 15) 
+colnames(docterms) <- tlabels
 ```
 
 ### Question 5 (2 points)
@@ -254,7 +287,10 @@ custom_kable <- function(.tbl){
   
 }
 
-
+# output
+custom_kable(docterms[, 1:10])
+custom_kable(docterms[,11:20])
+custom_kable(docterms[,21:30])
 ```
 
 

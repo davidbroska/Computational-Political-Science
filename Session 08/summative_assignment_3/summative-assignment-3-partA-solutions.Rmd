@@ -1,0 +1,105 @@
+---
+title: 'CPS Summative Assignment 3 Part A Solutions'
+subtitle: 'Clustering methods'
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include = F}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "##"
+)
+library(quanteda)
+library(ggplot2)
+```
+
+In the first part of the assignment, we will strengthen our intuition for hierarchical clustering. This technique is widely used in data science, even beyond natural language processing. It is therefore worthwhile to get a solid working knowledge this clustering method.
+
+# Hierarchical clustering
+
+Recall the following corpus from the lecture slides of session 8.
+
+```{r}
+txt <- c(A = "Win Prize", 
+         B = "Win Prize Prize Prize",
+         C = "Win Win", 
+         D = "Win Win Win")
+```
+
+**Question 1 (1 point)**
+
+Start by converting the corpus to a document-feature-matrix called `x`. Throughout the following tasks, we will use euclidean distance to quantify how different documents are. Therefore, it is recommendable to use the relative frequencies of the features given the document. Create a weighted document-feature-matrix called `xw` using `dfm_weight()` with the appropriate function argument.
+
+```{r}
+x <- dfm(txt)
+xw <- dfm_weight(x, scheme = "prop")
+```
+
+### Question 2 (6 points)
+
+The documents only have two distinct features and can therefore be represented in a two-dimensional coordinate system. Drawing on the figure below, calculate the euclidean distances between the documents manually. Please show the number that lead to your results. You should obtain six pair-wise distances between documents. For better readability, create a named vector that stores all six distances and print it to the console, for example: `c(A_to_B = NA, A_to_C = NA)`
+
+Hint: Recall the Pythagorean theorem which allows you to calculate the hypotenuse of a right triangle.
+
+```{r, out.width="90%", fig.align="center"}
+
+ggplot(data = convert(xw,"data.frame"), aes(win, prize)) + 
+  # use jitter because two points overlap
+  geom_jitter(aes(color = doc_id),width = .005, height = 0) + 
+  # specify axis ticks and breaks
+  scale_x_continuous(limits = c(-.05,1.1), breaks = c(0, .5, 1)) +
+  scale_y_continuous(limits = c(-.05,1.1), breaks = c(0, .5, 1)) +
+  # use simple layout with increased font size
+  theme_bw(base_size = 15)
+
+```
+
+```{r}
+# euclidean distances between documents in weighted dfm
+c(A_to_B = sqrt( (0.5-0.25)^2 + (0.75-0.5)^2 ), 
+  A_to_C = sqrt( (1-0.5)^2 + (1-0.5)^2 ),
+  A_to_D = sqrt( (1-0.5)^2 + (1-0.5)^2 ),
+  B_to_C = sqrt( (1-0.25)^2 + (0.75-0)^2 ),
+  B_to_D = sqrt( (1-0.25)^2 + (0.75-0)^2 ),
+  B_to_D = sqrt( (1-1)^2 + (1-1)^2 ))
+```
+
+### Question 3 (2 points)
+
+Verify your calculations by comparing your manual calculations to the output of the `textstat_dist()` function from the quanteda package. Assign the output to an object called `qdist`.
+
+We will use this distance matrix for creating a dendrogram using the stats package which is already installed and loaded in your current R session. For compatibility reasons, we need to convert the `qdist` object to a stats object using `as.dist()`. Please call it `sdist`. 
+
+```{r}
+qdist <- textstat_dist(xw, method = "euclidean")
+
+sdist <- as.dist(qdist)
+sdist
+```
+### Question 4 (4 points)
+
+On the basis of this dissimilarity matrix and the figure above, sketch the dendrogram that results from hierarchically clustering these four observations. Indicate the height at which the clusters were merged in your dendrogram. To do this, employ the same set of steps outlined in the lecture slides but use the *single-linkage* criterion.
+
+Please include a graphic of the calculations that lead to your results. It is fine to snap a photo of the drawing using your phone, or draw any other way. You can embed the photo in RMarkdown file with the example code below.
+
+```{r complete-linkage-example, out.width="90%", fig.align="center"}
+knitr::include_graphics("complete-linkage.jpg")
+```
+
+```{r single-linkage-example, out.width="90%", fig.align="center"}
+knitr::include_graphics("single-linkage.jpg")
+```
+
+### Question 5 (3 points)
+
+Now run the hierarchical clustering algorithm for "single" and "complete" linkage and plot the dendrogram using R's built-in functions. How are the two plots similar? How are they different?
+
+**Your answer here**
+
+> The C and D as well as A and B are joined at the same height to the clusters (C,D) and (A,B) regardless of the linkage criterion. However, the clusters are merged at height 0.71 under the single linkage criterion and at distance 1.06 under the complete linkage criterion. Therefore, the linkage criterion only changes the height at which clusters are joined but not their composition.
+
+```{r}
+plot(hclust(sdist, method = "complete"))
+plot(hclust(sdist, method = "single"))
+```
