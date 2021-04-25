@@ -1,7 +1,5 @@
 ---
 title: "LASSO classifier based on average word embeddings"
-author: "Friedrich Geiecke"
-date: "29 March 2021"
 output: html_document
 ---
 

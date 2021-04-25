@@ -1,7 +1,5 @@
 ---
 title: "Streaming tweets"
-author: "Friedrich Geiecke"
-date: "29 March 2021"
 output: html_document
 ---
 
@@ -22,13 +20,13 @@ When you use the API the first time, generate the token in your developer portal
 
 ```{r, eval = FALSE}
 # Storing tokens in a list
-authentication <- list(consumer_key = "",
-                       consumer_secret = "",
-                       access_token = "",
-                       access_token_secret = "")
+auth <- list(consumer_key = "",
+             consumer_secret = "",
+             access_token = "",
+             access_token_secret = "")
 
 # Saving the list as .rda file
-# save(authentication, file = "../myauthentication.rda")
+# save(auth, file = "../myauthentication.rda")
 ```
 
 Afterwards you can delete the code chunk above and in the future only run the code chunk below if the .rda file is in the same directory. Make sure to never display your access keys in an Rmd or HTML file publicly.
@@ -37,15 +35,16 @@ Afterwards you can delete the code chunk above and in the future only run the co
 load("../myauthentication.rda")
 ```
 
-Next, we create a token object and lookup the user "LSEnews" to see whether the access works:
+Next, we create a token object and lookup a user to see whether the access works:
 
 ```{r}
-token <- create_token(app = "", 
-                              consumer_key =authentication$consumer_key,
-                              consumer_secret = authentication$consumer_secret)
+token <- create_token(consumer_key = auth$consumer_key, 
+                      consumer_secret = auth$consumer_secret,
+                      access_token = auth$access_token,
+                      access_secret = auth$access_token_secret)
 
 # Test whether access works
-lookup_users(token = token, "david_broska")
+lookup_users(token = token, "zeppelin")
 ```
 
 We are going to use the streaming API because we are interested in collecting tweets with certain emojis as they are being posted. With the rest API on the other hand, we can download limited amounts of historical tweets e.g. from specific user timelines For research projects with larger amounts of historical data, also see the very new research API option. For a detailed description on how to use both the Twitter streaming and rest API through R, see the optional tutorials in this week's repo.
