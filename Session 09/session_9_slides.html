@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Political Science</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="David Broska" />
+    <meta name="date" content="2021-04-13" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../mycss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Computational Political Science
+## Session 9
+### David Broska
+### Zeppelin University
+### April 13, 2021
+
+---
+
+
+# Looking ahead
+
+#### What we did 
+
+So far we focused on how methods for quantitative text analysis work. 
+
+We only briefly looked at applications of those methods.
+
+--
+
+#### The road ahead
+
+However, we need to have a *deeper* understanding of how QTA helps us answer *substantive research questions*
+
+In the next sessions, we will therefore evaluate how useful QTA methods are (as opposed to understanding how they work)
+
+--
+
+#### Motivation 
+
+While methodological innovations are quite common, articles rarely showcase strong explanatory power of QTA for substantive research questions
+
+E.g. an application challenged a widely established belief or revealed new insights for a specific research area in political science/sociology
+
+
+
+---
+# Session 10 
+
+
+| Text                                                                                                                                                                                                                                                 | Presenter                |   
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| How Censorship in China Allows Government Criticism but Silences Collective Expression [(King et al 2014)](https://doi.org/10.1017/s0003055413000014)  | T.O.           |
+| Rhetorics of Radicalism [(Karell and Freedman 2019)](https://doi.org/10.1177/0003122419859519)                                                                                        | A.V.,&lt;br&gt;M.M.                   |
+| Racialized Discourse in Seattle Rental Ad Texts [(Kennedy et al 2020)](https://doi.org/10.1093/sf/soaa075)                                                      | N.R.                     |
+| Whose Ideas Are Worth Spreading? The Representation of Women and Ethnic Groups in TED Talks [(Schwemmer and Jungkunz 2019)](https://doi.org/10.1080/2474736X.2019.1646102)             | V.O.          |
+| The Geometry of Culture: Analyzing the Meanings of Class through Word Embeddings [(Kozlowski et al 2019)](https://doi.org/10.1177/0003122419877135)                 | D.B.          |
+
+####Note:
+
+&lt;p style="margin-left:2.5%"&gt;
+These are good examples of articles that addresses substantial social science questions
+&lt;/p&gt;
+
+&lt;p style="margin-left:2.5%"&gt;
+However, you may also present a different article if it better fits your research interest
+&lt;/p&gt;
+
+&lt;p style="margin-left:2.5%"&gt;
+You find the literature on &lt;a href=https://learning.zu.de/goto.php?target=fold_30469&amp;client_id=ilias&gt;ILIAS
+&lt;/p&gt;
+
+
+---
+# Research Design
+
+####A research design typically has the following structure and answers implicit questions
+
+1. Background/literature review: What do we know already?
+
+--
+
+2. Research question(s): What are you going to try to learn?
+
+--
+
+3. Data collection strategies: What kind of evidence are you going to collect and how will you collect it?
+
+--
+
+4. Data analysis strategies: How does that evidence enable us to draw conclusions?
+
+--
+
+5. Potential impact and relevance of the study: What might those conclusions be and why do they matter?
+
+--
+
+6. Limitations and further research: What are the limitations of what you are going to do? What have you done to mitigate these limitations? What more could be done with extra time and/or resources?
+
+--
+
+7. References / bibliography
+
+#### You can use this structure for the presentation of the reading (session 10) and your own intended research (session 11)
+
+
+
+
+
+
+
+---
+# Outline for today (session 9)
+
+1. **How to retrieve data from the web?**
+
+2. **Features of the internet**
+  
+3. **HTML and CSS**
+
+4. **XPath and CSS Selectors**
+
+5. **APIs**
+
+6. **Bias in social media data**
+
+7. **Coding example**
+  - Scraping the course [website](https://github.com/davidbroska/Computational-Political-Science) on GitHub with CSS selectors
+  - How to use the Twitter API and classify (dis)approval tweets
+  
+8. **Coding exercise**
+  - Scrape an [online bookshop](http://books.toscrape.com/catalogue/page-1.html?)
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | Overview and key concepts                            |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | Machine learning for texts: Classification II        |     \-        |     \-          |
+|    6    | Mar 09 | Supervised and unsupervised scaling                  | Summative 2   | Mar 22 23:59:59 |
+|    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
+|    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | *Retrieving data from the web*                       |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+
+---
+# What is webscraping?
+
+.pull-left[
+An increasing amount of data is available on the web
+
+- Speeches, biographical information ...
+
+- Social media data, press releases ...
+- Geographic information, conflict data... 
+
+]
+
+.pull-right[
+&lt;img src="../figures/what-is-web-scraping-diagram.png"&gt;
+
+
+]
+
+&lt;br&gt;
+
+However, these data are often provided in an *unstructured format*
+
+#### Web scraping is the process of automatically extracting content from the web and transforming it into a structured dataset
+
+---
+# How to get data from the internet with R
+
+#### 1. Screen scraping 
+
+Extract data from source code of website with HTML parser and/or regular expressions
+
+- `rvest` package in R for screen scraping
+
+&lt;br&gt;
+--
+
+#### 2. Web APIs
+
+A set of structured http requests that return JSON or XML data
+
+- `httr` package to construct API requests
+
+- Packages specific to each API 
+
+
+
+---
+class: inverse, middle, center
+# Key features of the internet
+------------------------------
+
+---
+# Client-server model
+
+&lt;img src="../figures/client-server-model.jpg" class="centerimg" width="60%"&gt;
+
+#### 1. User computer tablet, phone, etc. make request to server. Depending on what you want to get, the request might be
+
+- HTTP(S): Hypertext Transfer Protocol
+- SMTP: Simple Mail Transfer Protocol
+- FTP: File Transfer Protocol
+
+#### 2. Server returns response
+
+---
+# HTTP request and response
+
+&lt;br&gt;
+
+&lt;img src="../figures/http_reqest_and_response.png" class="centerimg" width="90%"&gt;
+
+&lt;small&gt;
+&lt;p style="margin-left:72%"&gt; 
+Figure from &lt;a href="https://stackoverflow.com/questions/4109689/how-does-a-client-browser-generate-a-request-to-be-sent-to-a-server"&gt;StackOverflow&lt;/a&gt;
+&lt;/p&gt;
+&lt;/small&gt;
+
+---
+# Example: zu.de
+
+Press `Ctrl+Shift+I` in your Google Chrome browser to see the source code of a website
+
+&lt;img src="../figures/zu-de-dev.jpg" width="98%" class="centerimg"&gt;
+
+####We can use the `rvest` package to parse data from the website's source code!
+
+
+
+---
+# Example: zu.de
+
+#### General header 
+
+&lt;img src="../figures/zu-de-general-header.jpg" class="centerimg" width="48%"&gt;
+.pull-left[
+#### Request header
+&lt;img src="../figures/zu-de-request-header.jpg"&gt;
+]
+.pull-right[
+#### Response header
+&lt;img src="../figures/zu-de-response-header.jpg" width="80%"&gt;
+]
+
+&lt;small&gt;
+Please refer to [this guide](https://mkyong.com/computer-tips/how-to-view-http-headers-in-google-chrome/) on viewing HTTP headers
+&lt;/small&gt;
+
+---
+class: inverse, middle, center
+# HTML and CSS
+--------------
+
+
+---
+# HTML and beyond
+
+#### Hypertext Markup Language (HTML)
+
+&lt;p style="margin-left:2.5%"&gt;
+HTML displays mostly static content
+&lt;/p&gt;
+
+&lt;p style="margin-left:2.5%"&gt;
+Many contents of dynamic webpages cannot be found in HTML, e.g. Google Maps
+&lt;/p&gt;
+  
+
+&amp;rArr; Understanding what is static and dynamic in a webpage is a crucial first step
+
+--
+
+#### Cascading Style Sheets (CSS)
+
+&lt;p style="margin-left:2.5%"&gt;
+Style sheet language which describes formatting of HTML components
+&lt;/p&gt;
+
+&lt;p style="margin-left:2.5%"&gt;
+CSS is useful for webscraping because there are CSS-based selectors for HTML elements
+&lt;/p&gt;
+
+--
+
+#### Javascript (JS)
+
+&lt;p style="margin-left:2.5%"&gt;
+Adds functionalities to websites, e.g. change content/structure after website has been loaded
+&lt;/p&gt;
+
+&lt;p style="margin-left:2.5%"&gt;
+Javascript on websites usually makes webscraping more difficult
+&lt;/p&gt;
+
+
+---
+# A simple HTML file
+
+
+
+Let's create a simple HTML page
+
+```{}
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h3&gt;My First Heading&lt;/h1&gt;
+    &lt;p&gt;My first paragraph.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+```
+
+It will look like this: 
+
+&lt;html&gt;
+  &lt;head&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h3&gt;My first heading&lt;/h1&gt;
+    &lt;p&gt;My first paragraph.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+
+---
+# Slightly more features
+
+```{}
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Heading of the first division&lt;/h1&gt;
+    &lt;p&gt;A first paragraph.&lt;/p&gt;
+    &lt;p&gt;A second paragraph with some &lt;b&gt;formatted&lt;/b&gt; text.&lt;/p&gt;
+    &lt;p&gt;A third paragraph with a &lt;a href="http://www.zu.de"&gt;hyperlink&lt;/a&gt;.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+```
+
+It will look like this:
+
+&lt;html&gt;
+  &lt;head&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Heading of the first division&lt;/h1&gt;
+    &lt;p&gt;A first paragraph.&lt;/p&gt;
+    &lt;p&gt;A second paragraph with some &lt;b&gt;formatted&lt;/b&gt; text.&lt;/p&gt;
+    &lt;p&gt;A third paragraph with a &lt;a href="http://www.zu.de"&gt;hyperlink&lt;/a&gt;.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+---
+# With some content divisions
+
+```{}
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div&gt;
+      &lt;h3&gt;Heading of the first division&lt;/h3&gt;
+      &lt;p&gt;A first paragraph.&lt;/p&gt;
+      &lt;p&gt;A second paragraph with some &lt;b&gt;formatted&lt;/b&gt; text.&lt;/p&gt;
+      &lt;p&gt;A third paragraph with a &lt;a href="http://www.zu.de"&gt;hyperlink&lt;/a&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;h3&gt;Heading of the second division&lt;/h3&gt;
+      &lt;p&gt;Another paragraph with some text.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+```
+
+
+---
+# Adding some simple CSS
+
+```{}
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;style&gt;
+      .text-about-web-scraping {color: blue;}
+      .division-two h3 {color: green;}
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div&gt;
+      &lt;h3&gt;Heading of the first division&lt;/h3&gt;
+      &lt;p&gt;A first paragraph.&lt;/p&gt;
+      &lt;p&gt;A second paragraph with some &lt;b&gt;formatted&lt;/b&gt; text.&lt;/p&gt;
+      &lt;p&gt;A third paragraph with a &lt;a href="http://www.zu.de"&gt;hyperlink&lt;/a&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="division-two"&gt;
+      &lt;h3&gt;Heading of the second division&lt;/h3&gt;
+      &lt;p class="text-about-web-scraping"&gt;Webscraping is a tricky thing...&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+```
+
+---
+# Et voilà ...
+
+#### This is how our HTML page looks like with formatting tags and CSS styles: 
+&lt;br&gt;
+
+&lt;div style="margin-left:20%;"&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;style&gt;
+      .text-about-web-scraping {color: blue;}
+      .division-two h3 {color: green;}
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div&gt;
+      &lt;h3&gt;Heading of the first division&lt;/h3&gt;
+      &lt;p&gt;A first paragraph.&lt;/p&gt;
+      &lt;p&gt;A second paragraph with some &lt;b&gt;formatted&lt;/b&gt; text.&lt;/p&gt;
+      &lt;p&gt;A third paragraph with a &lt;a href="http://www.zu.de"&gt;hyperlink&lt;/a&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="division-two"&gt;
+      &lt;h3&gt;Heading of the second division&lt;/h3&gt;
+      &lt;p class="text-about-web-scraping"&gt;Webscraping is a tricky thing to do...&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+&lt;/div&gt;
+
+
+---
+class: inverse, middle, center
+# Identifying elements with CSS and XPath
+-------
+
+---
+# Identifying elements via CSS selector
+
+#### Selecting by tag-name
+
+Exemplary html code: `&lt;h3&gt;Some text&lt;/h3&gt;`
+
+Selector: `h3`
+
+&lt;br&gt;
+
+#### Selecting by class
+
+Exemplary html code: `&lt;div class = 'itemdisplay'&gt;Some text&lt;/div&gt;`
+
+Selector: `.itemdisplay`
+
+&lt;br&gt;
+
+#### Selecting by id
+
+Exemplary html code: `&lt;div id = 'maintitle'&gt;Some text&lt;/div&gt;`
+
+Selector: `#maintitle`
+
+
+---
+# Identifying elements via CSS selector
+
+#### Selecting by tag-name
+
+Exemplary html code: `&lt;h3&gt;Some text&lt;/h3&gt;`
+
+Selector: `h3`
+
+&lt;br&gt;
+
+#### Selecting by class
+
+
+
+Exemplary html code: `&lt;div class = 'itemdisplay'&gt;Some text&lt;/div&gt;`
+
+Selector: `.itemdisplay`
+
+&lt;br&gt;
+
+#### Selecting by id
+
+Exemplary html code: `&lt;div id = 'maintitle'&gt;Some text&lt;/div&gt;`
+
+Selector: `#maintitle`
+
+
+
+
+---
+# XPath basic syntax 
+
+
+`/` selects from the root node, e.g. `/html/body/div[2]/p[1]`
+
+`//` selects specific nodes from the document, e.g. `//div[2]/p[1]`
+
+`//div/*` Selects all nodes which are immediate children of a div node
+
+`//div/p[last()]` selects the last paragraph nodes which are children of all div nodes
+
+`//div[@*]` selects all division nodes which have any attribute
+
+`//div[@class]` selects all division nodes which have a class attribute
+
+`//div[@class='division-two']` selects all division nodes which have a class attribute with name "division-two"
+
+`//*[@class='division-two']` selects any node with a class attribute with name "division-two"
+
+.footnote[
+See [w3schools.com](https://www.w3schools.com/xml/xpath_syntax.asp) for reference and full details
+]
+
+
+---
+# XPath vs CSS selector
+
+
+| Selector type                                                                              | CSS Selector                          | XPath                                 |
+|:-------------------------------------------------------------------------------------------|:--------------------------------------|:--------------------------------------|
+| By tag                                                                                     | `"h1"`, `"p"`                         | `"//h1"`, `"//p"`                     |
+| By class                                                                                   | `".division-two"`                     | `"//*[@class='division-two']"`        |
+| By id                                                                                      | `"exemplary-id"`                      | `"//*[@id='exemplary-id']"`           |
+| By tag with class (or id)                                                                  | `"div.division-two"`                  | `"//div[@class='division-two']`       |
+| Tag structure &lt;br&gt; (p as a child of div)                                                   | `"div &gt; p"`                           | `"//div/p"`                           |
+| Tag strucure &lt;br&gt; (p which is a second child of the div node with class name division-two) | `"div.division-two&gt;p:nth-of-type(2)"` | `"//div[@class='division-two']/p[2]"` |
+
+--
+
+See this [guide](https://ghostinspector.com/docs/css-xpath-conversion/) and this [converter app](https://css-selector-to-xpath.appspot.com/) for XPath and CSS
+
+---
+# Using rvest
+
+
+.pull-left[
+Recall our simple HTML with some CSS:
+
+&lt;br&gt;
+
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;style&gt;
+      .text-about-web-scraping {color: blue;}
+      .division-two h3 {color: green;}
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div&gt;
+      &lt;h3&gt;Heading of the first division&lt;/h3&gt;
+      &lt;p&gt;A first paragraph.&lt;/p&gt;
+      &lt;p&gt;A second paragraph with some &lt;b&gt;formatted&lt;/b&gt; text.&lt;/p&gt;
+      &lt;p&gt;A third paragraph with a &lt;a href="http://www.zu.de"&gt;hyperlink&lt;/a&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="division-two"&gt;
+      &lt;h3&gt;Heading of the second division&lt;/h3&gt;
+      &lt;p class="text-about-web-scraping"&gt;Webscraping is a tricky thing to do...&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+]
+
+--
+
+.pull-right[
+Let's first make R recognize the HTML code 
+
+
+
+
+
+```r
+page &lt;- read_html('&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;style&gt;
+    .text-about-web-scraping{color:blue;}
+    .division-two h3{color: green;}
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div&gt;
+      &lt;h3&gt;Heading of the first division&lt;/h3&gt;
+      &lt;p&gt;A first paragraph.&lt;/p&gt;
+      &lt;p&gt;A second paragraph with some &lt;b&gt;formatted&lt;/b&gt; text.&lt;/p&gt;
+      &lt;p&gt;A third paragraph with a &lt;a href="http://www.zu.de"&gt;hyperlink&lt;/a&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="division-two"&gt;
+      &lt;h3&gt;Heading of the second division&lt;/h3&gt;
+      &lt;p class="text-about-web-scraping"&gt;Webscraping is a tricky thing to do...&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;')
+```
+]
+
+---
+# Parsing HTML with rvest
+
+
+```r
+page                               # let's look at the parsed HTML file
+```
+
+```
+## {html_document}
+## &lt;html&gt;
+## [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;\n&lt;style ...
+## [2] &lt;body&gt;\n    &lt;div&gt;\n      &lt;h3&gt;Heading of the first division&lt;/h3&gt;\n      &lt;p&gt;A first p ...
+```
+
+--
+
+.pull-left[
+#### Using CSS selectors
+
+
+```r
+page %&gt;% html_nodes(css= 'h3') %&gt;% 
+  html_text()
+```
+
+
+```
+## Heading of the first division
+## Heading of the second division
+```
+]
+
+.pull-right[
+#### Using XPath
+
+
+```r
+page %&gt;% html_nodes(xpath= '//h3') %&gt;% 
+  html_text() 
+```
+
+```
+## Heading of the first division
+## Heading of the second division
+```
+]
+--
+
+.pull-left[
+
+```r
+page %&gt;% html_node(css= 'a') %&gt;% 
+  html_attr('href') 
+```
+
+```
+## http://www.zu.de
+```
+]
+
+
+.pull-right[
+
+```r
+page %&gt;% html_nodes(xpath= '//a') %&gt;% 
+  html_attr('href')
+```
+
+```
+## http://www.zu.de
+```
+]
+
+
+
+
+---
+class: inverse, middle, center
+# Scraping with RSelenium
+-------------------------
+
+---
+# Why RSelenium?
+
+
+Many websites cannot be scraped as easily as a simple HTML
+--
+.pull-left[
+#### Authentication 
+
+Sometimes you have to be logged in to access the content of a website
+
+Thus, we need a way to fill the authentication form!
+]
+.pull-right[
+&lt;img src="../figures/linkedin_signin.jpg" width="57%" class="centerimg"&gt;
+]
+--
+.pull-left[
+#### Dynamic contents
+Some websites do not load all content at once but only if you scroll down, e.g. on social media
+]
+.pull-right[
+&lt;img src="../figures/linkedin_post.jpg" width=57% class="centerimg"&gt;
+]
+---
+# Selenium
+
+[Selenium](https://www.seleniumhq.org/) is a  technology for browser automation.
+[RSelenium](https://www.rdocumentation.org/packages/RSelenium/versions/1.7.7) is a R binding for Selenium
+
+#### Idea
+
+Launch a browser session and all communication will be routed through that browser session
+
+We scrape websites loaded in that browser session
+
+--
+.pull-left[
+#### How it works
+
+1. The webscraper opens a browser window, 
+2. navigates to apartments listings 
+
+3. downloads all apartment-listings on that page 
+
+4. and navigates to the next page to repeat the process
+
+]
+.pull-right[
+&lt;br&gt;
+
+&lt;img src="../figures/selenium_scraper_demo.gif" class="centerimg"&gt;
+]
+
+.pull-right[
+&lt;small&gt;
+Example from [towardsdatascience.com](https://towardsdatascience.com/a-data-science-approach-to-stockholms-apartment-prices-part-1-dcee0212596d)
+&lt;/small&gt;
+]
+
+
+---
+# Selenium drivers
+
+####There are two general strategies to run Selenium drivers
+
+####1. Normal browsers
+
+  - Chrome
+  
+  - Firefox
+  
+  - etc.
+
+&lt;br&gt;
+
+####2. Headless browser (will not display website)
+  - Allows to set up the browser in a situation where you do not have a visual device (i.e. Crawler on the cloud) or do not need an open browser window 
+  
+  - Common headless browser: phantomJS
+  
+  - [Selenium in Python](https://pypi.org/project/selenium/) allows to also run Chrome or Firefox in headless mode
+
+
+
+---
+# Key functions of RSelenium I
+
+Load RSelenium package
+
+```r
+library("RSelenium")
+```
+
+Create browser instance
+
+```r
+rD &lt;- rsDriver(browser=c("firefox"))
+driver &lt;- rD$client
+```
+
+Navigate to website
+
+```r
+driver$navigate("https://www.zu.de")
+```
+
+Find element on website
+
+
+```r
+some_element &lt;- driver$findElement(using = "xpath", value = "...")
+```
+
+---
+# Key functions of RSelenium II
+
+Click on element
+
+```r
+some_element$clickElement()
+```
+
+Type text into box/element
+
+```r
+search_box &lt;- driver$findElement(using = "xpath", value = "...")
+search_box$sendKeysToElement(list("some text"))
+```
+
+Press enter key
+
+
+```r
+search_box$sendKeysToElement(list(key = "enter"))
+```
+
+
+---
+class: inverse, middle, center
+# APIs
+------
+
+---
+# APIs
+
+.pull-left[
+- API: Application Programming Interface
+
+- Provides access to data!
+
+- In web APIs, a set of structured HTTP requests can return data in a lightweight format e.g. JSON or XML
+
+- The API user sends a request to the API (e.g. with a software
+such as R) and the API returns data from the API provider’s
+database
+
+- We will use the `rtweet` package to to access the Twitter API from R
+]
+.pull-right[
+&lt;img src="../figures/API.png"&gt;
+]
+--
+.pull-right[
+&lt;small&gt;
+&lt;p style="margin-left:50%"&gt;
+Figure from &lt;a href="https://www.seamgen.com/blog/why-apis-are-important-for-business/"&gt;seamgen.com&lt;/a&gt;
+&lt;/p&gt;
+&lt;/small&gt;
+]
+
+
+---
+# Why APIs?
+
+#### Advantages
+
+- Cleaner data collection: Avoid malformed HTML, no legal
+issues, clear data structures, more trust in data collection...
+
+- Standardized data access procedures: Transparency, replicability
+
+- Robustness: Benefits from "wisdom of the crowds"
+
+
+--
+&lt;br&gt;
+
+#### Disadvantages
+
+- Not always available
+
+- Dependency on API providers
+
+- Rate limits
+
+---
+# Packages that wrap existing APIs
+
+#### rtweet
+
+- Excellent, well-maintained [R package](https://rtweet.info/) that wraps the Twitter API
+- Twitter search API is limited to recent tweets, so you cannot go back more than a few days
+- rtweet provides functions to retrieve tweets as well as user profiles and social graphs (friends, followers)
+
+
+#### tubeR
+
+- Medium quality [R package](https://cran.r-project.org/web/packages/tuber/vignettes/tuber-ex.html) that wraps Googles Youtube API
+- It allows you to fetch video statistics, comments, and statistics on comments
+
+
+#### Other packages
+
+- `wbstats` for easy access to World Bank data
+
+- `WikipediR`, `wikipediatrend`, or `WikidataR` for data on Wikipedia
+
+- A more extensive list is in this [CRAN view](https://cran.r-project.org/web/views/WebTechnologies.html) 
+
+
+---
+# Twitter APIs
+
+#### Two different methods to collect Twitter data
+
+1. REST API
+  - Queries for specific information about users and tweets
+  - Search recent tweets
+  - Examples: User profile, list of followers and friends, tweets
+generated by a given user ("timeline"), users lists, etc.
+
+2. Streaming API
+  - Connect to the "stream" of tweets as they are being published
+  - Three streaming APIs:
+      - Sample stream: 1% random sample of tweets
+      - Filter stream: tweets filtered by keywords (when volume reaches 1% of all tweets, it will also return a random sample)
+      - Geo stream: tweets filtered by location
+
+---
+# Twitter APIs
+
+-  Tweets can only be downloaded in real time, historical data is generally much harder to obtain (exceptions: last seven days or user timelines, where ∼ 3,200 most recent tweets are available)
+
+- Very recent special access for researchers allows to obtain more historical data
+
+
+---
+class: inverse, middle, center
+# Bias in social media data
+---------------------------
+
+
+
+---
+# Biases in sampling
+
+#### Morstatter et al (2013) "Is the Sample Good Enough? Comparing Data from Twitter’s Streaming API with Twitter’s Firehose"
+
+- 1% random sample from Streaming API is not truly random
+
+- Less popular hashtags, users, topics... less likely to be sampled
+
+- But for keyword-based samples, bias is not as important 
+
+--
+&lt;br&gt;
+
+#### González-Bailón et al (2014) "Assessing the bias in samples of large online networks"
+
+- Small samples collected by filtering with a subset of relevant hashtags can be biased
+
+- Central, most active users are more likely to be sampled
+
+- Data collected via search (REST) API more biased than those collected with Streaming API
+
+
+---
+# Biases in social media data
+
+####Population bias
+
+&lt;p style="margin-left:2.5%"&gt;
+Sociodemographic characteristics are correlated with presence on social media
+&lt;/p&gt;
+
+
+#### Self-selection within samples
+
+&lt;p style="margin-left:5%"&gt;
+Partisans are more likely to post about politics (Barberá &amp; Rivero 2014)
+&lt;/p&gt;
+
+#### Proprietary algorithms for public data
+
+&lt;p style="margin-left:2.5%"&gt;
+Twitter API does not always return 100% of publicly available tweets (Morstatter et al 2014)
+&lt;/p&gt;
+
+#### Human behavior and online platform design
+
+&lt;p style="margin-left:2.5%"&gt;
+e.g. Google Flu (Lazer et al 2014)
+&lt;/p&gt;
+
+
+&lt;br&gt;
+&lt;br&gt;
+&amp;rArr; For an overview of sources of bias see Ruths and Pfeffer (2015) and Lazer et al (2017)
+
+---
+# Biases in social media data
+
+&lt;img src="../figures/ruths_and_pfeffer_2014_social_media.jpg" class="centerimg" width="76%"&gt;
+
+&lt;small&gt;
+  &lt;p style="margin-left:12%"&gt;
+  Ruths and Pfeffer (2015) "Social media for large studies of behavior"
+  &lt;/p&gt;
+&lt;/small&gt;
+
+---
+class: inverse, middle, center
+# Computer exercises
+--------------------
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

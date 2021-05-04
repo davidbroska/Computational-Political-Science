@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Political Science</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="David Broska" />
+    <meta name="date" content="2021-03-23" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../mycss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Computational Political Science
+## Session 8
+### David Broska
+### Zeppelin University
+### March 23, 2021
+
+---
+
+
+# Outline for today
+
+1. **Building blocks**
+  - Probability distributions
+
+2. **Latent Dirichlet Allocation (LDA)**
+  - Estimation intuition
+  - Results
+  
+3. **Extensions**
+  - Correlated, dynamic, and structural topic model
+
+4. **Coding examples**
+  - Uncovering themes in New York Times articles with LDA
+  - Using the correlated topic model for Newton's Principia
+  - Structural topic model: Tweets of members of congress
+
+5. **Coding exercise**
+  - Themes in Trump's tweets using LDA
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | Overview and key concepts                            |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | Machine learning for texts: Classification II        |     \-        |     \-          |
+|    6    | Mar 09 | Supervised and unsupervised scaling                  | Summative 2   | Mar 22 23:59:59 |
+|    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
+|    8    | Mar 23 | *Topic models*                                       | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+
+---
+# Mixed membership models
+
+&lt;img src="../figures/fig1_grimmer_stuart_adapted.jpg" width="97%" class="centerimg"&gt;
+&amp;nbsp; Fig. 1 in Grimmer and Stuart (2013)
+
+---
+# Topic models: motivation
+
+
+.pull-left[
+&lt;img src="../figures/newspapers.jpg" class="centerimg"&gt;
+]
+.pull-right[
+- Topic models offer an automated procedure to discover the main "themes" in an unstructured corpus of texts
+
+- Can be used to understand and organize large collections of documents according to the discovered themes (e.g. New York Times articles from 2019-2020)
+]
+&lt;br&gt;
+- Unsupervised learning: topic models require no labeled data - only a set of documents
+
+- Mixture model: Documents can contain multiple topics; words can belong to multiple topics (as opposed to k-means for example)
+
+
+
+
+---
+class: inverse, middle, center
+# Distributions review
+----------------------
+
+
+---
+# Univariate probability density function
+
+&lt;img src="../figures/univariate_probability_density.jpg" class="centerimg"&gt;
+
+Different parameter values (e.g. `\(\mu\)` and `\(\sigma\)` for the normal distribution) change the distributions’ shape 
+
+The notation `\(x \sim N(0, 1)\)` denotes to sample or draw `\(x\)` from a standard normal distribution. This draw could e.g. return x = −1.124.
+
+
+---
+# Multivariate probability density function 
+
+&lt;img src="../figures/multivariate_probability_density.jpg" class="centerimg"&gt;
+
+A draw `\(a \sim N(\mu, \Sigma)\)` from this multivariate normal distribution
+could e.g. return a = (−0.12, 1.2) 
+
+
+---
+# Standard simplex
+
+
+&lt;img src="../figures/standard_simplex.jpg" class="centerimg" width="35%"&gt;
+
+#### Graphical intuition of a standard simplex
+
+A point on the triangle is `\(x_1 , x_2 , x_3\)`, with `\(x_1 , x_2 , x_3 \in [0, 1]\)` and
+`\(x_1 + x_2 + x_3 = 1\)`. For example, (0.05, 0.8, 0.15)
+
+Generalizes to higher dimensions with `\(x_1 , ..., x_k \in [0, 1]\)` and `\(\sum x_k = 1\)`
+
+
+
+
+
+---
+# Key distribution 1: Multinomial distribution
+
+
+
+.pull-left[
+
+&lt;img src="session_8_slides_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+
+X is a discrete random variable with three categories x&lt;sub&gt;1&lt;/sub&gt;, x&lt;sub&gt;2&lt;/sub&gt;, and x&lt;sub&gt;3&lt;/sub&gt;
+
+The figure shows a multinomial distribution with probabilities [0.2, 0.7, 0.1]. 
+
+A draw X ~ Multinomial([0.2, 0.7, 0.1]) is most likely to return the second category
+]
+
+
+---
+# Key distribution 2: Dirichlet distribution
+
+####The Dirichlet distribution is a probability distribution over a simplex
+
+&lt;img src="../figures/dirichlet_distribution.jpg" class="centerimg"&gt;
+
+####We can draw a multinomial distribution from a Dirichlet distribution
+
+
+- A draw b ~ Dir(&amp;alpha;) from this distribution could e.g. return b = (0.2, 0.7, 0.1)
+- Hence, we can think of the draw from a Dirichlet distribution being
+itself a multinomial distribution (previous slide)
+
+---
+class: inverse, middle, center
+# Topic models
+------------
+
+---
+# Topic models: main idea 
+
+#### Intuition
+
+Topic models reverse-engineer the writing process of documents with a sequence of probabilistic steps
+
+--
+
+#### Generative probabilistic model
+
+Topic models models assume a *fixed number of topics* which are *distributions over words*, and each document has a *distribution over topics*
+
+--
+
+Each document is "written" by randomly sampling a topic from a document-topic distribution, then sampling a word from that topic distribution. Repeat that process until you have all words in the text.
+
+--
+
+Latent Dirichlet Allocation (LDA) by [Blei et al. (2003)](http://www.cs.columbia.edu/~blei/papers/BleiNgJordan2003.pdf) is a common approach but there are extensions such as Structural Topic models (STM) by [Roberts et al (2014)](https://www.jstor.org/stable/24363543)
+
+---
+# Latent Dirichlet Allocation (LDA)
+
+&lt;img src="../figures/lda_blei2012.png" class="centerimg"&gt;
+
+--
+
+&lt;small&gt;
+Figure by [Blei (2012)](http://www.cs.columbia.edu/~blei/papers/Blei2012.pdf)
+&lt;/small&gt;
+
+
+???
+
+Assume that some number of topics exists for the corpus. A topic is 
+
+Each document is assumed to be generated as follows
+
+1. Choose a topic from the distribution over K topics (histogram on the right)
+2. For each word, choose a topic assignment (the colored circles) and choose the word from the assigned topic
+
+---
+# Topic model results I
+
+#### From an input corpus and a predefined number of topics k, we get words related to topics
+
+
+.pull-left[
+&lt;h4&gt;
+  &lt;center&gt;
+  Topics
+  &lt;/center&gt;
+&lt;/h4&gt;
+&lt;img src="../figures/blei_2012_topics_example.png" class="centerimg" width="50%"&gt; 
+]
+
+.pull-right[
+&lt;br&gt;
+- Each topic is a multinomial distribution over words
+
+- Each topic comes from a Dirichlet distribution
+
+- The degree of association of words with a topic is quantified with a probability 
+
+]
+
+
+---
+# Topic model results II
+
+
+&lt;!-- #### Each document is a distribution over topics --&gt;
+
+Each topic is multinomial distribution that is drawn from a Dirichlet distribution
+
+LDA quantifies the extent to which a document belongs to a topic
+
+
+&lt;img src="../figures/blei_2012_simplex_topics_example.png" class="centerimg" width="70%"&gt; 
+
+&lt;center&gt;
+  &lt;small&gt;
+  Depiction of the association of 3 topics with documents in a simplex
+  &lt;/small&gt;
+&lt;/center&gt;
+
+
+
+
+---
+# LDA: plate notation
+
+&lt;img src="../figures/probabilistic_topic_model.jpg" class="centerimg" width="90%"&gt;
+
+- For each topic k &amp;in; {1, ..., K}, draw a multinomial distribution &amp;beta;&lt;sub&gt;k&lt;/sub&gt; from a Dirichlet distribution with parameter &amp;eta;
+
+--
+
+- For each document d &amp;in; {1, ..., D}, draw a multinomial distribution &amp;theta;&lt;sub&gt;d&lt;/sub&gt; from a Dirichlet distribution with parameter &amp;alpha;  
+
+--
+
+- For each word position in the document n &amp;in; {1, ..., N}, select a hidden topic assignment z&lt;sub&gt;n&lt;/sub&gt; from the multinomial distribution parametrized by &amp;theta;
+
+--
+
+- Choose the observed word w&lt;sub&gt;n&lt;/sub&gt; from the distribution &amp;beta;&lt;sub&gt;z&lt;sub&gt;n&lt;/sub&gt;&lt;/sub&gt;
+
+???
+
+https://youtu.be/fCmIceNqVog?t=714
+
+&lt;small&gt;
+Figure by [Blei (2012)](http://www.cs.columbia.edu/~blei/papers/Blei2012.pdf)
+&lt;/small&gt;
+
+
+---
+# LDA: General case
+
+&lt;!-- Idea: Assume a statistical model that generated the observed corpus, then estimate the model and recover latent (unobserved) quantities, i.e. under the assumptions made --&gt;
+
+#### Let's look more closely at how LDA assumes our document have been generated 
+
+
+- We consider a corpus of `\(D\)` document, each with `\(N_d\)` words
+
+- For each document `\(d \in {1, ..., D}\)`, draw its *topic shares* from a Dirichlet distribution `\(\theta_d \sim \text{Dir}(\alpha)\)`
+
+--
+
+- For each topic `\(k \in {1, ..., K}\)`, draw its *word shares* from a second Dirichlet distribution `\(\beta_k \sim \text{Dir}(\eta)\)`
+
+--
+
+- Fill each document with words. For each document-word position `\(d,n\)` in `\(d \in {1, ..., D}\)` and `\(n \in {1, ..., N_d}\)`
+
+  - Choose the topic `\(z_{d,n}\)` of the document-word position by taking a draw from document `\(d\)`'s topic distribution: `\(z_{d,n} \sim \text{Multinomial}(\theta_d)\)`
+  
+--
+  
+  - Choose the word `\(w_{d,n}\)` by taking a draw from the corresponding topic distribution: `\(w_{d,n} \sim \text{Multinomial}(\beta_{z_{d,n}})\)`
+
+
+---
+# LDA: stylized example
+
+Let us first imagine a stylized corpus with only `\(D=5\)` documents, `\(N=8\)` words per document (and also 8 unique words in the corpus in total), and `\(K=3\)` topics
+
+--
+
+- For each of the 5 documents, draw its topic shares from a Dirichlet distribution `\(\theta_d \sim \text{Dir}(\alpha)\)`. For document 1 this could e.g. yield `\(\theta_1=(0.1,0.8,0.1)\)`, i.e. document 1 consists predominantly of topic 2
+
+--
+
+- For each of the 3 topics, draw its word shares from a second Dirichlet distribution `\(\beta_k \sim \text{Dir}(\eta)\)`. For topic 2 this e.g. yield `\(\beta_2=(0,0,0,0.1, 0,0, 0.4, 0.5)\)`, i.e. topic consists predominantly of words 7 and 8. 
+
+--
+
+
+- Now it is possible to fill each document with words. For each document-word position `\(d,n\)`
+
+  - Choose the topic `\(z_{d,n}\)` of the document-word position by talking a draw from document `\(d\)`'s topic distribution: `\(z_{d,n} \sim \text{Multinomial}(\theta_d)\)`
+  
+  - Choose the word `\(w_{d,n}\)` by taking a draw from the corresponding topic distribution: `\(w_{d,n}\)`
+
+
+
+---
+# Estimation output
+
+Say we have a corpus with `\(D=1,000\)` documents, a vocabulary of `\(V=10,000\)` total unique words/n-grams, and choose `\(K=3\)` topics. The final output after estimating the topic model could be 
+
+#### Topic shares for each document
+
+&lt;img src="../figures/topic_models_theta_matrix_example.jpg" class="centerimg" width = "70%"&gt;
+
+#### Word shares for each topic
+
+&lt;img src="../figures/topic_models_beta_matrix_example.jpg"&gt;
+
+---
+# Topics
+
+- What is referred to as a "topic" is a row vector in `\(\beta\)` with a probability for every word in the corpus to belong to that topic
+
+- For example, the second topic is the second row vector &amp;beta;&lt;sub&gt;2&lt;/sub&gt; = [&amp;beta;&lt;sub&gt;2,1&lt;/sub&gt;   &amp;beta;&lt;sub&gt;2,2&lt;/sub&gt;   ... &amp;beta;&lt;sub&gt;2,10000&lt;/sub&gt;] = [0.00002  0.001 ...  0.05]
+
+- Put differently, a topic is a collection of word probabilities, names which summarizes their meaning are given by humans
+
+--
+
+.pull-left[
+&lt;img src="../figures/topic_wordcloud.jpg" class="centerimg" width="95%"&gt;
+]
+.pull-right[
+- A topic us often visualized via a word cloud where the size of words corresponds to their frequency in the vector
+
+- The figures shows a topic which could be termed "astronomy". 
+]
+
+&lt;/small&gt;
+&lt;/center&gt;
+
+---
+# Estimation intuition
+
+- Estimation the topic models is done in a Bayesian framework
+
+- Our `\(\text{Dir}(\alpha)\)` and `\(\text{Dir}(\eta)\)` are the so called *prior distributions* of the `\(\theta_d\)` and `\(\beta_k\)`
+
+- With Bayes' theorem, with the help of our data, and the model, we update these prior distributions to obtain a so called *posterior distribution* for each `\(\theta_d\)` and `\(\beta_k\)`
+
+- The means of these posterior distributions are the rows in the above matrices commonly given by statistical packages and referred to as `\(\theta\)` and `\(\beta\)`
+
+
+---
+# Obtain posterior distributions
+
+- Algorithms to obtain posterior distributions are not the focus of this lecture 
+
+- Common algorithm to obtain posterior distributions for the `\(\theta_d\)` and `\(\beta_k\)` are from two main groups
+
+  1. Sampling algorithms such as **Gibbs sampling** approximate the posterior distribution with an empirical distribution by drawing a sequence of samples in a way that ensure its limit distribution is the true posterior distribution
+  
+  2. **Variational methods** approximate the posterior distribution with a  parametrized family of distributions. The error of this approximation  is minimized and obtaining posterors thus becomes an optimization problem
+  
+  
+&lt;br&gt;
+See *Probabilistic Topic Models* by [Blei (2012)](https://dl.acm.org/doi/10.1145/2133806.2133826) for links to further resources
+
+
+
+---
+class: inverse, middle, center
+# Extensions
+------------
+
+---
+# Correlated topic model 
+
+- Blei and Lafferty (2005, 2007) developed the correlated topic model (CTM)
+
+- It swaps the Dirichlet distribution of topic shares in documents (&amp;theta;) with a logistic normal normal distribution
+
+- The logistic normal distribution is also defined over a simplex, however, unlike the Dirichlet distribution, it also allows to model correlations (between topics) through a covariance matrix
+
+- This can return estimates of correlations between the topics
+and can also lead to a better fit
+
+
+---
+# Structural topic model
+
+The structural topic model was introduced by Roberts et al. (2013)
+
+#### Topic prevalence covariates
+
+Topic proportions within documents can vary through covariates 
+
+E.g. social media posts by Republican politicians might have different topic proportions than those posted by Democrats
+
+--
+
+&lt;br&gt;
+
+#### Topical content covariates
+
+Word proportions within topics can vary through covariates 
+
+E.g. when talking about a health care topic, Republican politicians might use different words than Democrats
+
+&lt;br&gt;
+
+Without any covariates supplied, the model reduce to the correlated topic model
+
+
+---
+# Structural topic model
+
+&lt;img src="../figures/structural_topic_model.jpg" class="centerimg"&gt;
+
+From: “A Model of Text for Experimentation in the Social Sciences” by
+Roberts, Stewart, and Airoldi, 2016
+
+
+---
+# Dynamic topic model
+
+&lt;img src="../figures/dynamic_topic_model_blei2012.jpg" class="centerimg" width = "75%"&gt;
+
+A physics topics from a dynamic topic model that was fit to articles in *Science* from 1880 to 2002 from by [Blei (2012)](https://dl.acm.org/doi/10.1145/2133806.2133826) 
+
+
+
+
+---
+# Selecting K and beyond 
+
+#### Challenge
+
+In particular selecting the amount of topics K, but also parameters, covariates, and potentially initializations is a very challenging exercise without a single solution
+
+#### What to do?
+
+####Researchers typically consult a combination of quantitative metrics and human judgment
+
+---
+# Quantitative metrics
+
+#### Held-out likelihood or perplexity 
+
+For some held-out documents, how likely would the model have generated/predicted these documents
+
+--
+
+#### Semantic coherence
+
+For example, how likely do the most common words from a topic also co-occur in the same document?
+
+--
+
+#### Exclusivity
+
+Do words with high probability in one topic have low probabilities in others?
+
+--
+
+&lt;br&gt;
+
+Many automated metrics exist, see e.g. Grimmer and Stewart (2013), Mimno et al. (2011), Taddy (2012)
+
+&lt;!-- --- --&gt;
+&lt;!-- # On held-out likelihood metrics --&gt;
+
+&lt;!-- - Held-out likelihood and perplexity allow to judge the --&gt;
+&lt;!-- predictive ability of the model --&gt;
+
+&lt;!-- - Yet, choosing K such that it achieves the highest held-out --&gt;
+&lt;!-- likelihood has serious limitations --&gt;
+
+&lt;!-- - Rather than creating an auto-complete prediction model or --&gt;
+&lt;!-- something similar, the purpose of topic modeling most often --&gt;
+&lt;!-- is to obtain coherent topics that tell a story --&gt;
+
+&lt;!-- - In their paper “Reading tea leaves” (2009) Chang et al. contrast likelihood based metrics with human judgments about topic coherence --&gt;
+
+&lt;!-- - Also see this short [video](https://www.youtube.com/watch?v=rfHCronRgQU) by one of the authors --&gt;
+
+&lt;!-- --- --&gt;
+&lt;!-- # Reading tea leaves --&gt;
+
+&lt;!-- &lt;img&gt; --&gt;
+
+&lt;!-- From: “Reading Tea Leaves: How Humans Interpret Topic Models” by Chang --&gt;
+&lt;!-- et al., 2009 --&gt;
+
+&lt;!-- Likelihood based metrics were actually negatively correlated with human --&gt;
+&lt;!-- metrics about topic coherence --&gt;
+
+---
+# Quantitative metrics
+
+
+#### According to Roberts et al. (2014), a semantically interpretable topic has two qualities: 
+
+1. It is **cohesive** in the sense that high-probability words for the topic tend to co-occur within documents
+
+2. It is **exclusive** in the sense that the top words for that topic are unlikely to appear with in top words of other topics.
+
+--
+
+Semantic coherence and exclusivity, with many other quantitative metrics, are outputs of the function ‘searchK‘ in the ‘stm’ package
+
+--
+
+
+For a discussion of model selection for (structural) topic models (e.g. different choices of K, initializations, and covariates) and evaluation, see e.g. Section “3.4. Evaluate: Model selection and search” in the package vignette or the Section Model Specification and Selection in “Structural Topic Models for Open-Ended Survey Responses” by Roberts et al. (2014)
+
+
+
+
+---
+# Takeaways
+
+####No quantitative metric can replace human judgement when selecting K or other model parameters, and evaluating the fit of a particular topic model more generally
+
+- “The most effective method for assessing model fit is to carefully read documents that are closely associated with particular topics to verify that the semantic concept covered by the topic is reflected in the text.” from “A Model of Text for Experimentation in the Social Sciences” by Roberts et al. (2016)
+
+- The ‘plotQuote‘ function in `stm` allows to plot documents highly
+associated with certain topics
+
+- Key consideration: What is the goal of the current model?
+
+- To generate coherent topics which describe themes? Combine careful human reading with quantitative metrics
+
+- To use topic models e.g. for document embeddings to find similar documents? As input in a predictive model? Try to select K and other parameters such that they maximize whatever the objective function
+
+
+---
+# Example
+
+A carefully documented project with very good average topic coherence is e.g. “Leaders or Followers? Measuring Political Responsiveness in the U.S. Congress Using Social Media Data” by Barberá et al. (2014)
+
+- Data: 651,116 tweets sent by US legislators from January 2013 to
+December 2014
+
+- 2,920 documents = 730 days × 2 chambers × 2 parties
+
+- Why aggregating? Applications that aggregate by author or day
+outperform tweet-level analyses (Hong and Davidson, 2010)
+- Sidenote: For short texts, such as also e.g. survey responses, topic models such as sparse additive generative models (SAGE) might create more coherent topics than e.g. LDA (see e.g. Bauer et al, Political Behavior, 2017)
+
+- K = 100 topics
+
+- Validation: http://j.mp/lda-congress-demo 
+
+---
+# Implementations in R
+
+For an implementation of the LDA and CTM, see e.g. the
+package `topicmodels`
+
+- We will focus on the `stm` package which offers a range of helpful functionalities
+
+- Without added covariates, the `stm` function also estimates a standard CTM, with covariates a structural topic model
+
+- Further helpful package to visualize topic models are `LDAvis` or, the stm-specific, `stminsights`
+
+---
+# Functionalities of stm package
+
+&lt;img src="../figures/stm_functionalities.jpg" class="centerimg"&gt;
+
+From the [vignette](https://cran.r-project.org/web/packages/stm/vignettes/stmVignette.pdf) “stm: RPackage for Structural Topic Models” by Roberts,
+Stewart, and Tingley
+
+---
+# Before we move on
+
+- If you are interested in using the Twitter API in the next weeks, please apply for a developer account
+
+- Applications can be done via https://developer.twitter.com/en/apps and take some time to be processed 
+
+- After your application is approved, you can create an app within a project or a standalone app
+
+- This will create a 1) key and a 2) key secret
+
+- Afterwards you can create 3) an access token and 4) an access token secret 
+
+These four strings/characters will be used to access the API, e.g. via the package `rtweet`
+
+
+---
+class: inverse, middle, center
+# Computer exercises
+--------------------
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

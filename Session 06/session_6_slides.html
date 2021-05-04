@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Political Science</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="David Broska" />
+    <meta name="date" content="2021-03-09" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+    <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../mycss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Computational Political Science
+## Session 6
+### David Broska
+### Zeppelin University
+### March 9, 2021
+
+---
+
+
+# Outline for today
+
+1. **Supervised scaling**
+  - Wordscores model
+  - How it relates to Naive Bayes
+  - Wordscore example
+  
+2. **Unsupervised Learning**
+  - Basics of unsupervised scaling methods
+  - Parametric scaling models: Wordfish 
+  
+3. **Coding examples**
+  - Scaling UK manifestos with Wordscores
+  - Scaling Irish budget debate 2010 using Wordfish
+
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | Overview and key concepts                            |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | Machine learning for texts: Classification II        |     \-        |     \-          |
+|    6    | Mar 09 | *Supervised and unsupervised scaling*                | Summative 2   | Mar 22 23:59:59 |
+|    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
+|    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+
+---
+class: inverse, center, middle
+
+# Wordscores
+------------
+
+---
+# Supervised and unsupervised learning 
+
+&lt;img src="../figures/fig1_grimmer_stuart_adapted.jpg" width="97%" class="centerimg"&gt;
+&amp;nbsp; Fig. 1 in Grimmer and Stuart (2013)
+
+
+
+---
+# From classification to scaling
+
+Machine learning focuses on identifying classes (*classification*), while social science is typically interested in locating things on latent traits (*scaling*), for example:
+
+- Policy positions on economic vs social dimension
+- Inter- and intra-party differences
+- Soft news vs hard news
+- ...and any other continuous scale
+
+
+But the two methods overlap and can be adapted - will demonstrate later using the Naive Bayes classifier
+
+In fact, the class predictions for a collection of words from Naive Bayes can be adapted to scaling
+
+
+---
+# Wordscores 
+
+Analogous to a "training set" and a "test set" in classification, the Wordscores method by Laver, Benoit, and Garry (2003) uses two sets of texts:
+
+#### Reference texts
+
+- texts about which we know something (a scalar dimensional score)
+
+#### Virgin texts
+
+- texts about which we know nothing (but whose dimensional score we'd like to know)
+
+&lt;br&gt;
+#### Basic procedure
+
+1. Analyze reference texts to obtain a single "score" for every word 
+2. Use word scores to score virgin texts
+
+
+---
+# Wordscores procedure (I)
+
+&lt;img src="../figures/wordscores_step_1.jpg" class="centerimg" width="85%"&gt;
+
+---
+# Wordscores procedure (II)
+
+&lt;img src="../figures/wordscores_step_2.jpg" class="centerimg" width="85%"&gt;
+---
+# Wordscores procedure (III)
+
+&lt;img src="../figures/wordscores_step_3.jpg" class="centerimg" width="85%"&gt;
+---
+# Wordscores procedure (IV)
+
+&lt;img src="../figures/wordscores_step_4.jpg" class="centerimg" width="85%"&gt;
+
+
+
+---
+# Wordscore implementation
+
+
+
+
+
+```r
+# 4 texts with known and 3 texts with unknown category
+txt &lt;- c(k1 = "$ Win $", 
+         k2 = "$ Prize $", 
+         k3 = "Earn $ Easily", 
+         k4 = "Paypal 100 $",
+         u1 = "$",
+         u2 = "$ $",
+         u3 = "Paypal 100 $ $")
+x &lt;- dfm(txt) 
+y &lt;- c(1, 1, 1, -1, NA, NA, NA)
+```
+
+
+.pull-left[
+
+training dfm from references texts
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; $ &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; prize &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; earn &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; easily &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; paypal &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; 100 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k3 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k4 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+.pull-right[
+
+training vector with known positions
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; y &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; -1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+---
+# Wordscores
+
+#### Compute probability of a reading document given a word
+
+Start with a set of `\(D\)` reference texts, represented by an `\(D \times W\)` document-feature matrix `\(C_{dw}\)` , where `\(d\)` indexes the document and `\(w\)` indexes the `\(W\)` total word types.
+
+We normalize the document-feature matrix within each
+document by converting `\(C_{ij}\)` into a relative document-feature
+matrix (within document), by dividing `\(C_{ij}\)` by its word total
+marginals
+
+####Probability of word given the document
+
+
+```r
+( PwGd &lt;- dfm_weight(x[1:4,],scheme="prop") )
+```
+
+
+```
+##     features
+## docs    $  win prize earn easily paypal  100
+##   k1 0.67 0.33  0.00 0.00   0.00   0.00 0.00
+##   k2 0.67 0.00  0.33 0.00   0.00   0.00 0.00
+##   k3 0.33 0.00  0.00 0.33   0.33   0.00 0.00
+##   k4 0.33 0.00  0.00 0.00   0.00   0.33 0.33
+```
+
+---
+# P( k&lt;sub&gt;1&lt;/sub&gt; | &amp;#36; )
+
+.pull-left[
+
+&lt;img src="../figures/conditional_prob_with_4_classes.png" width="93.5%" class="centerimg"&gt;
+
+
+Uniform priors: P(k&lt;sub&gt;1&lt;/sub&gt;)=...=P(k&lt;sub&gt;4&lt;/sub&gt;)= &amp;frac14;
+
+####If we only read "&amp;#36;" the probability of reading the document k&lt;sub&gt;1&lt;/sub&gt; is  &amp;frac13;.
+
+
+]
+
+.pull-right[
+
+Probability of word given the document:
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;font-size: 17.5px;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:left;font-size: 17.5px;"&gt; $ &lt;/th&gt;
+   &lt;th style="text-align:center;font-size: 17.5px;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;font-size: 17.5px;"&gt; prize &lt;/th&gt;
+   &lt;th style="text-align:center;font-size: 17.5px;"&gt; earn &lt;/th&gt;
+   &lt;th style="text-align:center;font-size: 17.5px;"&gt; easily &lt;/th&gt;
+   &lt;th style="text-align:center;font-size: 17.5px;"&gt; paypal &lt;/th&gt;
+   &lt;th style="text-align:center;font-size: 17.5px;"&gt; 100 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;max-width: 0.15in; font-size: 17.5px;"&gt; k1 &lt;/td&gt;
+   &lt;td style="text-align:left;font-size: 17.5px;"&gt; 0.67 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;max-width: 0.15in; font-size: 17.5px;"&gt; k2 &lt;/td&gt;
+   &lt;td style="text-align:left;font-size: 17.5px;"&gt; 0.67 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;max-width: 0.15in; font-size: 17.5px;"&gt; k3 &lt;/td&gt;
+   &lt;td style="text-align:left;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;max-width: 0.15in; font-size: 17.5px;"&gt; k4 &lt;/td&gt;
+   &lt;td style="text-align:left;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+   &lt;td style="text-align:center;font-size: 17.5px;"&gt; 0.33 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;br&gt;
+
+$$
+`\begin{align}
+&amp;P(k_1|$)\\
+&amp;=\frac{P(k_1)P($|k_1)}{P(k_1)P($|k_1)+\text{...}+P(k_2)P($|k_4)}\\
+&amp;=\frac{P($|k_1)}{P($|k_1)+\text{...}+P($|k_4)}\\
+&amp;=\frac{ \frac{2}{3} }{\frac{2}{3} + \frac{2}{3} + \frac{1}{3} + \frac{1}{3}}=\frac{1}{3}
+\end{align}`
+$$
+
+]
+
+---
+# P( document | word )
+
+####Now let's compute all probabilities of reading a document given a word
+
+
+```r
+PwGd # recall our matrix containing all P(word | document)
+```
+
+
+```
+##     features
+## docs    $  win prize earn easily paypal  100
+##   k1 0.67 0.33  0.00 0.00   0.00   0.00 0.00
+##   k2 0.67 0.00  0.33 0.00   0.00   0.00 0.00
+##   k3 0.33 0.00  0.00 0.33   0.33   0.00 0.00
+##   k4 0.33 0.00  0.00 0.00   0.00   0.33 0.33
+```
+
+.pull-left[
+
+```r
+# transpose PwGd matrix
+( tPwGd &lt;- t(PwGd) ) 
+```
+
+
+```
+##         docs
+## features   k1   k2   k3   k4
+##   $      0.67 0.67 0.33 0.33
+##   win    0.33 0.00 0.00 0.00
+##   prize  0.00 0.33 0.00 0.00
+##   earn   0.00 0.00 0.33 0.00
+##   easily 0.00 0.00 0.33 0.00
+##   paypal 0.00 0.00 0.00 0.33
+##   100    0.00 0.00 0.00 0.33
+```
+]
+
+.pull-right[
+
+```r
+# P(document | word)
+( PdGw &lt;- tPwGd / rowSums(tPwGd) )
+```
+
+```
+##         docs
+## features   k1   k2   k3   k4
+##   $      0.33 0.33 0.17 0.17
+##   win    1.00 0.00 0.00 0.00
+##   prize  0.00 1.00 0.00 0.00
+##   earn   0.00 0.00 1.00 0.00
+##   easily 0.00 0.00 1.00 0.00
+##   paypal 0.00 0.00 0.00 1.00
+##   100    0.00 0.00 0.00 1.00
+```
+]
+
+
+---
+# Scoring words
+
+Compute a `\(J\)`-length "score" vector `\(S\)` for each word `\(j\)` as the average of each document `\(i\)`’s scores `\(a_i\)`, weighted by each word's `\(P_{ij}\)` so that 
+`\(S_j=\sum_i^I a_i P_{ij}\)`
+
+```r
+y[1:4] # the "a" vector with the positions of the document
+```
+
+```
+## [1]  1  1  1 -1
+```
+
+
+
+```r
+t(PdGw) * y[1:4] # transpose matrix so we can multiply PdGw with the doc positions
+```
+
+```
+##     features
+## docs     $ win prize earn easily paypal 100
+##   k1  0.33   1     0    0      0      0   0
+##   k2  0.33   0     1    0      0      0   0
+##   k3  0.17   0     0    1      1      0   0
+##   k4 -0.17   0     0    0      0     -1  -1
+```
+
+
+```r
+( ws &lt;- colSums( t(PdGw) * y[1:4] )) # then, sum up the result column-wise
+```
+
+```
+##      $    win  prize   earn easily paypal    100 
+##   0.67   1.00   1.00   1.00   1.00  -1.00  -1.00
+```
+
+---
+# Scoring words
+
+We obtain the scored words *also* by using matrix multiplication. In matrix algebra, `$$\underset{1 \times J}{S} = \underset{1 \times I}{a} \cdot \underset{I \times J}{P}$$`
+
+.pull-left[
+
+
+
+```r
+PdGw # P(document | word)
+```
+
+
+```
+##         docs
+## features   k1   k2   k3   k4
+##   $      0.67 0.67 0.33 0.33
+##   win    0.33 0.00 0.00 0.00
+##   prize  0.00 0.33 0.00 0.00
+##   earn   0.00 0.00 0.33 0.00
+##   easily 0.00 0.00 0.33 0.00
+##   paypal 0.00 0.00 0.00 0.33
+##   100    0.00 0.00 0.00 0.33
+```
+]
+
+.pull-right[
+
+
+```r
+y[1:4] # documents scale
+```
+
+```
+## [1]  1  1  1 -1
+```
+
+]
+
+
+
+
+
+```r
+ # matrix multiplication with P(document|words) and scores
+( ws &lt;- PdGw %*% y[1:4] )
+```
+
+```
+##      $    win  prize   earn easily paypal    100 
+##   0.67   1.00   1.00   1.00   1.00  -1.00  -1.00
+```
+
+
+---
+# Scoring texts
+
+####The goal is to obtain a single score for any new text, relative to the reference texts
+
+We do this by taking the mean of the scores of its words, weighted by their term frequency
+
+.pull-left[
+
+```r
+PwGd &lt;- dfm_weight(x, scheme="prop")
+t(PwGd) # transpose matrix 
+```
+
+```
+##         docs
+## features   k1   k2   k3   k4 u1 u2   u3
+##   $      0.67 0.67 0.33 0.33  1  1 0.50
+##   win    0.33 0.00 0.00 0.00  0  0 0.00
+##   prize  0.00 0.33 0.00 0.00  0  0 0.00
+##   earn   0.00 0.00 0.33 0.00  0  0 0.00
+##   easily 0.00 0.00 0.33 0.00  0  0 0.00
+##   paypal 0.00 0.00 0.00 0.33  0  0 0.25
+##   100    0.00 0.00 0.00 0.33  0  0 0.25
+```
+
+
+]
+
+
+.pull-right[
+
+
+```r
+# row-wise PwGd * score
+t(PwGd) * ws[,1]
+```
+
+```
+##         docs
+## features   k1   k2   k3    k4   u1   u2
+##   $      0.44 0.44 0.22  0.22 0.67 0.67
+##   win    0.33 0.00 0.00  0.00 0.00 0.00
+##   prize  0.00 0.33 0.00  0.00 0.00 0.00
+##   earn   0.00 0.00 0.33  0.00 0.00 0.00
+##   easily 0.00 0.00 0.33  0.00 0.00 0.00
+##   paypal 0.00 0.00 0.00 -0.33 0.00 0.00
+##   100    0.00 0.00 0.00 -0.33 0.00 0.00
+```
+
+]
+
+
+```r
+colSums( t(PwGd) * ws[,1] )
+```
+
+```
+##    k1    k2    k3    k4    u1    u2    u3 
+##  0.78  0.78  0.89 -0.44  0.67  0.67 -0.17
+```
+---
+# Scoring texts
+
+We obtain the scored words *also* by using matrix multiplication.
+
+
+```r
+# matrix multiplication with P(word | document) and obtained wordscores 
+PwGd %*% ws
+```
+
+```
+##    k1    k2    k3    k4    u1    u2    u3 
+##  0.78  0.78  0.89 -0.44  0.67  0.67 -0.17
+```
+
+
+
+#### Does this result make sense in the context of the spam example? 
+&lt;br&gt;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; k1 (s) &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; k2 (s) &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; k3 (s) &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; k4 (¬s) &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; u1 &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; u2 &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; u3 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;min-width: 0.8in; "&gt; $ Win $ &lt;/td&gt;
+   &lt;td style="text-align:center;min-width: 0.8in; "&gt; $ Prize $ &lt;/td&gt;
+   &lt;td style="text-align:center;min-width: 0.8in; "&gt; Earn $ Easily &lt;/td&gt;
+   &lt;td style="text-align:center;min-width: 0.8in; "&gt; Paypal 100 $ &lt;/td&gt;
+   &lt;td style="text-align:center;min-width: 0.8in; "&gt; $ &lt;/td&gt;
+   &lt;td style="text-align:center;min-width: 0.8in; "&gt; $ $ &lt;/td&gt;
+   &lt;td style="text-align:center;min-width: 0.8in; "&gt; Paypal 100 $ $ &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+--
+
+#### Final remarks
+- Note that new words outside of the set `\(J\)` may appear in the `\(K\)` virgin documents — these are simply ignored (because we have no information on their scores)
+- Note also that nothing prohibits reference documents from also being scored as virgin documents
+
+
+---
+# Using textmodel_wordscores()
+
+#### For convenience we can use the quanteda function to obtain the above results
+
+
+```r
+ws_mod &lt;- textmodel_wordscores(x,y) 
+```
+
+
+#### Wordscores
+
+
+```r
+summary(ws_mod)
+```
+
+```
+## textmodel_wordscores.dfm(x = x, y = y)
+```
+
+```
+## (showing first 7 elements)
+##      $    win  prize   earn easily paypal    100 
+##   0.67   1.00   1.00   1.00   1.00  -1.00  -1.00
+```
+
+#### Scaled documents
+
+
+```r
+predict(ws_mod)
+```
+
+```
+##    k1    k2    k3    k4    u1    u2    u3 
+##  0.78  0.78  0.89 -0.44  0.67  0.67 -0.17
+```
+
+
+---
+class: inverse, center, middle
+# Unsupervised scaling
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt;
+
+---
+# Unsupervised scaling methods
+
+Text gets converted into a quantitative matrix of features
+
+- words, typically
+- could be dictionary entries, or parts of speech
+
+Documents are scaled based on similarity or distance in feature use but the fundamental problem is distance on which scale?
+
+- Ideally, something we care about, e.g. policy positions, ideology, preferences, sentiment
+- But often other dimensions (language, rhetoric style, authorship) are more predictive
+
+First dimension in unsupervised scaling will capture main source of variation, whatever it is
+
+Unlike supervised models, validation comes after estimating
+the model
+
+---
+# Unsupervised scaling methods
+
+#### Two main approaches
+
+**Parametric methods** model feature occurrence according to some stochastic distribution, typically in the form of a measurement model
+
+- for instance, model words as a multi-level Bernoulli distribution, or a Poisson distribution
+- word effects and “positional” effects are unobserved parameters to be estimated
+- e.g. Wordﬁsh (Slapin and Proksch 2008) and Wordshoal (Lauderdale and Herzog 2016)
+
+**Non-parametric methods** typically based on the Singular Value Decomposition of a matrix
+- correspondence analysis
+- factor analysis
+- other (multi)dimensional scaling methods
+
+---
+class: inverse, middle, center
+# Parametric scaling models
+---------------------------------------------------
+
+
+---
+# Wordfish (Slapin and Proksch 2008)
+
+####The goal is unsupervised scaling of ideological positions
+
+The frequency with which politician `\(i\)` uses word `\(k\)` is drawn from a Poisson distribution:
+
+`$$w_{ik} \sim \text{Poisson}(\lambda_{ik} )$$`
+`$$\lambda_{ik} = \exp(\alpha_i +  \psi_k +  \beta_k \times \theta_i )$$`
+with latent parameters:
+
+
+
+`\(\alpha_i\)` is “loquaciousness” of politician `\(i\)` (document fixed effect, hence it’s associated with the party or politician)
+
+`\(\psi_k\)` is frequency of word `\(k\)` (word fixed effect)
+
+`\(\beta_k\)` is discrimination parameter of word `\(k\)`
+
+`\(\theta_i\)` is the politician's ideological position
+
+
+
+**Key intuition**: controlling for document length and word frequency, words with negative `\(k\)` will tend to be used more often by politicians with negative `\(\theta_i\)` (and vice versa)
+
+
+---
+# Wordfish (Slapin and Proksch 2008)
+
+
+#### Why Poisson?
+&lt;br&gt;
+
+- Poisson distributed variables are bounded between (0, &amp;infin;) and take on only discrete values 0, 1, 2, ..., &amp;infin;
+
+- Exponential transformation: word counts are function of log document length and word frequency
+
+&lt;br&gt;
+
+$$
+`\begin{align}
+w_{ik} &amp;\sim \text{Poisson}(\lambda_{ik}) \\
+\lambda_{ik} &amp;= \exp(\alpha_i + \psi_k + \beta_k \times \theta_i) \\
+\log(\lambda_{ik}) &amp;= \alpha_i + \psi_k \times \theta_i
+\end{align}`
+$$
+
+---
+# How to estimate this model 
+
+#### Conditional maximum likelihood estimation:
+
+- If we knew `\(\psi\)` and `\(\beta\)` (the word parameters) then we have a Poisson regression model
+
+- If we knew `\(\alpha\)` and `\(\beta\)` (the party/politician/document parameters) then we have a Poisson regression model too!
+
+- So we alternate them and hope to converge to reasonable estimates for both
+
+- Implemented in the quanteda package `textmodel_wordfish()`
+
+
+An alternative is MCMC with a Bayesian formulation or variational inference using an Expectation-Maximization algorithm (Imai et al 2016)
+
+
+---
+# Conditional max. likelihood for wordfish
+
+Start by guessing the parameters (some guesses are better than other, e.g. SVD)
+
+Algorithm: 
+
+1. Assume the current *legislator parameters* are correct and fit as a Poisson regression model
+
+2. Assume the current *word parameters* are correct and fit as a Poisson regression model 
+
+3. Normalize `\(\theta\)`s to mean 0 and variance 1
+
+Iterate until convergence (change in value below a certain threshold)
+
+---
+# Identification 
+
+The *scale* and *direction* of `\(\theta\)` is undetermined - like most models with latent variables 
+
+To identify the model in Wordfish
+
+- Fix one `\(\alpha\)` to zero to specify the left-right direction (Wordfish option 1)
+
+- Fix one `\(\hat \theta\)`s to mean zero and variance 1 to specify the scale (Wordfish option 2)
+
+- Fix two `\(\hat \theta\)`s to specify the direction and scale (Wordfish option 3 and Wordscores)
+
+Note: Fixing two reference scores does not specify the policy domain, it just identifies the model
+
+---
+# "Features" of parametric scaling
+
+- Standard (statistical) inference about parameters
+
+- Uncertainty accounting for parameters 
+
+- Distributional assumptions are made explicit (as part of the data generating process motivating the choice of stochastic distribution)
+
+  - conditional independence
+  - stochastic process (e.g. `\(\text{E}(Y_{ij}=\text{Var}(Y_{ij})=\lambda_{ij}\)`)
+
+- Permits hierarchical reparameterization (to add covariates)
+
+- Generative model: given the estimated parameters, we could
+generate a document for any specified length
+
+---
+# Some reasons why this model is wrong
+
+- Violations of conditional independence:
+
+  - Words occur in sequence (serial correlation)
+
+  - Words occur in combinations (e.g. as collocations) “carbon tax” / “income tax” / “inheritance tax” / “capital gains tax” /”bank tax”
+
+  - Legislative speech uses rhetoric that contains frequent
+synonyms and repetition for emphasis (e.g. “Yes we can!”)
+
+- Heteroskedastic errors (variance not constant and equal to
+mean):
+
+  - overdispersion when “informative” words tend to cluster
+together
+
+  - underdispersion could (possibly) occur when words of high frequency are uninformative and have relatively low between-text variation (once length is considered)
+
+
+
+---
+# Overdispersion 
+
+
+#### Overdispersion in German manifesto data (data taken from Slapin and Proksch 2008)
+
+&lt;img src="../figures/overdisperson_slapin_proksch_2008.jpg" class = "centerimg" width = "90%"&gt;
+
+
+---
+# One solution to model overdispersion
+
+Negative binomial model (Lo, Proksch, and Slapin 2014):
+
+$$
+`\begin{align}
+w_{ik} &amp;\sim \text{NB}(r, \frac{\lambda_{ik}}{\lambda_{ik} + r_i}) \\
+\lambda_{ik} &amp;= \exp(\alpha_i + \psi_k + \beta_k \times \theta_i)
+\end{align}`
+$$
+
+where ri is a variance inflation parameter that varies across
+documents.
+
+It can have a substantive interpretation (ideological ambiguity),
+e.g. when a party emphasizes an issue but fails to mention key
+words associated with it that a party with similar ideology
+mentions.
+
+---
+# Example from Slapin and Proksch 2008
+
+&lt;img src="../figures/slapin_proksch_2008_party_positions.jpg" class="centerimg" width="69%"&gt;
+
+---
+# Example from Slapin and Proksch 2008
+
+&lt;img src="../figures/slapin_proksch_2008_left_right.jpg" class="centerimg" width="69%"&gt;
+
+---
+# Example from Slapin and Proksch 2008
+
+&lt;img src="../figures/slapin_proksch_2008_table.jpg" class="centerimg" width="90%"&gt;
+
+
+---
+class: inverse, center, middle
+# Coding exercise
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt;
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

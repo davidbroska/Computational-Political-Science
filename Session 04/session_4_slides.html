@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Political Science</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="David Broska" />
+    <meta name="date" content="2021-02-23" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+    <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../mycss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Computational Political Science
+## Session 4
+### David Broska
+### Zeppelin University
+### February 23, 2021
+
+---
+
+
+# Outline for today
+
+1. **Supervised machine learning**
+    - Why do we need a labeled set? 
+
+2. **Probability fundamentals review**
+    - Conditional probability
+    - Rule of product
+
+3. **Bayes theorem**
+    - From conditional probabilities to Bayes theorem
+    - Example: How good is our spam classifier?
+
+4. **Naive Bayes**
+    - Dissecting the Naive Bayes
+    - Implementation in quanteda
+    
+5. **Prior probabilities**
+
+6. **Coding Exercise**
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | Overview and key concepts                            |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | *Machine learning for texts: Classification I*       | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | Machine learning for texts: Classification II        |     \-        |     \-          |
+|    6    | Mar 09 | Supervised and unsupervised scaling                  | Summative 2   | Mar 22 23:59:59 |
+|    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
+|    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+---
+class: inverse, center, middle
+
+# Supervised machine learning
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+
+---
+# Supervised machine learning 
+
+&lt;img src="../figures/fig1_grimmer_stuart_adapted.jpg" width="97%" class="centerimg"&gt;
+&amp;nbsp; Fig. 1 in Grimmer and Stuart (2013)
+
+
+---
+# Supervised machine learning
+
+### The goal is classify documents into pre existing categories.
+
+For example, authors of documents, sentiment of tweets, ideological position of parties based on manifestos, tone of movie reviews...
+
+### What we need
+
+- Hand-coded dataset (labeled), to be split into:
+    
+    - *Training set*: used to train the classifier
+    - *Validation/Test set*: used to validate the classifier
+  
+- Method to *extrapolate* from hand coding to unlabeled documents (classifier):
+    
+    - Naive Bayes, regularized regression, SVM, CNN, ensemble
+methods, etc.
+
+- *Performance metric* to choose best classifier and avoid overfitting:
+    
+    - Confusion matrix, accuracy, precision, recall...
+
+- Approach to *validate* classifier: cross-validation
+
+---
+# Creating a labeled set
+
+
+### How do we obtain a labeled set?
+
+- External sources of annotation
+    - Disputed authorship of Federalist papers estimated based on known authors of other documents
+
+- Expert annotation
+  - "Canonical" dataset in Comparative Manifesto Project
+  - In most projects, undergraduate students (expertise comes from training)
+
+- Crowd-sourced coding
+  - Wisdom of crowds: aggregated judgments of non-experts
+converge to judgments of experts at much lower cost (Benoit
+et al 2016)
+  - Easy to implement with CrowdFlower or MTurk
+
+---
+# Labeling example
+
+&lt;img src="../figures/twitter_annotate.jpg" class="centerimg" width="93%"&gt;
+
+---
+# Principles of supervised learning
+
+.pull-left[
+### Generalization
+
+A classifier or a regression algorithm learns to correctly predict output from given inputs
+
+Crucially, it predicts correctly not only in previously seen samples but also in previously unseen samples.
+]
+
+.pull-right[
+
+### Overfitting
+
+A classifier or a regression algorithm learns to correctly predict output from given inputs in previously seen samples. 
+
+However, it fails to do so in previously unseen samples. This causes poor prediction/generalization.
+]
+
+&lt;br&gt;
+####The goal is to maximize the frontier of precise identification of true condition with accurate recall
+
+---
+class: inverse, center, middle
+
+# Probability fundamentals review
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt;
+
+---
+# Motivation
+
+#### Why should we look more closely into conditional probabilities and Bayes theorem?
+&lt;br&gt;
+After all, we could just learn the broad idea of the Naive Bayes classifier and run `textmodel_nb()` in R without knowing the details ...
+
+&lt;br&gt;
+
+- We introduce classification by the example of the Naive Bayes which requires a better understanding of the model's internal mechanisms
+
+--
+
+- Although universities mostly teach probability theory for independent events, the most interesting social phenomena are conditional (and not independent of) other factors
+
+--
+
+- We lay the foundation for interesting and widely used data science applications of Bayesian thinking
+
+  ... such as the Wordscores model covered next week!
+ 
+
+---
+# Conditional probability
+
+
+
+#### Definition
+
+`$$P(A|B)=\frac{P( A \cap B)}{P(B)} \text{, when } P(B)&gt;0$$`
+where `\(A\)` and `\(B\)` are events in a sample space `\(S\)`. 
+
+&lt;img src="../figures/a_and_b_conditional_no_background.png" class="centerimg" width="60%"&gt;
+
+Intuitively, what this formula does is _restricting the sample space_ to events where `\(B\)` occurs, and counting those where both `\(A\)` and `\(B\)` occur.
+
+
+---
+# Example
+
+####What is the probability of event `\(A\)` given `\(B\)`?
+
+.pull-left[
+Let `\(A\)` be the event that a the roll of a dice results in an *odd* number: `\(A=\{1,3,5\}\)`
+
+Let `\(B\)` be the event that the outcome is *smaller or equal to three*: `\(B=\{1,2,3\}\)`
+]
+
+.pull-right[
+&lt;img src="../figures/red_dice.png" width="45%" class="centerimg"&gt;
+
+]
+&lt;br&gt;
+
+--
+
+`$$P(A|B)=\frac{| A \cap B|}{|B|}=\frac{|\{1,3\}|}{|\{1,2,3\}|}=\frac{2}{3}$$`
+
+--
+
+More generally, we can rewrite this in terms of probabilities 
+
+`$$P(A|B)=\frac{P(A \cap B)}{P(B)}=\frac{ \frac{|A \cap B|}{|S|} }{ \frac{|B|}{|S|} }=\frac{ \frac{2}{6} }{ \frac{3}{6}}=\frac{2}{3}$$`
+where `\(S=\{1,2,3,4,5,6\}\)` is the sample space.
+
+---
+# Rule of product
+
+The rule of product allows finding the probability of two (or more) events occurring together
+
+
+#### Rule of product for dependent events
+
+
+$$
+`\begin{align}
+P(A|B)= \frac{P( A \cap B)}{P(B)}  \text{ }
+\Leftrightarrow  \text{ }  P(A|B)P(B)=&amp;P(A\cap B)
+\end{align}`
+$$
+
+Rewriting the conditional probability allows finding `\(P(A \cap B)\)` using a tree diagram:
+
+&lt;img src="../figures/conditional_probability_A_B.png" class="centerimg" width="44%"&gt; 
+
+---
+# Rule of product
+
+The rule of product allows finding the probability of two (or more) events occurring together
+
+#### Rule of product for independent events 
+
+Two events `\(A\)` and `\(B\)` are independent only if `$$P(A \cap B)=P(A)  P(B)$$`
+
+&lt;br&gt;
+
+Independence means that conditional probability of one event given another is the same as the original (prior) probability:
+
+$$
+`\begin{align}
+P(A|B)=&amp; \frac{P(A \cap B)}{P(B)}= \frac{P(A)P(B)}{P(B)} = P(A)
+\end{align}`
+$$
+
+
+---
+# Rule of product
+
+#### Rule of product for independent events (continued)
+
+Sometimes the independence of two events is clear because they do not have a  physical interaction with each other 
+
+&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; For example, the roll of a dice today and the weather tomorrow
+
+
+
+At other times, independence is not obvious so we need to check if they satisfy the independence condition
+
+.pull-left[
+
+In the die roll example, we had `\(P(A)=\frac{|\{1,3,5\}|}{|S|}=\frac{3}{6}=\frac{1}{2}\)` and `\(P(B)=\frac{ |\{1,2,3\} | }{|S|}=\frac{3}{6}=\frac{1}{2}\)` and
+`\(P(A \cap B) = \frac{1}{3}\)`
+
+]
+
+.pull-right[
+
+&lt;img src="../figures/red_dice.png" width="45%" class="centerimg"&gt;
+
+]
+
+`\(A\)` and `\(B\)` are not independent since
+
+`$$P(A)P(B)=  \left( \frac{1}{2} \right)^2 =\frac{1}{4} \quad \quad  \boldsymbol{\neq} \quad \quad P(A \cap B)=\frac{1}{3}$$`
+???
+
+In previous slide on the die roll example, we used set theory to determine P(A *and* B). Ask for a different way to come up with the probability of the intersection. 
+
+Answer: Going back to the tree-diagram (or rule of product) interpretation of conditional probabilities, we can compute P(A *and* B) with P(A|B)P(B)=(2/3)*(1/2).
+
+
+
+---
+# Special cases (I)
+
+If `\(A\)` and `\(B\)` are disjoint they cannot occur together, so `\(A \cap B = \varnothing\)`. 
+
+`$$P(A|B)=\frac{P(A \cap B)}{P(B)}=\frac{P(\varnothing)}{P(B)}=0$$`
+
+&lt;img src="../figures/a_and_b_disjoint_no_background.png" class="centerimg" width="60%"&gt;
+
+---
+# Special cases (II)
+
+
+If `\(A\)` is a subset of `\(B\)`, then whenever `\(A\)` happens `\(B\)` happens as well. 
+
+In this case, `\(A \cap B = A\)`.
+
+`$$P(A|B)=\frac{P(A \cap B)}{P(B)}=\frac{P(A)}{P(B)}$$`
+
+&lt;img src="../figures/a_subset_of_b_no_background.png" class="centerimg" width="60%"&gt;
+
+
+???
+
+For example: What is the probability of sampling a PhD among holders of a master's degree? Let `\(A\)` be the number of people in a population who hold a doctoral degree and `\(B\)` the number of people who hold a master's degree. The probability of randomly sampling a PhD who also has a master's degree simplifies from `\(P(A \cap B)\)` to `\(P(A)\)` because PhDs also hold master's degrees.
+
+---
+# Special cases (III)
+
+If `\(B\)` is a subset of `\(A\)`, then whenever `\(B\)` happens `\(A\)` also happens. 
+
+In this case, `\(A \cap B=B\)`.
+
+`\(P(A|B)=\frac{P(A \cap B)}{P(B)}=\frac{P(B)}{P(B)}=1\)`
+
+&lt;img src="../figures/b_subset_of_a_no_background.png" class="centerimg" width="60%"&gt;
+
+
+---
+class: inverse, center, middle
+
+# Bayes theorem
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+
+
+---
+# Bayes theorem
+
+Rearranging the definition of conditional probability gives the probability of the intersection:
+
+$$
+P(A|B)= \frac{P(A \cap B)}{P(B)} \Leftrightarrow P(B)P(A|B)=P(A\cap B)
+$$
+
+An alternative way of expressing the probability of the intersection is based on `\(P(B|A)\)`.
+
+$$
+P(B|A) = \frac{P(A \cap B)}{P(A)} \Leftrightarrow P(A)P(B|  A )=P(A \cap B)
+$$
+&lt;br&gt;
+
+Setting both equations equal to another and rearranging gives the **Bayes theorem**:
+
+$$
+`\begin{aligned}
+P(A)P(B|  A )=&amp;P(B)P(A|B) \\ 
+\text{ } \\
+\Leftrightarrow P(B|  A )=&amp;\frac{P(B)P(A|B)}{P(A)}
+\end{aligned}`
+$$
+
+
+---
+# Applying Bayes theorem
+
+&lt;br&gt; 
+###The rate of spam mails for a certain email address is 2%. A spam filter identifies a spam mail with a probability of 95%. At the same time, 10% of non-spam messages are classified as spam.
+
+&lt;br&gt;
+
+####(a) What is the probability that a mail that was marked as spam is truly a spam mail?
+
+####(b) What is the probability that a mail that was not identified as spam is spam?
+
+---
+class: inverse, center, middle
+
+# Naive Bayes
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt;
+
+
+---
+# Spam classification
+
+
+
+
+
+```r
+# 4 texts with known and 3 texts with unknown category
+txt &lt;- c(k1 = "$ Win $", 
+         k2 = "$ Prize $", 
+         k3 = "Earn $ Easily", 
+         k4 = "Paypal 100 $",
+         u1 = "$",
+         u2 = "$ $",
+         u3 = "Paypal 100 $ $")
+x &lt;- dfm(txt) 
+y &lt;- factor(c("Spam","Spam","Spam","No Spam", NA, NA, NA), ordered = T)
+```
+
+
+.pull-left[
+
+training dfm with known categories
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; $ &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; prize &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; earn &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; easily &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; paypal &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; 100 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k3 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; k4 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+.pull-right[
+
+training vector with known categories
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; y &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; No Spam &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+---
+# P( word | category )
+
+
+```r
+dfm(txt, groups = y)                # compute word frequency given category
+```
+
+
+```
+##          features
+## docs      $ win prize earn easily paypal 100
+##   No Spam 1   0     0    0      0      1   1
+##   Spam    5   1     1    1      1      0   0
+```
+
+
+
+```r
+dfm(txt, groups = y) + 1             # but we need to apply Laplacian smoothing 
+```
+
+
+```
+##          features
+## docs      $ win prize earn easily paypal 100
+##   No Spam 2   1     1    1      1      2   2
+##   Spam    6   2     2    2      2      1   1
+```
+
+
+```r
+# get probability of word given category 
+# divide feature frequency by category frequency (10 and 16 respectively)
+(dfm(txt, groups = y) + 1) / rowSums(dfm(txt, groups = y) + 1)
+```
+
+
+```
+##          features
+## docs          $   win prize  earn easily paypal    100
+##   No Spam 0.200 0.100 0.100 0.100  0.100 0.2000 0.2000
+##   Spam    0.375 0.125 0.125 0.125  0.125 0.0625 0.0625
+```
+
+---
+# nb &lt;- textmodel_nb(x,y,prior="docfreq")
+
+
+
+
+
+```r
+( Pc &lt;- nb$priors )                                 # extract prior for class
+```
+
+```
+## No Spam    Spam 
+##    0.25    0.75
+```
+
+```r
+( PwGc &lt;- nb$param )                                # get p of word given category
+```
+
+```
+##             $   win prize  earn easily paypal    100
+## No Spam 0.200 0.100 0.100 0.100  0.100 0.2000 0.2000
+## Spam    0.375 0.125 0.125 0.125  0.125 0.0625 0.0625
+```
+.pull-left[
+
+```r
+# get p of class given word(s)
+( PcGw &lt;- predict(nb, type="prob") )            
+```
+
+```
+##    No Spam Spam
+## k1    0.07 0.93
+## k2    0.07 0.93
+## k3    0.10 0.90
+## k4    0.65 0.35
+## u1    0.15 0.85
+## u2    0.09 0.91
+## u3    0.49 0.51
+```
+]
+.pull-right[
+
+
+```r
+# categorize based on highest p
+( cats &lt;- predict(nb, type="class") )               
+```
+
+
+```
+## Spam
+## Spam
+## Spam
+## No Spam
+## Spam
+## Spam
+## Spam
+```
+]
+
+
+---
+# Manually computing P( spam | words )
+
+Recall that we have the prior P(spam)=0.75 and estimated these conditional probabilities:
+
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; $ &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; prize &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; earn &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; easily &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; paypal &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; 100 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; No Spam &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.200 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.2000 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.2000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.375 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.0625 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.0625 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+####Notice how our belief of the message being spam changes as we consider various features  
+
+.pull-left[
+#### P(spam | &amp;#36;)
+
+```r
+(.75*.375) / (.75*.375 + .25*.2) 
+```
+
+```
+## [1] 0.85
+```
+
+#### P(no spam | &amp;#36;)
+
+```r
+(.25*.2) / (.25*.2 + .75*.375)
+```
+
+```
+## [1] 0.15
+```
+]
+
+
+
+.pull-right[
+#### P(spam | &amp;#36; &amp;#8745; &amp;#36;)
+
+```r
+(.75 * .375^2) / 
+ (.75 * .375^2 + .25 * .2^2)
+```
+
+```
+## [1] 0.91
+```
+
+#### P(spam | &amp;#36; &amp;#8745;  &amp;#36; 100  &amp;#8745; Paypal) 
+
+```r
+(.75 * .375^2 * .0625^2) / 
+ (.75 * .375^2 *.0625^2 + .25 * .2^4)
+```
+
+```
+## [1] 0.51
+```
+]
+
+
+
+
+---
+# P( spam | $ )
+
+.pull-left[
+What is the probability of spam given a dollar sign in the message?
+
+&lt;img src="../figures/P_spam_given_d.png" class="centerimg" width="78%"&gt;
+
+]
+
+--
+
+
+
+.pull-right[
+
+
+$$
+`\begin{align}
+P(\text{s}|\$)=&amp;\frac{P(\text{s})P(\$|\text{s})}{P(\text{s})P(\$|\text{s})+P(\neg \text{ s})P(\$|\neg \text{ s})}
+\\=&amp;\frac{0.75 \times0.375}{0.75\times 0.375 + 0.25\times 0.2} \\
+=&amp; 0.85
+\end{align}`
+$$
+
+#### Numerator
+
+Look at the branches where the evidence (&amp;#36;) occurs *and* the hypothesis (spam) is true; compute the joint probability P(s &amp;#8745; &amp;#36;)
+
+#### Denominator
+
+Consider all possibilities where the evidence occurs: 
+numerator *added* to the joint probability of the evidence occurring given the hypothesis is not true
+
+]
+
+---
+# Considering multiple features
+
+#### The Naive Bayes model (wrongly) assumes **conditional independence of word counts given the class**.
+
+- This is why the model is called "naive": it assumes that seeing a word does not change the probability of observing other words in a document. 
+
+- However, the word "weather" is more likely to be followed by related words like "forecast" and "report" rather than unrelated words such as "guitar".
+
+--
+
+#### This assumption has practical advantages as we can *multiply* the conditional probabilities of a *w*ord given a *c*lass `\(P(w_j|c_k)\)` to get the *joint* probability of the words occurring in a *d*ocument.
+
+Then, the probability that a document belongs to a class can be calculated with
+
+
+
+`$$P(c_k|d)=P(c_k|w_1 \cap w_2 \cap \dots w_J)=P(c_k) \prod_{j}^{J} \frac{P(w_j|c_k)}{P(w_j)}$$`
+
+where `\(\prod_j^J\)` means to multiply the `\(J\)` word probabilities.
+
+---
+# P( spam | $ &amp;#8745; $ )
+
+
+.pull-left[
+
+What is the probability of spam given **two** dollar signs in the message?
+
+&lt;img src="../figures/P_spam_given_d_d.png" class="centerimg" width="100%"&gt;
+
+]
+
+--
+
+.pull-right[
+
+Assuming conditional independence of features given the class allows us to easily calculate the probability of spam given **multiple** features.
+
+Independence simplifies the calculation, for example P(&amp;#36; | s &amp;#8745;  &amp;#36;) = P( &amp;#36;| s)
+
+Substantively, we assume that observing a &amp;#36; does not affect the probability of observing further &amp;#36; (or any other feature) 
+
+
+$$
+`\begin{align}
+&amp;P(\text{s}| \$ \cap \$)\\
+=&amp;\frac{P(\text{s})P(\$|\text{s})^2}{P(\text{s})P(\$|\text{s})^2 +P(\neg \text{ s})P(\$|\neg \text{ s})^2 }
+\\=&amp;\frac{0.75 \times0.375^2}{0.75\times 0.375^2 + 0.25\times 0.2^2} \\=&amp; 0.91
+\end{align}`
+$$
+
+]
+
+
+---
+# P( spam | $ &amp;#8745; $ &amp;#8745; Paypal &amp;#8745; 100 )
+
+What is the probability of spam given the message includes &amp;#36;, &amp;#36;, Paypal, and 100? 
+
+Recall that we have the prior of P(spam)=0.75 and estimated the following conditional probabilities:
+
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; $ &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; prize &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; earn &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; easily &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; paypal &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; 100 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; No Spam &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.200 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.2000 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.2000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.375 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.125 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.0625 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.0625 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;br&gt;
+
+--
+
+$$
+`\begin{align}
+&amp;P(\text{s}|\$ \cap \$ \cap \text{Paypal} \cap 100)\\
+=&amp;\frac{P(\text{s})P(\$|\text{s})^2 P(\text{Paypal}|s)P(100|s)}{P(\text{s})P(\$|\text{s})^2 P(\text{Paypal}|s)P(100|s) +P(\neg \text{ s})P(\$|\neg \text{ s})^2 P(\text{Paypal}| \neg s)P(100| \neg s)}
+\\=&amp;\frac{0.75 \times0.375^2 \times 0.0625^2}{0.75\times 0.375^2 \times 0.0625^2+ 0.25\times 0.2^4} \\ =&amp; 0.51
+\end{align}`
+$$
+
+
+???
+
+Note how the conditional probabilities are only conditional on the message being spam but not on the features occurring in that message (assumption: conditional independence of word counts given the class)
+
+---
+class: inverse, center, middle
+
+# Prior probabilities
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+
+
+---
+# Document frequency
+
+#### A prior probability is the baseline expectation of observing a category without considering any evidence. 
+
+`textmodel_nb()` allows specifying different priors for training a classifier
+
+#### Relative document frequency
+
+Throughout this lecture we assumed that the relative frequency of a category occurring in the corpus is a reasonable baseline expectation of receiving a spam message
+
+.pull-left[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; y &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Spam &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; No Spam &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+
+`$$P(\text{ s }) = \frac{3}{4}$$`
+&lt;br&gt;
+`$$P(\neg s) = \frac{1}{4}$$`
+]
+&lt;br&gt;
+
+#### However, there may be nothing informative in the relative numbers of documents.
+
+
+---
+# Term frequency
+
+#### Using term frequency makes the priors equal to the fraction of total feature counts found in the grouped documents in each training class
+
+Therefore, classes with the largest number of features are assigned the largest priors
+
+--
+
+Coincidentally, in our example the fraction of total features is the same as the relative document frequency
+
+.pull-left[
+
+```r
+dfm(txt, groups = y)
+```
+
+
+```
+##          features
+## docs      $ win prize earn easily paypal 100
+##   No Spam 1   0     0    0      0      1   1
+##   Spam    5   1     1    1      1      0   0
+```
+]
+
+.right-code[
+
+```r
+rs &lt;-rowSums(dfm(txt,groups=y))
+```
+
+```
+##  
+##  
+## 3
+## 9
+```
+]
+
+
+.pull-left[
+
+```r
+rs / sum(rs)
+```
+
+```
+## No Spam    Spam 
+##    0.25    0.75
+```
+]
+
+---
+# Uniform priors
+
+#### Using uniform priors means to set the unconditional probability of observing one class to be the same as observing any other class
+
+--
+
+To illustrate, let's recalculate the probability of P(spam | $ ) with uniform priors
+
+$$
+`\begin{align}
+P(\text{s}|\$)=&amp;\frac{P(\text{s})P(\$|\text{s})}{P(\text{s})P(\$|\text{s})+P(\neg \text{ s})P(\$|\neg \text{ s})}
+\end{align}`
+$$
+
+Equal prior probabilities simplify the calculation since `\(P(s)=P(\neg s)\)`
+
+$$
+`\begin{align}
+P(\text{s}|\$)=&amp;\frac{ P(\text{s})  P(\$|\text{s})}{P(\text{s})P(\$|\text{s})+P( \text{s})P(\$|\neg \text{ s})}
+\\=&amp;\frac{P(\$|\text{s})}{P(\$|\text{s})+P(\$|\neg \text{ s})}
+\\=&amp;\frac{0.375}{0.375 + 0.2} = 0.65
+\end{align}`
+$$
+
+--
+
+#### Therefore, assuming uniform priors implies calculating the probability of the category given the evidence with **no priors**!
+
+---
+# Uniform priors
+
+
+#### Assuming that categories have the same probability of occurring can be an explicit *decision* of the analyst
+
+This is appropriate if there is no reason to expect the occurrence of one category to be more likely than others
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+#### Uniform priors can also result from the available data in the following scenarios
+
+1. Setting `prior="docfreq"` and having the *same number of documents* in each training class
+  
+  For example, there are 500 spam messages and 500 non-spam messages in the dataset
+&lt;br&gt;
+
+2. Setting `prior="termfreq"` and having the *same the total count of features* in each training class
+
+  For example, all spam messages taken together contain 100,000 words and all non-spam messages also contain 100,000 words
+
+
+---
+class: inverse, center, middle
+# Coding exercise
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

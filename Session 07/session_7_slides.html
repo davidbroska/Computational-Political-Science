@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Political Science</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="David Broska" />
+    <meta name="date" content="2021-03-16" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+    <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../mycss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Computational Political Science
+## Session 7
+### David Broska
+### Zeppelin University
+### March 16, 2021
+
+---
+
+
+# Outline for today
+
+1. **Similarity metrics**
+  - Cosine
+  - Euclidean
+  - Jaccard
+  - Edit distance
+  
+2. **Clustering methods**
+  - k-means clustering
+  - Hierarchical clustering
+  
+3. **Computer exercises**
+  - Building a movie recommendation engine
+  - Clustering UK party manifestos
+
+
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | Overview and key concepts                            |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | Machine learning for texts: Classification II        |     \-        |     \-          |
+|    6    | Mar 09 | Supervised and unsupervised scaling                  | Summative 2   | Mar 22 23:59:59 |
+|    7    | Mar 16 | *Similarity and clustering*                          |     \-        |     \-          |
+|    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+
+---
+class: inverse, center, middle
+
+# Comparing documents
+---------------------
+
+
+---
+# Comparing documents
+
+###Idea 
+
+The (weighted) features form a vector for each document and these vectors can be judged using metrics of similarity
+
+A document's vector for us is simply (for us) the row of the document-feature matrix containing the (relative) frequency of features
+
+### Problem
+
+How do we measure distance or similarity between the vector representation of two (or more) different documents?
+
+---
+# Characteristics of similarity measures
+
+Let `\(A\)` and `\(B\)` be any two documents in a set and `\(d(A,B)\)` be the distance between `\(A\)` and `\(B\)`
+
+- `\(d(A,B) \geq 0\)` (the distance between any two points must be non-negative) 
+--
+
+- `\(d(A,B) = 0 \text{ iff } A = B\)` (the distance between two documents must be zero if and only if the objects are identical)
+
+--
+
+- `\(d(A,B) = d(B,A)\)` (the distance must be symmetric: A to `\(B\)` is the same distance as from `\(B\)` to `\(A\)`)
+
+--
+
+- `\(d(A,C) = \leq d(A,B) + d(B,C)\)` (the measure must satisfy the triangle inequality)
+
+---
+# A note on the triangle inequality
+
+#### The triangle inequality states that the sum of the lengths of any two sides of a triangle is greater than the length of the remaining side.
+
+--
+
+It follows from the fact that a straight line is the shortest path between two points. The inequality is strict if the triangle is non-degenerate (meaning it has a non-zero area).
+
+.pull-left[
+&lt;img src="../figures/triangle_inequality.png" class="centerimg" width="60%"&gt;
+]
+.pull-right[
+#### Example
+Two legs of a triangle have lengths of 7.4 and 17.3 respectively. 
+
+What is the *largest possible* length for the third side `\(z\)`?
+]
+--
+.pull-right[
+7.4 + 17.3 = 24.7 so that `\(z\)` &lt; 24 
+]
+
+
+&lt;small&gt;
+See [Brilliant.org](https://brilliant.org/wiki/triangle-inequality/)
+&lt;/small&gt;
+
+---
+# Euclidian distance
+
+Between document `\(A\)` and `\(B\)` where `\(j\)` indexes their features and `\(y_{ij}\)` is the value for feature `\(j\)` of document `\(i\)` 
+
+Euclidean distance is based on the *Pythagorean theorem*
+
+
+#### Formula
+`$$d(A,B) = \sqrt{ \sum_{j=1}^j (y_{Aj} - y_{Bj})^2 }$$`
+#### In vector notation 
+
+$$|| \mathbf{y}_A - \mathbf{y}_B || $$
+
+Can be performed for any number of features `\(J\)` where `\(J\)` is the number of columns of the dfm
+
+`\(y_{Aj}\)` and `\(y_{Bj}\)` can be any representation of features (count, relative frequency, indicator)
+
+
+
+---
+# Euclidean distance
+
+
+.pull-left[
+
+Let's create a dfm from these two texts
+
+
+```r
+# corpus
+txt &lt;- c("Win Prize", 
+         "Win Win")
+
+# document-feature-matrix
+x &lt;- dfm(txt) 
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; prize &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; text1 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; text2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+```r
+textstat_dist(x, method="euclidean")
+```
+
+```
+##       text1 text2
+## text1  0.00  1.41
+## text2  1.41  0.00
+```
+]
+
+.pull-right[
+
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+
+$$
+`\begin{align}
+\text{d}(A,B)= &amp;\sqrt{(y_{A1} - y_{B1})^2 +  (y_{A2} - y_{B2})^2 }\\
+=&amp;\sqrt{ (2-1)^2 + (1-0)^2 } \\
+=&amp; 1.41
+\end{align}`
+$$ 
+]
+
+---
+# Comparing more than two observations
+
+.pull-left[
+We can look at `\(\frac{n-1}{2}\)` pairwise comparisons between different documents
+
+
+```r
+txt2 &lt;- c(A = "Win Prize", 
+          B = "Win Prize Prize Prize",
+          C = "Win Win", 
+          D = "Win Win Win")
+x2 &lt;- dfm(txt2)
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; prize &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-9-1.png" width="91%" style="display: block; margin: auto;" /&gt;
+
+```r
+textstat_dist(x2, method="euclidean")
+```
+
+```
+##      A    B    C    D
+## A 0.00 2.00 1.41 2.24
+## B 2.00 0.00 3.16 3.61
+## C 1.41 3.16 0.00 1.00
+## D 2.24 3.61 1.00 0.00
+```
+]
+
+---
+# Cosine similarity
+
+Cosine similarity is based on the size of the angle between vectors. Perfect similarity yields a score of 1, no relation will yield 0, and -1 means the vectors are opposites.
+
+&lt;img src="../figures/cosine_similarity.png" class="centerimg" width="100%"&gt;
+
+--
+
+####Properties
+
+
+- cosine similarity between frequency vectors of (relative) frequencies cannot be negative as word-counts cannot be negative
+- the measure is independent of document length because it deals only with the angle of the vectors 
+
+--
+
+&lt;small&gt;
+Figure from [O'Reilly](https://www.oreilly.com/library/view/mastering-machine-learning/9781785283451/ba8bef27-953e-42a4-8180-cea152af8118.xhtml)
+&lt;/small&gt;
+
+
+---
+# Cosine similarity
+
+####Formula
+&lt;br&gt;
+
+`$$\frac{\mathbf{y}_A \cdot \mathbf{y}_B}{\|\mathbf{y}_A\| \|  \mathbf{y}_B\|}=\frac{\sum_j y_{Aj} y_{Bj}}{\sqrt{\sum_j y_{Aj}^2} \sqrt{\sum_j y_{Bj}^2}}$$`
+&lt;br&gt;
+
+The `\(\cdot\)` operator is the dot product, or `\(\sum_j y_{Aj}y_{Bj}\)` 
+
+`\(\| \mathbf{y}_A \|\)` is the norm of the feature vector `\(\mathbf{y}\)` for document `\(A\)`, such that `\(\| \mathbf{y}_A \| = \sqrt{ \sum_j y_{Aj}^2 }\)`
+
+
+####Euclidean distance measures how *different* documents are, whereas cosine similarity measures how *similar* documents are. Of course, it's easy to reverse them; generally, we can say (1 - distance) = similarity.
+
+
+---
+# Norm of a vector 
+
+####If `\(\vec{u} \in \mathbb{R}^n\)`, then the Norm or Magnitude of `\(\vec u\)`  denoted `\(\| \vec{u} \|\)` is defined as the length or magnitude of the vector and can be calculated using the formula:
+
+`$$\| \vec{u} \| = \sqrt{u_1^2 + u_2^2 + ... + u_J^2}=\sqrt{\sum_{j=1}^J u_j^2}$$`
+
+
+.pull-left[
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-12-1.png" width="95%" /&gt;
+
+
+]
+.pull-right[
+
+#### Example
+
+The feature vector of document `\(A\)` "*Win Prize*" is `\(\left( \begin{matrix} 1 &amp; 1\end{matrix} \right)\)`
+
+$$
+`\begin{align}
+\| \mathbf{y}_A\| =&amp;\sqrt{1^2 + 1^2} \\ =&amp;1.41
+\end{align}`
+$$
+
+&lt;br&gt;
+This formula should make sense geometrically as it analogous to the Pythagorean theorem!
+
+]
+
+---
+# Jaccard coefficient
+
+The Jaccard coefficient is similar to the Cosine similarity measure and ranges from 0 to 1
+
+`$$\frac{\text{doc}_A \cap \text{doc}_B}{\text{doc}_A \cup \text{doc}_B}=\frac{\mathbf{y}_A \cdot \mathbf{y}_B}{\|\mathbf{y}_A\| + \| \mathbf{y}_B \| - \mathbf{y}_A \cdot \mathbf{y}_B}$$`
+.pull-left[
+&lt;img src="../figures/jaccard.jpg" class="centerimg" width="70%"&gt;
+]
+
+--
+
+.pull-right[
+Using set notation, the coefficient is
+$$
+`\begin{align}
+&amp;\frac{\{\text{win, prize}\} \cap \{\text{win, win}\}}{\{\text{win, prize}\} \cup \{\text{win, win}\}} \\
+=&amp;\frac{\{\text{win}\}}{\{\text{win, prize\}}} =\frac{1}{2}
+\end{align}`
+$$
+In *R*  we calculate the measure on the dfm
+
+```r
+textstat_simil(x, method="jaccard")
+```
+
+```
+##       text1 text2
+## text1   1.0   0.5
+## text2   0.5   1.0
+```
+]
+
+
+---
+# Edit distances
+
+#### Edit distance refers to the number of operations required to transform one string into another for strings of equal length
+
+#### Levenshtein distance
+
+Example: the Levenshtein distance between "kitten" and "sitting" is 3
+  1. kitten ! sitten (substitution of "s" for "k")
+  2. sitten ! sittin (substitution of "i" for "e")
+  3. sittin ! sitting (insertion of "g" at the end).
+
+--
+
+#### Hamming distance
+
+- For two strings of equal length, the Hamming distance is the number of positions at which the corresponding characters are different
+- Not common, as at a textual level this is hard to implement and possibly meaningless
+
+---
+# Other uses and extensions
+
+Used extensively in information retrieval (search engines, library searches, ...)
+
+- Summary measures of how far apart two texts are – but be careful exactly how you define "features" 
+
+- Some but not many applications in social sciences to measure substantive similarity — scaling models are generally preferred 
+
+- Can be used to generalize or represent features in machine learning, by computing similarities between textual (sub)sequences without extracting the features explicitly
+
+---
+class: inverse, middle, center
+# Clustering 
+------------
+
+---
+# Clustering
+
+&lt;img src="../figures/fig1_grimmer_stuart_adapted.jpg" width="97%" class="centerimg"&gt;
+&amp;nbsp; Fig. 1 in Grimmer and Stuart (2013)
+
+
+---
+# The idea of "clusters"
+
+####Groups of items such that inside a cluster they are very similar to each other, but very different from those outside the cluster
+
+- Unsupervised classification: cluster is not to relate features to classes or latent traits, but rather to estimate membership of distinct groups
+
+- Groups are given labels through post-estimation interpretation of their elements
+
+- Typically used when we do not and never will know the "true" class labels 
+
+- Issues:
+  - How many clusters?
+  - How to compute distance is arbitrary
+  - Which features to include? Cluster might be sensitive to pre-processing (feature selection)
+
+---
+# Clustering
+
+&lt;br&gt;
+
+&lt;img src="../figures/clustering_process.png" class="centerimg"&gt;
+
+Note that this process may require reiteration until you arrive at meaningful groupings of your data!
+
+--
+
+.footnote[
+Figure by [Koch (2020)](https://towardsdatascience.com/a-friendly-introduction-to-text-clustering-fa996bcefd04)
+]
+
+
+
+
+
+---
+# Hierarchical clustering
+
+1. Start by considering each item as its own cluster, for n clusters
+2. Calculate the `\(\frac{n(n-1)}{2}\)` pairwise distances between each of
+the n clusters, store in a matrix `\(D\)`
+3. Find smallest (off-diagonal) distance in `\(D\)`, and merge the items corresponding to the `\(i, j\)` indexes in `\(D\)` into a new "cluster"
+4. Recalculate distance matrix `\(D_1\)` with new cluster(s). Options for determining the location of a cluster include:
+  - The furthest point in each cluster (complete-linkage)
+  - The closest point in each cluster (single-linkage)
+  - The average of each cluster (centroid)
+5. Repeat 3-4 until a stopping condition is reached
+  - i.e. all items have been merged into a single cluster
+6. To plot the dendrograms, need decisions on ordering, since there are `\(2^{(n-1)}\)` possible orderings
+
+---
+# Hierarchical clustering I
+
+
+
+.pull-left[
+Recall the previous example corpus
+
+```r
+txt2 &lt;- c(A = "Win Prize", 
+          B = "Win Prize Prize Prize",
+          C = "Win Win", 
+          D = "Win Win Win")
+```
+
+... and its document-feature-matrix
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; win &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; prize &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+]
+
+--
+.pull-right[
+
+
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" /&gt;
+
+We start by considering each item as its own cluster, for n=4 clusters
+
+]
+
+---
+# Hierarchical clustering II
+
+.pull-left[
+Using euclidean distance, we calculate the `\(\frac{n(n -1)}{2}\)` pairwise distances between each of the n clusters and store them in matrix `\(D\)`
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; A &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; B &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; C &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; D &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1.41 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 3.16 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.61 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+
+&lt;br&gt;
+Note we could use any other metric for distance/similarity
+
+]
+
+.pull-right[
+
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+
+---
+# Hierarchical clustering III
+
+.pull-left[
+Find smallest (off-diagonal) distance in `\(D\)`, and merge the items into a new "cluster"
+
+&lt;br&gt;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; A &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; B &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; C &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; D &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 1.41 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 3.16 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.61 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;width: 0.5in; "&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+Based on euclidean distance, C and D are closest to each other so we merge them into a new set!
+]
+
+.pull-right[
+
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+
+
+
+We are now left with 3 options to connect the sets: A &amp;harr; B, A	&amp;harr; h1, and B	&amp;harr; h1
+]
+
+
+---
+# Hierarchical clustering IV
+
+
+.pull-left[
+
+
+The distance between A and B remains the same `\(\text{d}(\text{A,B}) = 2\)` but we need to recalculate distances involving the new h1
+
+&lt;img src="../figures/distance_matrix_highlighted.jpg" class="centerimg" width = "63.5%"&gt;
+
+
+*Complete-linkage*: What is the *maximum* distance from A to h1? And from B to h1?
+
+$$
+`\begin{align}
+\text{d(A, h1)}=&amp;\max( \text{ d}(\text{A},\text{C}) , \text{ d}(\text{A},\text{D})\text{ )} \\
+=&amp;\max( \text{ 1.41, 2.24 )} =2.24 
+\end{align}`
+$$
+
+$$
+`\begin{align}
+\text{d(B, h1)}=&amp;\max( \text{ d}(\text{B},\text{C}) , \text{ d}(\text{B},\text{D})\text{ )} \\
+=&amp;\max( \text{ 3.16, 3.61 )} =3.61 \\
+\end{align}`
+$$
+
+]
+
+.pull-right[
+
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+
+
+With a distance of 2, A and B are closest!
+
+
+
+]
+
+---
+# Hierarchical clustering VI
+
+.pull-left[
+
+&lt;img src="session_7_slides_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.pull-right[
+
+We continue the clustering procedure until all items were merged into a single cluster.
+
+Employing the complete linkage criterion again, we find that the maximum distance between the sets, i.e. the distance between B and D, is 3.61. 
+
+Note that this calculation is only necessary to find the distance *at which* the sets were joined. The sets are joined anyway since there are only two left!
+]
+
+---
+# Dendrogram (complete-linkage)
+
+#### Dendrograms indicate both the similarity and the order that the clusters were formed
+.pull-left[
+
+```r
+# compute distance matrix with quanteda
+d&lt;-textstat_dist(x2,method="euclidean")
+
+# make it compatible 
+( dis &lt;- as.dist(d) )
+```
+
+```
+##      A    B    C    D
+## A 0.00 2.00 1.41 2.24
+## B 2.00 0.00 3.16 3.61
+## C 1.41 3.16 0.00 1.00
+## D 2.24 3.61 1.00 0.00
+```
+
+
+```r
+# run hierarchical clustering
+( hcc &lt;- hclust(dis,method="complete"))
+```
+
+```
+## 
+## Call:
+## hclust(d = dis, method = "complete")
+## 
+## Cluster method   : complete 
+## Number of objects: 4
+```
+
+]
+.pull-right[
+
+```r
+# plot complete linkage dendrogram
+plot(hcc)
+```
+
+![](session_7_slides_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+
+]
+
+---
+# Dendrogram (single-linkage)
+
+
+#### Single-linkage: compute the distance between a point and the closest point in each cluster
+
+
+.pull-left[
+
+```r
+# compute distance matrix with quanteda
+d&lt;-textstat_dist(x2,method="euclidean")
+
+# make it compatible 
+( dis &lt;- as.dist(d) )
+```
+
+```
+##      A    B    C    D
+## A 0.00 2.00 1.41 2.24
+## B 2.00 0.00 3.16 3.61
+## C 1.41 3.16 0.00 1.00
+## D 2.24 3.61 1.00 0.00
+```
+
+
+```r
+# run hierarchical clustering
+( hcs &lt;- hclust(dis,method = "single"))
+```
+
+```
+## 
+## Call:
+## hclust(d = dis, method = "single")
+## 
+## Cluster method   : single 
+## Number of objects: 4
+```
+
+]
+.pull-right[
+
+```r
+# plot single linkage dendrogram
+plot(hcs)
+```
+
+![](session_7_slides_files/figure-html/unnamed-chunk-31-1.png)&lt;!-- --&gt;
+
+]
+---
+# Dendrogram (centroid)
+
+#### Centroid: compute the distance between a point and the average distance to a cluster
+
+.pull-left[
+
+```r
+# compute distance matrix with quanteda
+d&lt;-textstat_dist(x2,method="euclidean")
+
+# make it compatible 
+( dis &lt;- as.dist(d) )
+```
+
+```
+##      A    B    C    D
+## A 0.00 2.00 1.41 2.24
+## B 2.00 0.00 3.16 3.61
+## C 1.41 3.16 0.00 1.00
+## D 2.24 3.61 1.00 0.00
+```
+
+
+```r
+# run hierarchical clustering
+( hca &lt;- hclust(dis,method="centroid"))
+```
+
+```
+## 
+## Call:
+## hclust(d = dis, method = "centroid")
+## 
+## Cluster method   : centroid 
+## Number of objects: 4
+```
+
+]
+.pull-right[
+
+```r
+# plot dendrogram centroid linkage
+plot(hca)
+```
+
+![](session_7_slides_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+
+]
+
+---
+# Dendrogram
+
+#### Dendrograms indicate both the similarity and the order that the clusters were formed
+
+&lt;img src="../figures/dendrogram_presidential_addresses.jpg" class="centerimg"&gt; 
+
+Data: Presidential State of the Union addresses
+
+---
+# Pros and Cons of hierarchical clustering
+
+#### Advantages
+
+- deterministic, unlike k-means
+
+- no need to decide on k in advance (although can specify as a stopping condition)
+
+- allows hierarchical relations to be examined (usually through dendrograms)
+
+--
+
+#### Disadvantages
+
+- more complex to compute: quadratic in complexity: `\(O(n^2)\)` - whereas k-means has complexity that is `\(O(n)\)`
+
+- the decision about where to create branches and in what order can be somewhat arbitrary, determined by method of declaring the "distance" to already formed clusters
+
+- for words, tends to identify collocations as base-level clusters (e.g. "saddam" and "hussein")
+
+---
+# Dendrogram at word level
+
+#### Hierarchical clustering tends to create word collocations as base-level clusters
+
+&lt;img src="../figures/dendogram_word_level.jpg" width="70%" class="centerimg"&gt;
+
+Data: Presidential State of the Union addresses
+
+
+---
+# k-means clustering
+
+#### Assign each item to one of k clusters, where the goal is to minimised within-cluster difference and maximize between-cluster differences
+
+- Uses random starting positions and iterates until stable. Hence, results can be different when running the algorithm again!
+
+- k-means clustering treats feature values as coordinates in a multi-dimensional space
+
+- Advantages
+  - simplicity
+  - highly flexible
+  - efficient
+
+- Disadvantages
+  - no fixed rules for determining k
+  - uses an element of randomness for starting values
+  
+  
+---
+# Algorithm details
+
+1. Choose starting values
+  - assign random positions to k starting values that will serve as the "cluster centres", known as "centroids" ; or,
+  - assign each feature randomly to one of k classes
+2. assign each item to the class of the centroid that is "closest"
+  - Euclidean distance is most common
+  - any others may also be used (Manhattan, Minkowski, Mahalanobis, etc.)
+  - (assumes feature vectors are normalized within document)
+3. update: recompute the cluster centroids as the mean value of the points assigned to that cluster
+4. repeat reassignment of points and updating centroids
+5. repeat 2-4 until some stopping condition is satisfied
+  - e.g. when no items are reclassified following update of centroids
+  
+  
+---
+# k-means clustering 
+&lt;br&gt;
+&lt;br&gt;
+&lt;img src="../figures/kmeans.jpg" class="centerimg"&gt;
+
+---
+# Appropriate number of clusters
+
+- very often based on prior information about the number of categories sought
+- for example, you need to cluster people in a class into a fixed number of (like-minded) tutorial groups
+- a (rough!) guideline: set k equal to `\(\sqrt{ \frac{N}{2}}\)` where `\(N\)` is the number of items to be classified
+- usually too big: setting k to large values will improve within-cluster similarity, but risks overfitting
+- "elbow plots": fit multiple clusters with different k values, and choose k beyond which are diminishing gains
+
+&lt;img src="../figures/elbow_points.jpg" class="centerimg"&gt;
+
+---
+class: inverse, middle, center
+# Computer exercises
+--------------------
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

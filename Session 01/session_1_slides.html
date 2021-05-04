@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Political Science</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="David Broska" />
+    <meta name="date" content="2021-02-02" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../mycss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Computational Political Science
+## Session 1
+### David Broska
+### Zeppelin University
+### February 2, 2021
+
+---
+
+
+&lt;!-- # see live presentation with xaringan::inf_mr('Session 1/session_1_slides.Rmd') --&gt;
+
+# Outline for today
+
+
+1. **Intro**
+    - What is this course?
+    - What am I going to learn in this course?
+    
+2. **Quantitative Text Analysis principles**
+    - What is QTA?
+    - Motivation and assumptions
+    - Example analyses
+
+3. **Review of the R language**
+    - Anatomy of code
+    - Data types and structures
+    - Operators
+    - Functions and libraries
+    
+---
+class: inverse, center, middle
+
+# Intro
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+
+---
+#Text as data
+
+.pull-left[
+&lt;img src="../figures/parliament.jpg" width="92%" class="centerimg"&gt;
+
+&lt;img src="../figures/manifesto_project.jpg" width="100%" class="centerimg"&gt;
+
+]
+.pull-right[
+&lt;img src="../figures/catholic_church.jpg" width="100%" class="centerimg"&gt;
+&lt;br&gt;
+&lt;img src="../figures/social_media.jpg" width="100%" class="centerimg"&gt;
+]
+
+???
+
+**Technological change** created many new **research opportunities** because a increasing number of events become documented and readily **available in electronic format**. 
+
+Very old documents such this publication by the catholic church and not so old documents such as these party manifestos are digitized.
+
+Other events happen in the digital sphere
+
+Political scientist use these data sources to answer old and new questions of the discipline
+
+These data, particularly textual data but it could also voice recordings, require new methods for analysis - which is what this course will be about: **equip you with a new tool set for empirical projects**
+
+Two use cases for the content of this course: 
+
+1. maybe you're interested in data mining, machine learning, sentiment analysis and want to see **how these methods play out when comes to answering scientific question** of the field you're working in. you'll get a better understanding of this line of research
+
+2. you might want to conduct a **pilot study** for your masters thesis -&gt; help 
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | *Overview and key concepts*                          |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | Machine learning for texts: Classification II        |     \-        |     \-          |
+|    6    | Mar 09 | Supervised and unsupervised scaling                  | Summative 2   | Mar 22 23:59:59 |
+|    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
+|    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+
+???
+
+we will apply these techniques to text data but there are **broader principles underlying the methods that your can transfer** to other data settings (classifier, evaluating the quality of the results of a machine learning algorithm) 
+
+---
+# Course objectives
+
+&lt;br&gt;
+
+- learning the fundamentals of computational methods, particularly for text analysis
+
+- ability to apply statistical and machine learning methods for text in R 
+
+- evaluating the strengths and weaknesses of these techniques for answering political science questions
+
+- enhanced understanding of published applications
+
+- conduct independent empirical research using quantitative text analysis 
+
+???
+
+
+Administrative:
+- save computer memory during sessions: Most problems arise due to internet connection or working memory. BigBlueButton is browser based and therefore require more working memory than app-based software like Zoom or Microsoft Teams. It is therefore crucial to close unnecessary applications and to clean the cache of your browser, for example by restarting your computer regularly.
+
+---
+# Tell us about yourself
+
+.left-column[
+&lt;br&gt;
+&lt;img src="../figures/ww.jpg" width="100%" class="centerimg"&gt;
+
+]
+.right-column[
+- What do you study?
+
+- What do you expect from this course?
+
+- What is your experience with R and/or quantitative text analysis?
+
+- Do you have a topic in mind that you want to explore?
+]
+
+???
+
+getting to know each other: 
+- creates a more enjoyable atmosphere
+- helps me to adapt the course material to your experience and expectations
+
+---
+class: inverse, center, middle
+
+# Fundamentals of&lt;br&gt;quantitative text analysis
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+
+---
+# Text to document-feature matrix
+&lt;br&gt;
+&lt;br&gt;
+&lt;img src="../figures/text_to_dfm.jpg" width="100%" class="centerimg"&gt;
+
+???
+
+this is what QTA is about on a **technical level**
+
+- **matrix shows** the count of words (columns) in a document (row)
+- **descriptive statistics** on words 
+    - has the frequency of a word changed 
+    - which words occur in which contexts
+- **sentiment analysis**
+    - has a text a more negative or positve tone
+- **scaling documents **
+    - estimating left right ideology of parliament speeches
+
+---
+# Roadmap for QTA projects
+
+1. Selecting texts: Defining the **corpus**
+
+2. **Conversion** of texts into a common electronic format
+
+3. **Defining documents**: deciding what will be the documentary
+unit of analysis
+
+4. **Defining features**. These can take a variety of forms, including
+tokens, equivalence classes of tokens (dictionaries), selected
+phrases, human-coded segments (of possibly variable length),
+linguistic features, and more.
+
+5. Conversion of textual features into a **quantitative matrix**
+
+6. A **quantitative or statistical procedure** to extract information
+from the quantitative matrix
+
+7. **Summary** and interpretation of the quantitative results
+
+???
+
+1. Where does the **data come from**? What are the **conclusions** that the texts allow me me draw? (What is the data generating process? Random or convenience sample...)
+2. For example, before analyzing inauguration speeches by US presidents they had to be converted. Most of the texts we will analyze come in electronic format
+3. Defining documents (or rows in the dfm) depends on your research question. Analyze tweets of a single member of parliament (each tweet = 1 row). Compare members of parliamemt (combine all tweets of one person = 1 row)
+4. 
+---
+# Why quantitative text analysis?
+
+#### Justin Grimmer's haystack metaphor
+
+Analyzing a straw of hay: understanding the meaning of a
+sentence
+
+`\(\rightarrow\)` Humans are great! But computer struggle.
+
+Organizing the haystack: *describing, classifying, scaling texts*
+
+`\(\rightarrow\)` Humans struggle. But computers are great! (What this course is about)
+
+&lt;br&gt;
+
+--
+
+#### Principles of quantitative text analysis (Grimmer and Stewart 2013)
+
+1. All quantitative models are wrong - but some are useful
+2. Quantitative methods for text *amplify* resources and *augment*
+humans
+3. There is no globally best method for automated text analysis
+4. Validate, validate, validate
+
+???
+
+- QTA augments human ability rather replace
+- interpretation of quantitative results is hard (or impossible) without knowing the texts
+- choice of method depends on your question, therefore we will cover a broad range so that participants not confined to particular research questions in the final project
+
+
+
+
+
+---
+# Quantitative text analysis requires assumptions
+
+1. Texts represent an observable implication of some **underlying
+characteristic** of interest
+  - An attribute of the author
+  - A sentiment or emotion
+  - Salience of a political issue
+
+2. Texts can be represented through **extracting their features**
+  - most common is the bag of words assumption
+  - many other possible definitions of “features” (e.g. word
+embeddings)
+
+3. A document-feature matrix can be analyzed using quantitative
+methods to produce **meaningful and valid estimates** of the
+underlying characteristic of interest
+
+---
+# Overview of text as data methods
+&lt;br&gt;
+&lt;img src="../figures/fig1_grimmer_stuart_adapted.jpg" width="97%" class="centerimg"&gt;
+&amp;nbsp; Fig. 1 in Grimmer and Stuart (2013) 
+
+???
+
+- Classification: Which documents are about a certain topic? (or spam email)
+    - Known categories: sorting newspaper articles into categories (sports, politics, business)
+        - Dictionary methods: which words are associated with certain concepts (positive or negative tone)
+        - Supervised methods: let individuals categorize a collection of documents and apply machine learning algorithm to predict the categories of other documents
+    - Unknown categories: sometimes we don't know the categories included in a corpus. We can use a computer to identify topics
+        - Single membership models: the computer will assign a single category to the document
+        - Mixed membership model: the computer assigns a numerical value corresponding to the degree to which the documents contains a certain topic: this document is 20% about business, 30% about politics etc.
+- Scaling documents: Place documents within a spectrum, for example left and right ideology
+    - We will talk about unsupervised and unsupervised methods
+- Entity recognition: let the computer recognize which words represent names, events, locations, etc.
+
+---
+class: inverse, center, middle
+
+# Examples
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+
+---
+# Compare documents
+
+&lt;img src="../figures/mentions_of_unity.png" width="100%" class="centerimg"&gt;
+The Economist ([2021](https://www.economist.com/graphic-detail/2021/01/21/more-than-any-president-joe-biden-emphasised-unity-at-his-inauguration))
+
+
+???
+
+
+The article points to the various requirements an inaugural speech has to fulfill. The president has to define an agenda of goals and priorities, has to address important people such as supreme-court justices, former presidents, members of the armed forces, and elicit emotions from in the audience.
+
+In his 2411-word speech in 21.5 minutes, Biden called for unity more than any other president. The words "unity", "together", and "as one" accounted for 0.8% of his speech. Put differently, such language occurred roughly one in every hundred words.
+
+In percentage terms, he also surpassed George Washington's 133-word speech where he included one reference to people of the "united America". Of course, its the brevity of the speech that accounted for that long-held record: `\(100 \times \frac{1}{133}=0.75\%\)`. 
+
+From the perspective of quantitative text analysis, this example tells us that we need measurements that account for the importance of a word within a document before being compared the importance of word within other documents.
+
+---
+# Authorship identification
+
+&lt;img src="../figures/trump_terms.png" width="86%" class="centerimg"&gt;
+&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Robinson ([2016](http://varianceexplained.org/r/trump-tweets/))
+
+???
+
+In his analysis, David Robinson analyzed 1390 tweets posted between December 12, 2015 and August 8, 2016. Following a hint by a vigilant twitter user, his shows that Trump tweets with Android while his campaign uses an iPhone.
+
+Trump vs. campaign
+
+Using the relative frequency of words in tweets from Android and iPhone, Robinson compares the words that are characteristic for each device.
+
+The tweets differ with respect to hashtags, the use of dates when announcing events, and the use emotionally charged words.
+
+After Trump switched to an iPhone a more sophisticated method is required: e.g. a classifier based on machine learning 
+
+---
+# Sentiment analysis
+
+&lt;img src="../figures/trump_sentiment.png" width="90%" class="centerimg"&gt;
+&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Robinson ([2016](http://varianceexplained.org/r/trump-tweets/))
+
+---
+# Track censorship
+
+&lt;img src="../figures/censorship_fig5.png" width="71%" class="centerimg"&gt;
+&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; King, Pan and Roberts (2013)
+
+???
+
+- Good example of the skills we are going to learn: The authors retrieved posts on social media quickly after being published and then verified if the post was removed later
+- Idea: What is the agenda of the censorship program of the Chinese government? 
+- They argue: topic with much speculation but little empirical evidence
+
+---
+# Track censorship
+
+#### What is the agenda of the censorship program of the Chinese government?
+
+
+&lt;img src="../figures/censorship_fig4.png" width="92%" class="centerimg"&gt;
+&amp;nbsp; &amp;nbsp; &amp;nbsp; King, Pan and Roberts (2013) 
+
+???
+
+The authors find that censorship affects posts that spur collective action while allowing posts that criticize the state, its leaders, or policies.
+
+---
+class: inverse, center, middle
+
+# The R language
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+---
+# R and RStudio
+
+.left-column[
+&lt;br&gt;
+&lt;img src="../figures/Rlogo.svg" width="75%" class="centerimg"&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../figures/RStudio-Logo-flat.svg" width="100%" class="centerimg"&gt;
+]
+
+.right-column[
+&lt;br&gt;
+R is a free software environment for statistical computing and graphics (and a programming language)
+
+
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+RStudio is an integrated development environment (IDE) for R
+
+Loosely speaking, it makes using R more convenient!
+
+]
+
+.footnote[
+Please download and install base [R](https://cran.microsoft.com/) and [RStudio](https://rstudio.com/products/rstudio/download/) Desktop before the next session (see [tutorial](https://www.datacamp.com/community/tutorials/installing-R-windows-mac-ubuntu)).
+]
+---
+# Parts of RStudio
+
+
+.left-column[
+1. **Scripts**: Recipe of what to do
+2. **Console**: executes commands
+3. **Workspace**: Memory of what is currently loaded
+4. **Files/Plots/Help**: Miscellaneous functions such as displaying files, plots, and help files
+]
+
+.right-column[
+&lt;img src="../figures/rstudio.png" width="97%" class="centerimg"&gt;
+]
+
+???
+
+stress importance of help function in quanteda and give example ?mean
+
+
+---
+
+# Projects in RStudio
+
+Where did R just save the file to? Its "working directory".
+
+Each project should have its own encapsulation using an RStudio project
+
+Upper right corner of RStudio, click new Projects
+
+&lt;img src="../figures/rstudio_projects.png" width="45%" class="centerimg"&gt;
+
+Then the working directory is set where the project (`.Rproj`) is saved.
+
+Fore more, read this [blog](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
+
+---
+
+# Outline Intro R
+
+- &lt;mark&gt;Anatomy of Code&lt;/mark&gt;: How does code look like what are components of it?
+
+- R as a (fancy) Calculator: Simple maths with R
+
+- &lt;mark&gt;Comparison and Logical Operations&lt;/mark&gt;: How can we compare data?
+
+- &lt;mark&gt;Data Types&lt;/mark&gt;: What kind of data does R recognize?
+
+- &lt;mark&gt;Data Structures&lt;/mark&gt;: How can we store data?
+
+- Conditional Statements: Managing workflow
+
+- &lt;mark&gt;Anatomy of a Function&lt;/mark&gt;: What are the elements of a function?
+
+- &lt;mark&gt;Libraries&lt;mark&gt;: How can we use predefined functions
+
+&lt;br&gt;
+
+We need to have a basic understanding of highlighted topics before we start with QTA in R!
+
+???
+
+
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- Comments
+- Variables
+- Conditionals
+- Functions
+- Libraries
+]
+.right-column[
+
+```r
+ # Load data, run a regression, and export the results
+ library(tidyverse)
+ library(texreg)
+ 
+ # should the result be saved to a file?
+ save_to_file &lt;- TRUE
+
+ # loads the data from file
+ cars_data &lt;- read_csv("data/cars_data.csv")
+
+ # performs the regression
+ model &lt;- lm(mpg ~ wt + cyl + hp, data = cars_data)
+
+ # converts the regression model to a tex-string
+ tex_string &lt;- texreg(model)
+ 
+ # check if the result should be saved to a file
+ if (save_to_file) {
+   # saves the tex-string to a file
+   write_lines(tex_string, "written/tables/cars_regression.tex")
+ }
+```
+]
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- &lt;mark&gt;Comments&lt;/mark&gt;
+- Variables
+- Conditionals
+- Functions
+- Libraries
+]
+.right-column[
+
+```r
+*# Load data, run a regression, and export the results
+ library(tidyverse)
+ library(texreg)
+
+*# should the result be saved to a file?
+ save_to_file &lt;- TRUE
+ 
+*# loads the data from file
+ cars_data &lt;- read_csv("data/cars_data.csv")
+
+*# performs the regression
+ model &lt;- lm(mpg ~ wt + cyl + hp, data = cars_data)
+
+*# converts the regression model to a tex-string
+ tex_string &lt;- texreg(model)
+
+*# check if the result should be saved to a file
+ if (save_to_file) {
+*  # saves the tex-string to a file
+   write_lines(tex_string, "written/tables/cars_regression.tex")
+ }
+```
+]
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- Comments
+- &lt;mark&gt;Variables&lt;/mark&gt;
+  - &lt;mark&gt;Assignment&lt;/mark&gt;
+  - Usage
+- Conditionals
+- Functions
+- Libraries
+]
+.right-column[
+
+```r
+ # Load data, run a regression, and export the results
+ library(tidyverse)
+ library(texreg)
+
+ # should the result be saved to a file?
+ `save_to_file &lt;- `TRUE
+ 
+ # loads the data from file
+ `cars_data &lt;- `read_csv("data/cars_data.csv")
+
+ # performs the regression
+ `model &lt;- `lm(mpg ~ wt + cyl + hp, data = cars_data)
+
+ # converts the regression model to a tex-string
+ `tex_string &lt;- `texreg(model)     
+
+ # check if the result should be saved to a file
+ if (save_to_file) {
+   # saves the tex-string to a file
+   write_lines(tex_string, "written/tables/cars_regression.tex")
+ }
+```
+]
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- Comments
+- &lt;mark&gt;Variables&lt;/mark&gt;
+  - Assignment
+  - &lt;mark&gt;Usage&lt;/mark&gt;
+- Conditionals
+- Functions
+- Libraries
+]
+.right-column[
+
+```r
+ # Load data, run a regression, and export the results
+ library(tidyverse)
+ library(texreg)
+
+ # should the result be saved to a file?
+ save_to_file &lt;- TRUE
+ 
+ # loads the data from file
+ cars_data &lt;- read_csv("data/cars_data.csv")
+
+ # performs the regression
+ model &lt;- lm(mpg ~ wt + cyl + hp, data = `cars_data`)
+
+ # converts the regression model to a tex-string
+ tex_string &lt;- texreg(`model`)     
+
+ # check if the result should be saved to a file
+ if (`save_to_file`) {
+   # saves the tex-string to a file
+   write_lines(`tex_string`, "written/tables/cars_regression.tex")
+ }
+```
+]
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- Comments
+- Variables
+- &lt;mark&gt;Conditionals&lt;/mark&gt;
+- Functions
+- Libraries
+]
+.right-column[
+
+```r
+ # Load data, run a regression, and export the results
+ library(tidyverse)
+ library(texreg)
+
+ # should the result be saved to a file?
+ save_to_file &lt;- TRUE
+ 
+ # loads the data from file
+ cars_data &lt;- read_csv("data/cars_data.csv")
+
+ # performs the regression
+ model &lt;- lm(mpg ~ wt + cyl + hp, data = cars_data)
+
+ # converts the regression model to a tex-string
+ tex_string &lt;- texreg(model)     
+
+ # check if the result should be saved to a file
+ `if (save_to_file) {`
+   # saves the tex-string to a file
+   write_lines(tex_string, "written/tables/cars_regression.tex")
+ `}`
+```
+]
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- Comments
+- Variables
+- Conditionals
+- &lt;mark&gt;Functions&lt;/mark&gt;
+  - &lt;mark&gt;Function Call&lt;/mark&gt;
+  - Function Parameters
+- Libraries
+]
+.right-column[
+
+```r
+ # Load data, run a regression, and export the results
+ `library(`tidyverse`)`
+ `library(`texreg`)`
+
+ # should the result be saved to a file?
+ save_to_file &lt;- TRUE
+ 
+ # loads the data from file
+ cars_data &lt;- `read_csv(`"data/cars_data.csv"`)`
+
+ # performs the regression
+ model &lt;- `lm(`mpg ~ wt + cyl + hp, data = cars_data`)`
+
+ # converts the regression model to a tex-string
+ tex_string &lt;- `texreg(`model`)`
+
+ # check if the result should be saved to a file
+ if (save_to_file) {
+   # saves the tex-string to a file
+   `write_lines(`tex_string, "written/tables/cars_regression.tex"`)`
+ }
+```
+]
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- Comments
+- Variables
+- Conditionals
+- &lt;mark&gt;Functions&lt;/mark&gt;
+  - Function Call
+  - &lt;mark&gt;Function Parameters&lt;/mark&gt;
+- Libraries
+]
+.right-column[
+
+```r
+ # Load data, run a regression, and export the results
+ library(`tidyverse`)
+ library(`texreg`)
+
+ # should the result be saved to a file?
+ save_to_file &lt;- TRUE
+ 
+ # loads the data from file
+ cars_data &lt;- read_csv(`"data/cars_data.csv"`)
+
+ # performs the regression
+ model &lt;- lm(`mpg ~ wt + cyl + hp`, `data = cars_data`)
+
+ # converts the regression model to a tex-string
+ tex_string &lt;- texreg(`model`)
+
+ # check if the result should be saved to a file
+ if (`save_to_file`) {
+   # saves the tex-string to a file
+   write_lines(`tex_string`, `"written/tables/cars_regression.tex"`)
+ }
+```
+]
+
+---
+
+# Anatomy of Code
+
+.left-column[
+- Comments
+- Variables
+- Conditionals
+- Functions
+- &lt;mark&gt;Libraries&lt;/mark&gt;
+]
+
+.right-column[
+
+```r
+ # Load data, run a regression, and export the results
+ `library(tidyverse)`
+ `library(texreg)`
+
+ # should the result be saved to a file?
+ save_to_file &lt;- TRUE
+ 
+ # loads the data from file
+ cars_data &lt;- read_csv("data/cars_data.csv")
+
+ # performs the regression
+ model &lt;- lm(mpg ~ wt + cyl + hp, data = cars_data)
+
+ # converts the regression model to a tex-string
+ tex_string &lt;- texreg(model)
+ 
+# check if the result should be saved to a file
+ if (save_to_file) {
+   # saves the tex-string to a file
+   write_lines(tex_string, "written/tables/cars_regression.tex")
+ }
+```
+]
+
+---
+
+# R as a (fancy) calculator
+
+.left-column[
+Basic Oparators
+
+basic
+- `+`, `-`, `*`, `/`
+
+power
+- `^`, `sqrt()`
+
+logarithmic
+- `log()`, `exp()`
+
+modulus and int division
+- `%%`, `%/%`
+]
+.right-column[
+  .left-col[
+  
+  
+  ```r
+  1 + 1
+  ```
+  
+  ```
+  ## [1] 2
+  ```
+  
+  ```r
+  2 - 2
+  ```
+  
+  ```
+  ## [1] 0
+  ```
+  
+  ```r
+  3 * 3
+  ```
+  
+  ```
+  ## [1] 9
+  ```
+  
+  ```r
+  4 / 4
+  ```
+  
+  ```
+  ## [1] 1
+  ```
+  
+  ```r
+  5^5
+  ```
+  
+  ```
+  ## [1] 3125
+  ```
+  ]
+  .right-col[
+  
+  ```r
+  sqrt(9)
+  ```
+  
+  ```
+  ## [1] 3
+  ```
+  
+  ```r
+  log(2.7182)
+  ```
+  
+  ```
+  ## [1] 1
+  ```
+  
+  ```r
+  exp(1)
+  ```
+  
+  ```
+  ## [1] 2.7
+  ```
+  
+  ```r
+  10 %% 3
+  ```
+  
+  ```
+  ## [1] 1
+  ```
+  
+  ```r
+  10 %/% 3
+  ```
+  
+  ```
+  ## [1] 3
+  ```
+  ]
+]
+
+???
+
+- modulus %% gives the remainder of x divided by y
+- %/% integer division gives x divided by y but rounded down
+---
+
+# Data Types
+
+R knows different types of data
+
+Name | Description |Examples
+:----|:----|:----
+`logical` | Boolean values | `TRUE`, `FALSE`, `NA`
+`integer` | Integer numbers | `1L`,  `-10L`, `0L`, `NA`
+`numeric` | Numeric values | `1`, `-0.3`, `1/3`, `NA`
+`character` | Characters | `"hello"`, `"1.0"`, `"TRUE"`, `NA`
+... | ...
+
+Other types (that we won't really use for now) include `factors`, `complex`, ...
+
+---
+
+# Comparison Operators
+
+Operator | Name | Example | Result
+:--------|:-----|:-------:|:------:
+`&lt;`  | Smaller | `3 &lt; 5` | `TRUE`
+`&lt;=` | Smaller Equal | `3 &lt;= 3` | `TRUE`
+`&gt;`  | Larger | `3 &gt; 5` | `FALSE`
+`&gt;=` | Larger Equal | `5 &gt;= 3` | `TRUE`
+`==` | Equal | `"Alice" == "Bob"` | `FALSE`
+`!=` | Not Equal | `"Alice" != 5` | `TRUE`
+
+Also `%in%` (checks if a value is in a vector), `"Alice" %in% c("Alice", "Bob")` evaluates to `TRUE`.
+
+---
+
+# Logical Operators
+
+Operator | Name | Example | Result
+:--------|:-----|:-------:|:------:
+`&amp;` | And | `3 == 5 &amp; 4 &lt; 5` | `FALSE`
+&amp;#124; | Or  | `3 == 5 `&amp;#124;` 4 &lt; 5` | `TRUE`
+`!` | Not | `!(4 &lt; 5)` | `FALSE`
+
+---
+
+# Data Structures
+
+.left-column[
+- &lt;mark&gt;Single Type&lt;/mark&gt;
+  - &lt;mark&gt;Vectors&lt;/mark&gt;
+  - Matrix
+- Multiple Types
+]
+.right-column[
+Using the `c()` function to combine values into a vector
+
+```r
+heights &lt;- c(186, 176, 165, 172, 187)
+heights
+```
+
+```
+## [1] 186 176 165 172 187
+```
+
+```r
+# only one type per vector
+vec &lt;- c(160, "Alice", TRUE)
+vec
+```
+
+```
+## [1] "160"   "Alice" "TRUE"
+```
+]
+
+---
+
+# Data Structures
+
+.left-column[
+- &lt;mark&gt;Single Type&lt;/mark&gt;
+  - &lt;mark&gt;Vectors&lt;/mark&gt;
+  - Matrix
+- Multiple Types
+]
+.right-column[
+Creating a sequence using `:` or `seq()`
+
+```r
+1:10
+```
+
+```
+##  [1]  1  2  3  4  5  6  7  8  9 10
+```
+
+```r
+seq(1, 10, 2)
+```
+
+```
+## [1] 1 3 5 7 9
+```
+
+```r
+seq(1, 10, length.out = 5)
+```
+
+```
+## [1]  1.0  3.2  5.5  7.8 10.0
+```
+]
+
+---
+
+# Data Structures
+
+.left-column[
+- &lt;mark&gt;Single Type&lt;/mark&gt;
+  - Vectors
+  - &lt;mark&gt;Matrix&lt;/mark&gt;
+- Multiple Types
+]
+.right-column[
+Create a matrix from a vector using `matrix()`
+
+```r
+mat &lt;- matrix(1:9, nrow = 3)
+mat
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    4    7
+## [2,]    2    5    8
+## [3,]    3    6    9
+```
+
+```r
+# Only one type per matrix
+mat2 &lt;- matrix(c(1, 2L, TRUE, "Bob"), nrow = 2)
+mat2
+```
+
+```
+##      [,1] [,2]  
+## [1,] "1"  "TRUE"
+## [2,] "2"  "Bob"
+```
+]
+
+---
+
+# Data Structures
+
+.left-column[
+- Single Type
+- Multiple Types
+  - &lt;mark&gt;List&lt;/mark&gt;
+  - Data.Frames
+]
+.right-column[
+Create a list where each element can have a different type using `list`
+.smaller[
+
+```r
+# a named vector
+person &lt;- list(name = "Alice", 
+               children = list(
+                 list(name = "Bobby"),
+                 list(name = "Charlie")
+               )
+)
+person
+```
+
+```
+## $name
+## [1] "Alice"
+## 
+## $children
+## $children[[1]]
+## $children[[1]]$name
+## [1] "Bobby"
+## 
+## 
+## $children[[2]]
+## $children[[2]]$name
+## [1] "Charlie"
+```
+]
+]
+
+---
+
+# Data Structures
+
+.left-column[
+- Single Type
+- Multiple Types
+  - List
+  - &lt;mark&gt;Data.Frames&lt;/mark&gt;
+]
+.right-column[
+Create a data.frame from vectors, where each variable has one type (is a vector)
+
+```r
+people &lt;- data.frame(
+  name = c("Alice", "Bob", "Charlie"),
+  age  = c(40, 25, 15),
+  num_children = c(2, 1, 0),
+  has_children = c(TRUE, TRUE, FALSE)
+)
+people
+```
+
+```
+##      name age num_children has_children
+## 1   Alice  40            2         TRUE
+## 2     Bob  25            1         TRUE
+## 3 Charlie  15            0        FALSE
+```
+]
+
+---
+
+# Basic Data Access
+
+Using the `[]`-operator we can access elements of a vector (1D), a matrix (2D), a list (n-dimensional), a data.frame (2D).
+.left-col[
+
+```r
+heights &lt;- c(186, 204, 176, 165, 182)
+# accesses the third element
+heights[3]
+```
+
+```
+## [1] 176
+```
+
+```r
+# accesses certain elements
+heights[c(2, 1, 3, 5, 4)]
+```
+
+```
+## [1] 204 186 176 182 165
+```
+]
+.right-col[
+
+```r
+# compare if an element is 
+# larger than 180
+heights &gt; 180
+```
+
+```
+## [1]  TRUE  TRUE FALSE FALSE  TRUE
+```
+
+```r
+# take elements that are 
+# larger than 180
+heights[heights &gt; 180]
+```
+
+```
+## [1] 186 204 182
+```
+]
+
+
+---
+
+# Basic Data Access
+
+The `[]`-operator can also be used for 2D structures as `mat[row, col]`
+.left-col[
+
+```r
+mat &lt;- matrix(1:9, nrow = 3)
+mat
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    4    7
+## [2,]    2    5    8
+## [3,]    3    6    9
+```
+
+```r
+# take the first row, third column
+mat[1, 3]
+```
+
+```
+## [1] 7
+```
+]
+.right-col[
+
+```r
+# take only the first row
+mat[1, ]
+```
+
+```
+## [1] 1 4 7
+```
+
+```r
+# take only the first column
+mat[, 1]
+```
+
+```
+## [1] 1 2 3
+```
+
+```r
+# take the first and second row, 
+# first and third column
+mat[1:2, c(1, 3)]
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    7
+## [2,]    2    8
+```
+]
+---
+
+# Conditionals
+For workflow management, sometimes we need want to evaluate (=execute) code only if certain conditions are met
+
+.left-column[
+- if call
+- Condition
+- Body
+- (possible) else-if
+- (possible) else
+]
+.right-column[
+
+```r
+ if (condition1) {
+   print("condition1 is true!")
+ } else if (condition2) {
+   print("condition1 is not true but condition2 is true!")
+ } else {
+   print("Neither condition1 nor condition2 is true!")
+ }
+```
+]
+
+---
+
+# Conditionals
+For workflow management, sometimes we need want to evaluate (=execute) code only if certain conditions are met
+
+.left-column[
+- &lt;mark&gt;if call&lt;/mark&gt;
+- Condition
+- Body
+- (possible) else-if
+- (possible) else
+]
+.right-column[
+
+```r
+ `if (`condition1`)` {
+   print("condition1 is true!")
+ } else if (condition2) {
+   print("condition1 is not true but condition2 is true!")
+ } else {
+   print("Neither condition1 nor condition2 is true!")
+ }
+```
+]
+
+---
+
+# Conditionals
+For workflow management, sometimes we need want to evaluate (=execute) code only if certain conditions are met
+
+.left-column[
+- if call
+- &lt;mark&gt;Condition&lt;/mark&gt;
+- Body
+- (possible) else-if
+- (possible) else
+]
+.right-column[
+
+```r
+ if (`condition1`) {
+   print("condition1 is true!")
+ } else if (condition2) {
+   print("condition1 is not true but condition2 is true!")
+ } else {
+   print("Neither condition1 nor condition2 is true!")
+ }
+```
+]
+
+---
+
+# Conditionals
+For workflow management, sometimes we need want to evaluate (=execute) code only if certain conditions are met
+
+.left-column[
+- if call
+- Condition
+- &lt;mark&gt;Body&lt;/mark&gt;
+- (possible) else-if
+- (possible) else
+]
+.right-column[
+
+```r
+ if (condition1) `{`
+*  print("condition1 is true!")
+ `}` else if (condition2) {
+   print("condition1 is not true but condition2 is true!")
+ } else {
+   print("Neither condition1 nor condition2 is true!")
+ }
+```
+]
+
+---
+
+# Conditionals
+For workflow management, sometimes we need want to evaluate (=execute) code only if certain conditions are met
+
+.left-column[
+- if call
+- Condition
+- Body
+- &lt;mark&gt;(possible) else-if&lt;/mark&gt;
+- (possible) else
+]
+.right-column[
+
+```r
+ if (condition1) {
+   print("condition1 is true!")
+ } `else if (condition2) {`
+*  print("condition1 is not true but condition2 is true!")
+ `}` else {
+   print("Neither condition1 nor condition2 is true!")
+ }
+```
+]
+
+---
+
+# Conditionals
+For workflow management, sometimes we need want to evaluate (=execute) code only if certain conditions are met
+
+.left-column[
+- if call
+- Condition
+- Body
+- (possible) else-if
+- &lt;mark&gt;(possible) else&lt;/mark&gt;
+]
+.right-column[
+
+```r
+ if (condition1) {
+   print("condition1 is true!")
+ } else if (condition2) {
+   print("condition1 is not true but condition2 is true!") 
+ } `else {`
+*  print("Neither condition1 nor condition2 is true!")
+ `}`
+```
+]
+
+---
+
+# Conditionals 
+
+We can have conditional statements with only the `if`-part, ...
+
+```r
+if (rains) {
+  take_umbrella()
+}
+```
+
+... an `if` and an `else` case, ...
+
+```r
+if (rains) {
+  take_umbrella
+} else {
+  wear_shorts()
+}
+```
+
+---
+
+# Conditionals
+
+...,  multiple `else if`s (and multiple `else if`s and an `else` case)
+
+```r
+if (rains) {
+  take_umbrella()
+} else if (sunny) {
+  apply_sunsreen()
+} else if (snows) {
+  go_snowboarding()
+} else if (windy) {
+  go_surfing()
+}
+```
+
+Q: What happens if its windy and sunny?
+
+Q: What can we do if we want to go surfing and apply sunscreen?
+
+---
+
+# Conditionals short and vectorized
+
+The `if () {} else {}` functions evaluate only the first element of the condition.
+
+What can we use to apply the if-else statement to a vector of values? `ifelse()`
+
+
+```r
+ifelse(condition, 
+       "Value if condition is true",
+       "Value if condition is false")
+```
+--
+
+```r
+heights &lt;- c(186, 204, 176, 165, 182)
+ifelse(heights &gt; 180, "above 180", "below 180")
+```
+
+```
+## [1] "above 180" "above 180" "below 180" "below 180" "above 180"
+```
+--
+
+```r
+ifelse(heights &gt; 180, 
+       "h &gt; 180", 
+       ifelse(heights &gt; 170,
+              "170 &lt; h &lt;= 180",
+              "h &lt;= 170"))
+```
+
+```
+## [1] "h &gt; 180"        "h &gt; 180"        "170 &lt; h &lt;= 180" "h &lt;= 170"       "h &gt; 180"
+```
+
+---
+
+# Function introduction
+
+## Does this make sense?
+
+
+```r
+print("Good morning Alice")
+print("Good evening Alice")
+print("Good evening Bob")
+print("Good morning Bob")
+print("Good day Charlie")
+print("Good day Alice")
+```
+
+What happens if we want to change "Good" to something else or we find that we have some spelling error and need to find and change every part of it?
+
+--
+
+### &lt;mark&gt;Don't repeat yourself!&lt;/mark&gt;
+
+Use functions!
+
+---
+
+# Anatomy of a Function
+
+.left-column[
+- Assign
+- Arguments
+- Body
+- Return Values
+- Function Call
+]
+.right-column[
+**Function**: Write once, use often
+
+```r
+ # define the function 'greet' once:
+ greet &lt;- function(daytime, name) {
+   text &lt;- paste("Good", daytime, name)
+   text
+ }
+
+ # use the function 'greet' as often as needed
+ result &lt;- greet("morning", "Alice")
+ result
+```
+
+```
+## [1] "Good morning Alice"
+```
+
+```r
+ # or print result of the function directly to the console
+ greet("evening", "Alice")
+```
+
+```
+## [1] "Good evening Alice"
+```
+]
+
+---
+
+# Anatomy of a Function
+
+.left-column[
+- &lt;mark&gt;Assign&lt;/mark&gt;
+- Arguments
+- Body
+- Return Values
+- Function Call
+]
+.right-column[
+**Assigning** a function to `greet`
+
+```r
+ # define the function 'greet' once:
+ `greet &lt;- function`(daytime, name) {
+   text &lt;- paste("Good", daytime, name)
+   text
+ }
+
+ # use the function 'greet' as often as needed
+ result &lt;- greet("morning", "Alice")
+```
+]
+
+---
+
+# Anatomy of a Function
+
+.left-column[
+- Assign
+- &lt;mark&gt;Arguments&lt;/mark&gt;
+- Body
+- Return Values
+- Function Call
+]
+.right-column[
+**Arguments** are variables passed into the body of the functions
+
+```r
+ # define the function 'greet' once:
+ greet &lt;- function(`daytime`, `name`) {
+   text &lt;- paste("Good", daytime, name)
+   text
+ }
+
+ # use the function 'greet' as often as needed
+ result &lt;- greet(`"morning"`, `"Alice"`)
+```
+]
+
+---
+
+# Anatomy of a Function
+
+.left-column[
+- Assign
+- Arguments
+- &lt;mark&gt;Body&lt;/mark&gt;
+- Return Values
+- Function Call
+]
+.right-column[
+**Body** is executed everytime the function is called
+
+```r
+ # define the function 'greet' once:
+ greet &lt;- function(daytime, name) `{`
+*  text &lt;- paste("Good", daytime, name)
+*  text
+ `}`
+
+ # use the function 'greet' as often as needed
+ result &lt;- greet("morning", "Alice")
+```
+]
+
+---
+
+# Anatomy of a Function
+
+.left-column[
+- Assign
+- Arguments
+- Body
+- &lt;mark&gt;Return Values&lt;/mark&gt;
+- Function Call
+]
+.right-column[
+**Return**: the last element that is called is returned
+
+```r
+ # define the function 'greet' once:
+ greet &lt;- function(daytime, name) {
+   text &lt;- paste("Good", daytime, name)
+*  text # the last element is returned
+ }
+
+ # use the function 'greet' as often as needed
+ result &lt;- greet("morning", "Alice")
+```
+
+The function could be also shortened to
+
+```r
+greet &lt;- function(daytime, name) {
+   paste("Good", daytime, name)
+}
+# or even shorter
+greet &lt;- function(daytime, name) paste("Good", daytime, name)
+```
+]
+
+---
+
+# Anatomy of a Function
+
+.left-column[
+- Assign
+- Arguments
+- Body
+- Return Values
+- &lt;mark&gt;Function Call&lt;/mark&gt;
+]
+.right-column[
+**Call** the function using its name and parenthesis `()` with arguments
+
+```r
+ # define the function 'greet' once:
+ greet &lt;- function(daytime, name) {
+   text &lt;- paste("Good", daytime, name)
+   text
+ }
+
+ # use the function 'greet' as often as needed
+ `result &lt;- greet("morning", "Alice")`
+ result
+```
+
+```
+## [1] "Good morning Alice"
+```
+
+```r
+# named function call also possible
+greet(name = "Bob", daytime = "night")
+```
+
+```
+## [1] "Good night Bob"
+```
+]
+
+---
+
+# Default Values
+
+We can also specify default values for function arguments in the definition of the function
+
+```r
+greet &lt;- function(`daytime = "morning"`, `name = "Alice"`) {
+  text &lt;- paste("Good", daytime, name)
+  text
+}
+```
+
+--
+
+```r
+greet("evening") # no 'name' supplied, take default "Alice"
+```
+
+```
+## [1] "Good evening Alice"
+```
+--
+
+```r
+greet() # neither 'daytime' nor 'name' supplied, take both default values
+```
+
+```
+## [1] "Good morning Alice"
+```
+--
+
+```r
+greet(name = "Bob") # no daytime supplied, take default
+```
+
+```
+## [1] "Good morning Bob"
+```
+
+
+---
+
+# Objects and Functions
+
+&gt; To understand computations in R, two slogans are helpful:
+- Everything that **exists** is an object [variable]
+- Everything that **happens** is a function call
+
+John Chambers
+
+Example Code
+
+```r
+ x &lt;- rnorm(100)
+ mean(x)
+```
+
+---
+
+# Objects and Functions
+
+&gt; To understand computations in R, two slogans are helpful:
+- &lt;mark&gt;Everything that **exists** is an object [variable]&lt;/mark&gt;
+- Everything that **happens** is a function call
+
+John Chambers
+
+
+Example Code
+
+```r
+ `x` &lt;- rnorm(`100`)
+ mean(`x`)
+```
+
+---
+
+# Objects and Functions
+
+&gt; To understand computations in R, two slogans are helpful:
+- Everything that **exists** is an object (variable)
+- &lt;mark&gt;Everything that **happens** is a function call&lt;/mark&gt;
+
+John Chambers
+
+Example Code
+
+```r
+ x &lt;- `rnorm`(100)
+ `mean`(x)
+```
+
+---
+# From Functions to Libraries
+
+When we use R and its functions (e.g., linear regression), we don't want to implement every function over and over again but want to use existing functions.
+
+Functions can be packaged into a **Package/Library**, which is then easy to distribute and install on different machines.
+
+Main distribution channel is called CRAN (Comprehensive R Archive Network) https://cran.r-project.org/ with over 12,000 packages.
+
+--
+
+To **install** packages from CRAN we use the `install.packages("packageName")`. 
+Note, this needs to be done only once, thus we use the console!
+
+--
+
+In every session, we need to **load** the package using `library(packageName)`.
+
+
+```r
+# install the package tidyverse once (console)
+install.packages("tidyverse")
+
+# on top of each script, we write (NOT CONSOLE!)
+library(tidyverse)
+```
+
+
+
+---
+# References
+
+Grimmer, Justin, and Brandon M. Stewart. 2013. "Text as Data: The Promise and Pitfalls of Automatic Content Analysis Methods for Political Texts." Political Analysis 21 (3): 267–97. https://doi.org/10.1093/pan/mps028.
+
+King, Gary, Jennifer Pan, and Margaret E. Roberts. 2013. “How Censorship in China Allows Government Criticism but Silences Collective Expression.” The American Political Science Review 107 (2): 326–43.
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

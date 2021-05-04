@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Political Science</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="David Broska" />
+    <meta name="date" content="2021-03-02" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../mycss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Computational Political Science
+## Session 5
+### David Broska
+### Zeppelin University
+### March 2, 2021
+
+---
+
+
+# Outline for today
+
+
+1. **Evaluating classifier performance**
+  - Precision, Recall, F1
+  - Accuracy
+
+2. **Regularization**
+  - Ridge regression 
+  - Lasso regression
+
+3. **Coding exercise**
+  - Which letters are most predictive of female and male names?
+
+
+
+---
+# Course schedule
+
+| Session |  Date  | Topic                                                |   Assignment  |     Due date    |
+|:-------:|:------:|:-----------------------------------------------------|:-------------:|:---------------:|
+|    1    | Feb 02 | Overview and key concepts                            |     \-        |     \-          |
+|    2    | Feb 09 | Preprocessing and descriptive statistics             | Formative     | Feb 22 23:59:59 |
+|    3    | Feb 16 | Dictionary methods                                   |     \-        |     \-          |
+|    4    | Feb 23 | Machine learning for texts: Classification I         | Summative 1   | Mar 08 23:59:59 |
+|    5    | Mar 02 | *Machine learning for texts: Classification II*      |     \-        |     \-          |
+|    6    | Mar 09 | Supervised and unsupervised scaling                  | Summative 2   | Mar 22 23:59:59 |
+|    7    | Mar 16 | Similarity and clustering                            |     \-        |     \-          |
+|    8    | Mar 23 | Topic models                                         | Summative 3   | Apr 12 23:59:59 |
+|   \-    |   \-   | *Break*                                              |     \-        |     \-          |
+|    9    | Apr 13 | Retrieving data from the web                         |     \-        |     \-          |
+|   10    | Apr 20 | Published applications                               |     \-        |     \-          |
+|   11    | Apr 27 | Project Presentations                                |     \-        |     \-          |
+
+
+
+
+---
+class: inverse, center, middle
+
+# Evaluating classifier performance
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt; 
+
+---
+# Supervised machine learning 
+
+&lt;img src="../figures/fig1_grimmer_stuart_adapted.jpg" width="97%" class="centerimg"&gt;
+&amp;nbsp; Fig. 1 in Grimmer and Stuart (2013)
+
+
+
+---
+# Supervised machine learning
+
+### The goal is classify documents into pre existing categories.
+
+For example, authors of documents, sentiment of tweets, ideological position of parties based on manifestos, tone of movie reviews...
+
+### What we need
+
+- Hand-coded dataset (labeled), to be split into:
+    
+    - *Training set*: used to train the classifier
+    - *Validation/Test set*: used to validate the classifier
+  
+- Method to *extrapolate* from hand coding to unlabeled documents (classifier):
+    
+    - Naive Bayes, regularized regression, SVM, CNN, ensemble
+methods, etc.
+
+- *Performance metric* to choose best classifier and avoid overfitting:
+    
+    - Confusion matrix, accuracy, precision, recall...
+
+- Approach to *validate* classifier: cross-validation
+
+---
+# Principles of supervised learning
+
+.pull-left[
+### Generalization
+
+A classifier or a regression algorithm learns to correctly predict output from given inputs
+
+Crucially, it predicts correctly not only in previously seen samples but also in previously unseen samples.
+]
+
+.pull-right[
+
+### Overfitting
+
+A classifier or a regression algorithm learns to correctly predict output from given inputs in previously seen samples. 
+
+However, it fails to do so in previously unseen samples. This causes poor prediction/generalization.
+]
+
+&lt;br&gt;
+####The goal is to maximize the frontier of precise identification of true condition with accurate recall
+
+---
+# Confusion matrix
+
+&lt;img src="../figures/confusion_matrix.jpg" class="centerimg" width="64%"&gt;
+
+**Precision**: Does the classifier identify only my content?
+&lt;br&gt; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;  &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp; % of documents that are predicted positive that are indeed positive
+  
+--
+
+**Recall**: &amp;nbsp;&amp;nbsp; &amp;nbsp;  Does the classifier identify all my content?
+&lt;br&gt; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;  &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp; % of positive documents that are predicted positive
+
+--
+
+**Accuracy**: How correctly is the classifier’s identifications?
+&lt;br&gt; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;  &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp; % of documents that are correctly predicted
+
+
+---
+# Measuring performance example
+
+####Assume
+
+- We have a corpus where 80 documents are really positive (as opposed to negative, as in sentiment)
+- Our method declares that 60 are positive
+- Of the 60 declared positive, 45 are actually positive
+
+####Exercise
+
+1. Please draw a confusion matrix with the given numbers and compute precision and recall
+2. Compute accuracy for the following two scenarios
+     
+  a) 10 true negatives &lt;br&gt;
+  b) 100 true negatives
+  
+How do you interpret the result? How does accuracy relate to precision and recall?
+
+---
+# Measuring performance example
+
+####Let's fill in the blanks with the given numbers on the classified documents
+
+.pull-left[
+
+60 are predicted positve whereas 45 are truely positive leaving 15 false positives
+
+&lt;img src="../figures/performance_metrics_example_1.jpg" class="centerimg" width="100%"&gt;
+]
+
+--
+
+.pull-right[
+
+Since we have 80 truly positive documents there are 35 false negatives
+
+&lt;img src="../figures/performance_metrics_example_2.jpg" class="centerimg" width="100%"&gt;
+]
+
+--
+
+.pull-left[
+
+####Precision 
+
+`$$\frac{ \text{TP} }{ \text{TP} + FP}=\frac{45}{45+15}=\frac{3}{4}=75\%$$`
+]
+
+--
+
+.pull-right[
+#### Recall
+
+`$$\frac{ \text{TP} }{ \text{TP} + FN}=\frac{45}{45+35}=\frac{9}{16}=56.3\%$$`
+]
+--
+.pull-right[
+&lt;small&gt;
+Note: Recall also known as "Sensitivity"
+&lt;/small&gt;
+]
+
+---
+# Measuring performance example
+
+.pull-left[
+#### Accuracy with **10** true negatives
+
+&lt;img src="../figures/performance_metrics_example_3.jpg" class="centerimg" width="100%"&gt;
+
+
+$$
+`\begin{align}
+\text{Accuracy }=&amp;\frac{ \text{TP} + \text{TN} }{ \text{TP} + \text{TN} + \text{FP} + \text{FN}}\\
+=&amp;\frac{45+10}{105}=52\%
+\end{align}`
+$$
+
+]
+--
+
+.pull-right[
+
+#### Accuracy with **100** true negatives
+
+&lt;img src="../figures/performance_metrics_example_4.jpg" class="centerimg" width="100%"&gt;
+
+
+$$
+`\begin{align}
+\text{Accuracy }=&amp;\frac{ \text{sum of diagonal}  }{\text{sum of all cells}}\\
+=&amp;\frac{45+100}{195}=74\%
+\end{align}`
+$$
+
+]
+
+--
+
+While precision and recall remain constant accuracy increases as the true negatives increase
+
+--
+
+A model can achieve high classification accuracy but it might be useless in solving the problem!
+
+
+---
+# Measuring performance
+
+#### Combined metric for precision and recall
+
+$$
+`\begin{align}
+F1 &amp;= 2 \times \frac{ \text{Precision} \times \text{Recall}}{ \text{Precision} + \text{Recall}}\\
+&amp;= \frac{0.75 \times 0.52}{0.75+ 0.52}\\&amp;=0.64 
+\end{align}`
+$$ 
+
+F1 is a good measure when the goal is to seek a balance between Precision and Recall
+
+&lt;br&gt; 
+
+#### Additional remarks
+
+- Precision and recall can be reported separately for each category
+
+- Precision and recall (or F1) should be reported alongside accuracy. [Why?](https://youtu.be/j-EB6RqqjGI)
+
+-  There is generally a trade-off between precision and recall. [Why?](https://towardsdatascience.com/tradeoffs-how-to-aim-for-the-sweet-spot-c20b40d5e6b6)
+
+
+---
+# Bias-variance trade-off
+
+####What is the relationship between weight and height of mice?
+
+- At first, heavier mice tend to be larger but the increase levels off. 
+- As weight increases further, however, the mice are not larger but only obese.
+
+&amp;rarr; The *true* relationship is best described by a curve with decreasing slope.
+
+&lt;img src="../figures/weight_height.png" class="centerimg" width="64%"&gt;
+
+If we were to use a machine learning approach to predict height by weight on unseen data, we would create a training set (blue) and a test set (green).
+
+---
+# Bias-variance trade-off
+
+####The inability for a machine learning method to capture the true relationship is called bias.
+
+Broadly speaking, it is possible to apply a simple or a complex model on the training data 
+
+--
+
+.pull-left[
+#### Training a simple model
+
+&lt;img src="../figures/weight_height_training_simple_model.png" class="centerimg" width="80%"&gt;
+
+Since the relationship is actually curvy, a straight line is not an accurate representation of the true relationship. 
+
+&amp;rarr; The simple model has high bias.
+]
+
+.pull-right[
+#### Training a complex model
+
+&lt;img src="../figures/weight_height_training_complex_model.png" class="centerimg" width="80%"&gt;
+
+In contrast, the squiggly line can replicated the arc in the data. 
+
+&lt;br&gt;
+&amp;rarr; The complex model has very little bias.
+
+]
+
+--
+
+&lt;small&gt;
+Example by [Starmer (2018)](https://youtu.be/EuBBz3bI-aA)
+&lt;/small&gt;
+
+
+---
+# Bias-variance trade-off
+
+
+While the simpler model fits the training data *worse* than than complex model, it produces a *better* fit to the test data.
+
+&lt;img src="../figures/weight_height_simple_model.png" class="centerimg" width="63%"&gt;
+
+--
+
+While the complex model fits the training data *better* than the simpler model, it produces a *worse* fit to the test data.
+
+&lt;img src="../figures/weight_height_complex_model.png" class="centerimg" width="63%"&gt;
+
+
+#### The amount by which the predictions change if the model is applied to a different training data set is called **variance**.
+
+---
+# Bias-variance trade-off
+
+- Generally we want to apply method to new data, e.g. predict class of unseen documents
+- However, the classifier is trained to maximize in-sample performance
+- Danger: **overfitting**
+
+.pull-left[
+
+&lt;img src="../figures/bias_variance_tradeoff.jpg" class="centerimg" width="100%"&gt;
+
+]
+
+.pull-right[
+- Model is too complex, describes noise rather than signal (Bias-Variance trade-off)
+- Focus on features that perform well in labeled data but may
+not generalize (e.g. “inflation” in 1980s)
+- In-sample performance better than out-of-sample performance
+]
+
+Solutions
+- Randomly split dataset into training and test set
+- Cross validation
+
+---
+# Cross validation
+
+Using the same data for training and testing would give us no clue about how well the method works for data it was not trained on, e.g. when we use all data for training
+
+--
+
+A *better* idea is to use &amp;frac45; of the data for training and &amp;frac15; for testing. But how do we know that the first &amp;frac45; is the best way to divide up the data?
+
+--
+
+An *even better* idea is to let the computer evaluate the performance on all K combinations training and test sets ("folds") 
+
+Then, we choose the method specification with the best cross-validated performance
+
+&lt;img src="../figures/cross_validation.jpg" class="centerimg" width="91%"&gt;
+
+---
+class: inverse, center, middle
+# Regularization
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=800px&gt;&lt;/html&gt;
+
+---
+# Regularized regression
+
+Assume we have: 
+
+- `\(i = 1,2,..., N\)` documents
+- Each document `\(i\)` is in class `\(y_i=0\)` or `\(y_i=1\)`
+- `\(j = 1,2,..., J\)` unique features
+- `\(x_{ij}\)` as the count of feature `\(j\)` in document `\(i\)`
+
+We could try building a linear regression model as a classifier, using the values of `\(\beta_0, \beta_1, ..., \beta_J\)` that minimize 
+
+`$$\text{SSR}=\sum_{i=1}^N \left( y_i - \beta_0 - \sum_{j=1}^J \beta_j x_{ij} \right)^2$$`
+where SSR denotes the sum of squared residuals
+
+--
+
+#### But can we?
+
+- If `\(J &gt; N\)`, OLS does not have a unique solution
+- Even with `\(N&gt;J\)`, OLS has low bias/high variance &amp;rarr; overfitting
+
+---
+# Regularized regression
+
+What can we do? Add a penalty for model complexity so that we minimize either obtain
+
+
+#### Ridge regression
+
+`$$\sum_{i=1}^N \left( y_i - \beta_0 - \sum_{j=1}^J \beta_j x_{ij} \right)^2 + \lambda \sum_{j=1}^J \beta_j^2$$`
+or
+
+#### Lasso regression
+
+`$$\sum_{i=1}^N \left( y_i - \beta_0 - \sum_{j=1}^J \beta_j x_{ij} \right)^2+ \lambda \sum_{j=1}^J |\beta_j|$$`
+where `\(\lambda\)` is the **penalty parameter** (to be estimated)
+
+
+
+---
+# Constrained Optimization
+
+Why is it that the lasso, unlike ridge regression, results in coefficient estimates that are exactly equal to zero?
+
+One can show that the lasso and ridge regression coefficient estimates solve the problems below (may now look familiar if you recall Lagrange multipliers from calculus)
+
+`$$\underset{\beta}{\text{minimize}} = \sum_{i=1}^n \left( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij} \right)^2 \text{ subject to } \sum_{j=1}^p |\beta_j| &lt; s$$`
+
+&lt;p style="margin-left:100px"&gt; and &lt;/p&gt;
+
+
+`$$\underset{\beta}{\text{minimize}} = \sum_{i=1}^n \left( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij} \right)^2 \text{ subject to } \sum_{j=1}^p \beta_j^2 &lt; s$$`
+
+&lt;p style="margin-left:100px"&gt; respectively. &lt;/p&gt;
+
+---
+# Visualizing regularization
+
+Assume the task is to minimize SSR of a regression line that predicts height by weight
+
+&lt;img src="../figures/lasso_ridge_1.jpg" class="centerimg" width="80%"&gt;
+
+In typical regression settings, we would choose the slope where SSR is smallest at the lowest point of the parabola
+
+In machine learning, however, we would introduce bias to get lower variance! 
+
+We do this by adding the ridge or lasso regression penalty...
+
+--
+
+&lt;small&gt;
+Figures by [Starmer (2020)](https://youtu.be/Xm2C_gTAl8c)
+&lt;/small&gt;
+
+---
+# Visualizing regularization
+
+When we add the *squared* penalty parameter in **Ridge** regression the parabolas move towards zero but the lowest point *is never* zero 
+
+&lt;img src="../figures/lasso_ridge_2.jpg" class="centerimg" width="62.5%"&gt;
+
+--
+
+When we add the *absolute value* penalty parameter in **Lasso** regression the parabolas move towards zero and the lowest point *can be* zero
+
+&lt;img src="../figures/lasso_ridge_3.jpg" class="centerimg" width="62.5%"&gt;
+
+---
+# Visualizing Lasso vs. Ridge Regression
+
+&lt;img src="../figures/penalty_parameter.jpg" class="centerimg"&gt;
+
+- We penalize large coefficients more as the size of increases
+- Ridge regression shrinks some parameters close to zero but
+never quite gets there.
+- Lasso shrinks some parameters to exactly zero.
+
+#### In both models we find the best value of `\(\lambda\)` through cross-validation 
+
+
+
+
+
+---
+# Regularized regression
+
+####Why the penalty (shrinkage)? 
+
+- Reduces the variance (avoid overfitting)
+- Identifies the model if `\(J &gt; N\)`
+- Some coefficients become zero (feature selection)
+
+--
+
+####The penalty can take different forms: 
+
+- Ridge regression: `\(\lambda \sum_{j=1}^{J} \beta_j^2\)` with `\(\lambda &gt;0\)`; and when `\(\lambda =0\)` becomes OLS
+- Lasso `\(\lambda \sum_{j=1}^{J} |\beta_j|\)` where some coefficients become zero
+- Elastic Net: `\(\lambda_1 \sum_{j=1}^J \beta_j^2+ \lambda_2 \sum_{j=1}^J |\beta_j|\)` (best of both worlds?)
+
+
+--
+
+####How do they perform?
+
+Since Lasso regression can exclude useless variable from equations it tends to be better than Ridge regression at reducing variance for models with many useless variables. 
+
+Ridge regression tends to do a little better than Lasso regression when most variables are useful.
+
+
+---
+class: middle, inverse, center
+# Coding exercise
+-----------------
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
